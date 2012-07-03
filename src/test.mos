@@ -1,4 +1,0 @@
-loadFile("ForceMomentDatcom.mo");
-list(ForceMomentDatcom);
-simulate(ForceMomentDatcom);
-plot(L);
