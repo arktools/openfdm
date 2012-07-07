@@ -21,9 +21,13 @@ model TestModel
   
   Kinematics.FlatEarthBody6DOF body(m=1,Jx=1,Jy=1,Jz=1,Jxz=0);
   //Modelica.Mechanics.MultiBody.World world;
+  input Real a(start = 0);
+  output Real b(start = 0);
   
 equation
   
   //connect(world.frame_b,body.XYZ);
+  der(a) = 1;
+  der(b) = a;
   
 end TestModel;
