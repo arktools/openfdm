@@ -1,1 +1,1 @@
-#OpenFDM: An open source flight dynamic model library for Modelica
+#OpenFDM: An open source flight dynamics library for Modelica
