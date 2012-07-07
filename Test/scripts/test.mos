@@ -1,0 +1,21 @@
+// options
+setCommandLineOptions({"+d=linearization"});
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Test);
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("echo \"model TestModel extends Test.TestModel; end TestModel;\" > Test.mo");
+loadFile("Test.mo");
+
+// get linear model
+simulate(TestModel,numberOfIntervals=1);
+system("./TestModel -l 0 > log.out"); readFile("log.out");
+loadFile("/tmp/linear_TestModel.mo");
+list(linear_TestModel);
+
+// simulate non-linear model
+simulate(TestModel);
+plot({a,b});
+simulate(linear_TestModel);
+plot({x[1],x[2]});
