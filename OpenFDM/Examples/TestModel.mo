@@ -1,9 +1,9 @@
-within Test;
+within OpenFDM.Examples;
 
 model TestModel
   
   Real a(start=0);
-  Real b(start=0);
+  Real b(start=1);
 
 equation
   

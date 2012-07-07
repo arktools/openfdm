@@ -2,11 +2,11 @@
 setCommandLineOptions({"+d=linearization"});
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
-loadModel(Test);
+loadModel(OpenFDM);
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("echo \"model TestModel extends Test.TestModel; end TestModel;\" > Test.mo");
-loadFile("Test.mo");
+system("echo \"model TestModel extends OpenFDM.Examples.TestModel; end TestModel;\" > TestModel.mo");
+loadFile("TestModel.mo");
 
 // get linear model
 simulate(TestModel,numberOfIntervals=1);
