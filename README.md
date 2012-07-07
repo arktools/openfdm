@@ -1,5 +1,10 @@
 #OpenFDM: An open source flight dynamics library for Modelica
 
+## License
+
+OpenFDM  Copyright (C) 2012 James Goppert (GPL v3)
+This program comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions. For details see license.txt.
+
 ## Development
 
 * Using eclipse MDT plugin: https://www.openmodelica.org/index.php/developer/tools/133
