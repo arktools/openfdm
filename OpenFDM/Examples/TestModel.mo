@@ -2,12 +2,11 @@ within OpenFDM.Examples;
 
 model TestModel
   
-  Real a(start=0);
-  Real b(start=1);
-
+  Kinematics.FlatEarthBody6DOF body(m=1,Jx=1,Jy=1,Jz=1,Jxz=0);
+  Modelica.Mechanics.MultiBody.World world;
+  
 equation
   
-  der(a) = b;
-  der(b) = 1;
-
+  //connect(world.frame_b,body.XYZ);
+  
 end TestModel;
