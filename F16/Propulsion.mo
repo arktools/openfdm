@@ -1,3 +1,5 @@
+within F16;
+
 model Jet
 
     Real idleTable =
@@ -29,3 +31,5 @@ model Jet
       {0.8, 26070.0, 21075.0, 15975.0, 11115.0,  6860.0,  3950.0},
       {1.0, 28886.0, 23319.0, 18300.0, 13484.0,  8642.0,  5057.0}}
       "maximum thrust table(altitude[ft], mach number)";
+
+end Jet;
