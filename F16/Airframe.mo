@@ -3,7 +3,11 @@ within F16;
 model Airframe
 
   // components
-  Engine engine;
+  input Real thrust;
+
+  // atmosphere
+  input Real qbar "dynamics pressure";
+  input Real mach "mach number";
 
   // control variables
   input Real throttle;
@@ -11,37 +15,44 @@ model Airframe
   input Real aileron;
   input Real rudder;
 
+  // aerodynamic inputs
+  input Real cx "force x aero coef";
+  input Real cy "force y aero coef";
+  input Real cz "force z aero coef";
+  input Real cl "roll moment aero coef";
+  input Real cm "pitch moment aero coef";
+  input Real cn "yaw moment aero coef";
+
   // output
   output Real an "north acceleration";
   output Real alat "east acceleration";
-  output Real ax "not used";
-  output Real qbar "dynamics pressure";
-  output Real amach "mach number";
+  //output Real ax "not used";
 
   // physical attributes
-  parameter Real s "planform area";
-  parameter Real b "wing span";
-  parameter Real cbar "mean chord length";
-  parameter Real weight "weight of aircraft";
-  parameter Real Ixx "inertia about x axis @cm";
-  parameter Real Iyy "inertia about y axis @cm";
-  parameter Real Ixz "inertia xz term @cm";
-  parameter Real hx "x-axis engine angular momentum";
-  parameter Real xcg "center of gravity, % chord";
-  parameter Real xcgr "aerodynamics reference point, % chord";
-  parameter Real gd "gravitational acceleration";
+  parameter Real s(start=100) "planform area";
+  parameter Real b(start=10) "wing span";
+  parameter Real cbar(start=1) "mean chord length";
+  parameter Real weight(start=1) "weight of aircraft";
+  parameter Real Ixx(start=1) "inertia about x axis @cm";
+  parameter Real Iyy(start=1) "inertia about y axis @cm";
+  parameter Real Izz(start=1) "inertia about z axis @cm";
+  parameter Real Ixz(start=0) "inertia xz term @cm";
+  parameter Real hx(start=1) "x-axis engine angular momentum";
+  parameter Real xcg(start=0.3) "center of gravity, % chord";
+  parameter Real xcgr(start=0.4) "aerodynamics reference point, % chord";
+  parameter Real gd(start=9.8) "gravitational acceleration";
 
   // precomputed inertia terms
-  constant Real mass =weight/gd;
-  constant Real Ixzs = Ixz^2;
-  constant Real xpq = Ixz*(Ixx - Iyy + Izz);
-  constant Real zeta = Ixx*Izz - Ixz^2;
-  constant Real xqr = Izz*(Izz-Iyy) + Ixzs;
-  constant Real zpq = (Ixx-Iyy)*Ixx  +Ixzs;
-  constant Real ypr = Izz - Ixx;
+  Real mass = weight/gd;
+  Real Ixzs = Ixz^2;
+  Real xpq = Ixz*(Ixx - Iyy + Izz);
+  Real zeta = Ixx*Izz - Ixz^2;
+  Real xqr = Izz*(Izz-Iyy) + Ixzs;
+  Real zpq = (Ixx-Iyy)*Ixx  +Ixzs;
+  Real ypr = Izz - Ixx;
 
   // states
-  Real vt "true velocity";
+  Real vt(start=1) "true velocity";
   Real alpha "angle of attack";
   Real beta "side slip angle";
   Real phi "roll angle";
@@ -53,14 +64,14 @@ model Airframe
   Real posNorth "north position";
   Real posEast "east position";
   Real alt "altitude";
-  Real power "engine power";
+
+protected
 
   // temporary variables
   Real c_beta, u, v, w, s_theta, c_theta, s_phi, c_phi,
     s_psi, c_psi, qs, qsb, rmqs, g_c_theta, q_s_phi, ay,
-    az, pq, qr, qhx, t1, t2, t3, s1, s2, s3, s4, s5, s6,
-    s7, s8 , roll_m, pitch_m, yaw_m, dum, udot, vdot, wdot,
-    tvt, b2v, cq;
+    az, udot, vdot, wdot, dum, pq, qr, qhx, roll_m, pitch_m, 
+    yaw_m, t1, t2, t3, s1, s2, s3, s4, s5, s6, s7, s8; 
 
 equation
 
@@ -90,7 +101,7 @@ equation
   dum = u*u + w*w;
   der(vt) = (u*udot + v*vdot + w*wdot)/vt;
   der(alpha) = (u*wdot - w*udot) / dum;
-  der(beta) = (vt*vdot - v*state_dot(1)) * c_beta / dum;
+  der(beta) = (vt*vdot - v*der(vt)) * c_beta / dum;
 
   // kinematics
   der(phi) = p + (s_theta/c_theta)*(q_s_phi + r*c_phi);
@@ -128,11 +139,6 @@ equation
   an = -az/gd;
   alat = ay/gd;
 
-  // TODO: add atmos func
-  der(power) = 0; // TODO: add power function
-
-  // aerodynamics
-
-  // precomputation for state equations
-
 end Airframe;
+
+// vim:ts=2:sw=2:expandtab:
