@@ -24,10 +24,15 @@ import logging
 
 # parse command line
 parser = argparse.ArgumentParser(description='Runs modelica script using python.')
-parser.add_argument('script', metavar='script', help='script to run')
+parser.add_argument('-s','--script',default=None, help='script to run')
 parser.add_argument('-e', '--echo', default=False, action='store_true', help='enable echo')
 parser.add_argument('-q', '--quiet', default=False, action='store_true', help='quiet mode')
+parser.add_argument('-t', '--terminal', default=False, action='store_true', help='enable terminal')
 args = parser.parse_args()
+
+if not args.script and not args.terminal:
+    parser.print_help()
+    raise SystemExit("please specify terminal or script option")
 
 # handle logging
 if args.quiet:
@@ -38,11 +43,12 @@ logging.basicConfig(format='%(message)s',level=log_level)
 
 # find root path or project
 root_path = os.path.abspath(os.path.join(inspect.getfile(inspect.currentframe()),os.path.pardir))
-script_path = os.path.abspath(args.script)
 
 # check that script exists
-if not os.path.isfile(script_path):
-    raise IOError("script %s not found" % script_path)
+if args.script:
+    script_path = os.path.abspath(args.script)
+    if not os.path.isfile(script_path):
+        raise IOError("script %s not found" % script_path)
 
 # set enviornment to include project root
 os.environ['OPENMODELICALIBRARY'] = os.getenv('OPENMODELICALIBRARY') + ':' + root_path
@@ -59,33 +65,39 @@ import OMPython
 # add project root to modelica environment path
 logging.info('OPENMODELICALIBRARY: %s' % OMPython.execute('''getEnvironmentVar("OPENMODELICALIBRARY")''').strip())
 logging.info('working directory: %s' % OMPython.execute('''cd()''').strip())
-logging.info('script path: "%s"' % script_path)
 
 # run script
-#print 'running script: \n', OMPython.execute('''runScript("%s")''' % script_path).strip()[1:-1]
+if args.script:
+    logging.info('script path: "%s"' % script_path)
+    #print 'running script: \n', OMPython.execute('''runScript("%s")''' % script_path).strip()[1:-1]
 
-# get next line of script
-def get_next_line(stringio):
-    line = []
-    while True:
-        byte = stringio.read(1)
-        if not byte:
-            break
-        line.append(byte)
-        if byte == ';':
-            break
-    return ''.join(line).strip()
+    # get next line of script
+    def get_next_line(stringio):
+        line = []
+        while True:
+            byte = stringio.read(1)
+            if not byte:
+                line = []
+                break
+            if byte == ';':
+                break
+            line.append(byte)
+        return ''.join(line)
 
-# run script line by line checking for error
-with open(script_path,'r') as script_file:
-    while True:
-        line = get_next_line(script_file)
-        if args.echo:
-            print line
-        if not line:
-            logging.info('%s completed successfully without errors' % script_path)
-            break
-        result = OMPython.execute(line)
-        error = OMPython.execute('''getErrorString()''').strip()[1:-1]
-        if error:
-            raise Exception(error)
+    # run script line by line checking for error
+    with open(script_path,'r') as script_file:
+        while True:
+            line = get_next_line(script_file)
+            if not line:
+                logging.info('%s completed successfully without errors' % script_path)
+                break
+            if args.echo:
+                print line
+            result = OMPython.execute(line)
+            print result
+            error = OMPython.execute('''getErrorString()''').strip()[1:-1]
+            if error:
+                raise Exception(error)
+
+if args.terminal:
+    OMPython.run()

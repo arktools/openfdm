@@ -2,6 +2,9 @@ within F16;
 
 model Airframe
 
+  // components
+  Engine engine;
+
   // control variables
   input Real throttle;
   input Real elevator;

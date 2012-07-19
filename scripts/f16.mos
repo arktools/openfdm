@@ -21,3 +21,5 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
 loadModel(F16);
+simulate(F16.Airframe);
+plot({a});

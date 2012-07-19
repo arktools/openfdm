@@ -1,6 +1,6 @@
 within F16;
 
-function throttleGearing
+function throttleGearing "computer throttle gearing"
     input Real throttle "engine throttle";    
     output Real throttleGearing "engine throttle gearing";
 algorithm
@@ -8,7 +8,7 @@ algorithm
         throttleGearing := 64.94*throttle;
     else
         throttleGearing := 217.38*throttle-117.38;
-    end;
+    end if;
 end throttleGearing;
 
 function rtau "compute reciprocal of time constant for engine"
@@ -17,14 +17,14 @@ function rtau "compute reciprocal of time constant for engine"
 algorithm
     if (dp <= 25.0) then
         rtau := 1.0;
-    else if (dp >= 50.0) then
+    elseif (dp >= 50.0) then
         rtau := 0.1;
     else
         rtau := 1.9-0.36*dp;
-    end;
+    end if;
 end rtau;
 
-function powerDerivative
+function powerDerivative "computer derivative of power"
     input Real power "engine power";
     input Real powerCmd "command engine power";
     output Real powerDerivative "derivative of engine power";
@@ -39,7 +39,7 @@ algorithm
         else
             p := 60.0;
             t := rtau(p-power);
-        end;
+        end if;
     else
         if (power >= 50.0 ) then
             p := 40.0;
@@ -47,17 +47,16 @@ algorithm
         else
             p := powerCmd;
             t := rtau(p-power);
-        end;
-    end;
-    powerDerivative=t*(p-power);
+        end if;
+    end if;
+    powerDerivative := t*(p-power);
 end powerDerivative;
 
-function Engine
+model Engine
   // input
   input Real throttle;
   input Real alt;
   input Real mach;
-  input Real power;
   // output
   output Real thrust "engine thrust";
   // state
@@ -65,7 +64,8 @@ function Engine
 protected
   Real cPow "power coefficient";
 algorithm
-  cPow = throttleGearing(throttle);
-  thrust = computeThrust(power,alt,amach);
+  cPow := throttleGearing(throttle);
+  thrust := computeThrust(power,alt,amach);
+equation
   der(power) = powerDerivative(power,cPow);
 end Engine;
