@@ -32,6 +32,19 @@ equation
   connect(aerodynamics.cl,airframe.cl);
   connect(aerodynamics.cm,airframe.cm);
   connect(aerodynamics.cn,airframe.cn);
+  connect(airframe.alpha, aerodynamics.alpha);
+  connect(airframe.beta, aerodynamics.beta);
+  connect(airframe.vt, aerodynamics.vt);
+  connect(airframe.p, aerodynamics.p);
+  connect(airframe.q, aerodynamics.q);
+  connect(airframe.r, aerodynamics.r);
+  connect(airframe.b, aerodynamics.b);
+  connect(airframe.cbar, aerodynamics.cbar);
+  connect(airframe.xcg, aerodynamics.xcg);
+  connect(airframe.xcgr, aerodynamics.xcgr);
+  connect(elevator, aerodynamics.elevator);
+  connect(aileron, aerodynamics.aileron);
+  connect(rudder, aerodynamics.rudder);
 
   // control
   connect(throttle,airframe.throttle);

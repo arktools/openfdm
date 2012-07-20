@@ -29,18 +29,18 @@ model Airframe
   //output Real ax "not used";
 
   // physical attributes
-  parameter Real s(start=100) "planform area";
-  parameter Real b(start=10) "wing span";
-  parameter Real cbar(start=1) "mean chord length";
-  parameter Real weight(start=1) "weight of aircraft";
-  parameter Real Ixx(start=1) "inertia about x axis @cm";
-  parameter Real Iyy(start=1) "inertia about y axis @cm";
-  parameter Real Izz(start=1) "inertia about z axis @cm";
-  parameter Real Ixz(start=0) "inertia xz term @cm";
-  parameter Real hx(start=1) "x-axis engine angular momentum";
-  parameter Real xcg(start=0.3) "center of gravity, % chord";
-  parameter Real xcgr(start=0.4) "aerodynamics reference point, % chord";
-  parameter Real gd(start=9.8) "gravitational acceleration";
+  parameter Real s(start=300) "planform area";
+  parameter Real b(start=30) "wing span";
+  parameter Real cbar(start=11.32) "mean chord length";
+  parameter Real weight(start=20490.446) "weight of aircraft";
+  parameter Real Ixx(start=9496.0) "inertia about x axis @cm";
+  parameter Real Iyy(start=55814.0) "inertia about y axis @cm";
+  parameter Real Izz(start=63100.0) "inertia about z axis @cm";
+  parameter Real Ixz(start=982.0) "inertia xz term @cm";
+  parameter Real hx(start=160.0) "x-axis engine angular momentum";
+  parameter Real xcg(start=0.35) "center of gravity, % chord";
+  parameter Real xcgr(start=0.35) "aerodynamics reference point, % chord";
+  parameter Real gd(start=32.17) "gravitational acceleration";
 
   // precomputed inertia terms
   Real mass = weight/gd;
