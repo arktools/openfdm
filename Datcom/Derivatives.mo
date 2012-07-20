@@ -1,6 +1,6 @@
-within DatcomAero;
+within Datcom;
 
-expandable connector AeroConnector
+expandable connector Derivatives
   Real CD_FLAPS;
   Real CL_FLAPS;
   Real CM_FLAPS;
@@ -61,4 +61,4 @@ expandable connector AeroConnector
   Real CNP_TOTAL;
   Real CNR_TOTAL;
   Real CLR_TOTAL;
-end AeroConnector;
+end Derivatives;

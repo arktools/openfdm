@@ -1,9 +1,10 @@
-within DatcomAero;
+within Datcom;
 
-model AircraftForceMoment
+model ForceMoment
   import OpenFDM.*;
+ 
   AircraftState state(alpha = 1, alphaDot = 1, p = 1, q = 1, r = 1);
-  AeroConnector coef;
+  input TableConnector coef;
   DatcomTable_Citation table;
   constant Real V = 1;
   constant Real bref = 1;
@@ -62,4 +63,4 @@ equation
   P = q*S*cbar*Cl;
   Q = q*S*cbar*Cm;
   R = q*S*cbar*Cn;
-end AircraftForceMoment;
+end ForceMoment;

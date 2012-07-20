@@ -1,6 +1,6 @@
-within DatcomAero;
+within Datcom;
 
-model DatcomTable_Citation
+model Citation
   extends DatcomTable(
     CD_FLAPS.tableOnFile=false,
     CD_FLAPS.table=
@@ -1386,4 +1386,4 @@ model DatcomTable_Citation
       { 22.00,  2.047e-03},
       { 24.00,  1.853e-03}
     });
-end DatcomTable_Citation;
+end Citation;

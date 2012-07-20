@@ -1,4 +1,4 @@
 loadModel(Modelica);
-loadModel(DatcomAero);
-simulate(DatcomAero.AircraftForceMoment);
+loadModel(Datcom);
+simulate(Datcom.ForceMoment);
 val(L,0);

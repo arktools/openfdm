@@ -1,6 +1,6 @@
-within DatcomAero;
+within Datcom;
 
-partial model DatcomTable
+partial model Table
   import Modelica.Blocks.Tables.*;
   input AircraftState state;
   output AeroConnector coef;
@@ -186,6 +186,6 @@ equation
   connect(CNR_TOTAL.y[1],coef.CNR_TOTAL);
   connect(CLR_TOTAL.u[1],state.alpha);
   connect(CLR_TOTAL.y[1],coef.CLR_TOTAL);
-end DatcomTable;
+end Table;
 
 // vim:ts=2:sw=2:expandtab
