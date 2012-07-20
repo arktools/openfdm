@@ -3,5 +3,5 @@ export OPENMODELICALIBRARY=$PWD:$OPENMODELICALIBRARY
 tmpDir=/tmp/$(whoami)
 mkdir -p $tmpDir
 cd $tmpDir
-OMShell
-#OMShell-terminal
+kill -q $(pgrep omc) $(pgrep OMShell)
+OMShell-terminal
