@@ -1,4 +1,21 @@
 within F16;
+
+block Table2DTestSignal
+    input Real t;
+    parameter Real period = 1;
+    parameter Real heightX = 1;
+    parameter Real heightY = 1;
+    output Real x;
+    output Real y;
+    CombiTable1D table(columns={3}, table = transpose(
+     {{0,1,2,3,4,5,6,7,8},
+      {0,1,1,0,0,1,1,0,0},
+      {0,1,0,1,0,0,1,1,0}}));
+algorithm
+    table.u[1] := 8*time/period;
+    table.y[1] := heightX * x;
+    table.y[1] := heightY * y;
+end Table2DTestSignal;
   
 block Aerodynamics
 
@@ -25,45 +42,22 @@ block Aerodynamics
   output Real cl;
   output Real cm;
   output Real cn;
+
   // 2D tables must have more columns than rows. 
   // u1 is first column, u2 is first row.
   // some were transposed to have tables going vertically i.e. first column is input 
+
   CombiTable1D cxqTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     {-0.267, -0.110,  0.308,   1.34,   2.08,   2.91,   2.76,   2.05,   1.50,   1.49,   1.83,   1.21}}))
     "drag coefficient due to pitch rate table(aoa[deg])";
-  model test_cxq
-    Modelica.Blocks.Sources.Ramp ramp1(height = 45, duration = 1);
-  CombiTable1D cxqTable(columns={2}, table = transpose(
-   {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
-    {-0.267, -0.110,  0.308,   1.34,   2.08,   2.91,   2.76,   2.05,   1.50,   1.49,   1.83,   1.21}}))
-    "drag coefficient due to pitch rate table(aoa[deg])";
-    Real alpha;
-    output Real y;
-  equation
-    connect(alpha, ramp1.y);
-    connect(cxqTable.u[1], alpha);
-    connect(cxqTable.y[1], y);
-  end test_cxq;
-    
+
+   
   CombiTable1D cyrTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     { 0.882,  0.852,  0.876,  0.958,  0.962,  0.974,  0.819,  0.483,  0.590,  0.121, -0.493,  -1.04}}))
     "side coefficient due to yaw rate table(aoa[deg])";
-  model test_cyr
-    Modelica.Blocks.Sources.Ramp ramp1(height = 45, duration = 1);
-  CombiTable1D cyrTable(columns={2}, table = transpose(
-   {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
-    { 0.882,  0.852,  0.876,  0.958,  0.962,  0.974,  0.819,  0.483,  0.590,  0.121, -0.493,  -1.04}}))
-    "side coefficient due to yaw rate table(aoa[deg])";
-    Real alpha;
-    output Real y;
-  equation
-    connect(alpha, ramp1.y);
-    connect(cyrTable.u[1], alpha);
-    connect(cyrTable.y[1], y);
-  end test_cyr;
-    
+
   CombiTable1D cypTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     {-0.108, -0.108, -0.188,  0.110,  0.258,  0.226,  0.344,  0.362,  0.611,  0.529,  0.298,  -2.27}}))
@@ -107,7 +101,7 @@ block Aerodynamics
     {    12,   -0.040, -0.038, -0.039, -0.025,  0.006,  0.062,  0.087,  0.085,  0.100,  0.110,  0.104,  0.091},
     {    24,   -0.083, -0.073, -0.076, -0.072, -0.046,  0.012,  0.024,  0.025,  0.043,  0.053,  0.047,  0.040}})
     "drag coefficient table(aoa[deg],elev[deg])";
-  
+
   CombiTable1D czTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45}, 
     { 0.770,  0.241, -0.100, -0.416, -0.731, -1.053, -1.366, -1.646, -1.917, -2.120, -2.248, -2.229}}))
@@ -270,5 +264,13 @@ equation
   connect(dndrTable.y, dndr);
 
 end Aerodynamics;
+
+model test_Aerodynamics
+  Aerodynamics aerodynamics;
+  Table2DTestSignal singal2d;  
+algorithm
+  aerodynamics.alpha := 45 * signal2d.x;
+  aerodynamics.beta := 45 * signal2d.x;
+end test_Aerodynamics;
 
 // vim:ts=2:sw=2:expandtab:
