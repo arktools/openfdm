@@ -1,11 +1,12 @@
 within F16;
   
-block Aerodynamics
+block testAerodynamics
 
   import Modelica.Blocks.Tables.*;
+  Modelica.Blocks.Sources.Ramp ramp(height=45,duration=1);
 
   // inputs
-  input Real alpha "aoa [rad]";
+  Real alpha "aoa [rad]";
   input Real beta "side slip angle [rad]";
   input Real vt;
   input Real p;
@@ -19,12 +20,15 @@ block Aerodynamics
   input Real aileron;
   input Real rudder; 
 
+  /*
   output Real cx;
   output Real cy;
   output Real cz;
   output Real cl;
   output Real cm;
   output Real cn;
+  */
+
   // 2D tables must have more columns than rows. 
   // u1 is first column, u2 is first row.
   // some were transposed to have tables going vertically i.e. first column is input 
@@ -32,37 +36,11 @@ block Aerodynamics
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     {-0.267, -0.110,  0.308,   1.34,   2.08,   2.91,   2.76,   2.05,   1.50,   1.49,   1.83,   1.21}}))
     "drag coefficient due to pitch rate table(aoa[deg])";
-  model test_cxq
-    Modelica.Blocks.Sources.Ramp ramp1(height = 45, duration = 1);
-  CombiTable1D cxqTable(columns={2}, table = transpose(
-   {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
-    {-0.267, -0.110,  0.308,   1.34,   2.08,   2.91,   2.76,   2.05,   1.50,   1.49,   1.83,   1.21}}))
-    "drag coefficient due to pitch rate table(aoa[deg])";
-    Real alpha;
-    output Real y;
-  equation
-    connect(alpha, ramp1.y);
-    connect(cxqTable.u[1], alpha);
-    connect(cxqTable.y[1], y);
-  end test_cxq;
     
   CombiTable1D cyrTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     { 0.882,  0.852,  0.876,  0.958,  0.962,  0.974,  0.819,  0.483,  0.590,  0.121, -0.493,  -1.04}}))
     "side coefficient due to yaw rate table(aoa[deg])";
-  model test_cyr
-    Modelica.Blocks.Sources.Ramp ramp1(height = 45, duration = 1);
-  CombiTable1D cyrTable(columns={2}, table = transpose(
-   {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
-    { 0.882,  0.852,  0.876,  0.958,  0.962,  0.974,  0.819,  0.483,  0.590,  0.121, -0.493,  -1.04}}))
-    "side coefficient due to yaw rate table(aoa[deg])";
-    Real alpha;
-    output Real y;
-  equation
-    connect(alpha, ramp1.y);
-    connect(cyrTable.u[1], alpha);
-    connect(cyrTable.y[1], y);
-  end test_cyr;
     
   CombiTable1D cypTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
@@ -194,11 +172,12 @@ block Aerodynamics
 protected
   // local var for table use
   constant Real rtod = 57.296;
-  Real alpha_deg, beta_deg, beta_dabs;
-  Real tvt, b2v, cq, daileron, drudder; 
+  Real alpha_deg;
+  //Real alpha_deg, beta_deg, beta_dabs;
+  //Real tvt, b2v, cq, daileron, drudder; 
 
 algorithm
-
+/*
   //Calculate local variables
   alpha_deg := alpha*rtod;
   beta_deg := beta*rtod;
@@ -217,10 +196,10 @@ algorithm
   cm := cm0 + cq * cmq + cz * (xcgr - xcg);
   cn := cn0 + dnda*daileron + dndr*drudder + 
       b2v * ( cnr*r + cnp*p ) - cy*(xcgr-xcg) * cbar/b;
-
+*/
 
 equation
-  
+  connect(alpha_deg, ramp.y); 
   //Table connections: independent var
   connect(cxqTable.u[1], alpha_deg);
   connect(cyrTable.u[1], alpha_deg);
@@ -232,22 +211,6 @@ equation
   connect(cnrTable.u[1], alpha_deg);
   connect(cnpTable.u[1], alpha_deg);
   connect(czTable.u[1], alpha_deg);
-  connect(cxTable.u1, elevator);
-  connect(cxTable.u2, alpha_deg);
-  connect(cmTable.u1, beta_dabs);
-  connect(cmTable.u2, alpha_deg);
-  connect(clTable.u1, beta_dabs);
-  connect(clTable.u2, alpha_deg);
-  connect(cnTable.u1, beta_dabs);
-  connect(cnTable.u2, alpha_deg);
-  connect(dldaTable.u1, beta_dabs);
-  connect(dldaTable.u2, alpha_deg);
-  connect(dldrTable.u1, beta_dabs);
-  connect(dldrTable.u2, alpha_deg);
-  connect(dndaTable.u1, beta_dabs);
-  connect(dndaTable.u2, alpha_deg);
-  connect(dndrTable.u1, beta_dabs);
-  connect(dndrTable.u2, alpha_deg);
   
   //Table connections: dependent var
   connect(cxqTable.y[1], cxq);
@@ -260,15 +223,7 @@ equation
   connect(cnrTable.y[1], cnr);
   connect(cnpTable.y[1], cnp);
   connect(czTable.y[1], cz0);
-  connect(cxTable.y, cx0);
-  connect(cmTable.y, cm0);
-  connect(clTable.y, cl0);
-  connect(cnTable.y, cn0);
-  connect(dldrTable.y, dldr);
-  connect(dldaTable.y, dlda);
-  connect(dndaTable.y, dnda);
-  connect(dndrTable.y, dndr);
 
-end Aerodynamics;
+end testAerodynamics;
 
 // vim:ts=2:sw=2:expandtab:

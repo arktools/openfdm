@@ -10,13 +10,13 @@ public
   // output
   output Real thrust "engine thrust";
   // state
-  Real power "enigne power";
-  Real t_idle, t_military, t_maximum;
+  Real power(start=0) "enigne power";
+  
 protected
   Real cPow "power coefficient";
   
   //Table outputs, local
-  //Real t_idle, t_military, t_maximum;
+  Real t_idle, t_military, t_maximum;
 
     CombiTable2D idleTable(table =
     {{   0,       0,   10000,   20000,   30000,   40000,   50000},
@@ -59,6 +59,36 @@ protected
 	    end if;
 	end throttleGearing;
 
+  model Ramp
+    parameter Real initialValue = 0;
+    parameter Real finalValue = 1;
+    parameter Real startTime = 0;
+    parameter Real stopTime = 1;
+    Real x;
+    output Real y;
+  equation
+    if (time < stopTime) then
+      der(x) = (finalValue - initialValue)/(stopTime-startTime);
+    else
+      der(x) = 0;
+    end if;
+    y = x + initialValue;
+  end Ramp;
+
+  model test_throttleGearing
+    Real throttle;
+    Real gearing;
+    Modelica.Blocks.Sources.Ramp ramp1(height=1,duration=1);
+  algorithm
+    assert(thorttle > 0, "throttle must be > 0");
+    assert(thorttle <= 1, "throttle cannot be > 1");
+    assert(gearing > 0, "gearing must be > 0");
+    assert(gearing <= 1, "gearing cannot be > 1");
+  equation
+    connect(ramp1.y,throttle);
+    gearing = throttleGearing(throttle);
+  end test_throttleGearing;
+
 	function rtau "compute reciprocal of time constant for engine"
 	    input Real dp "power difference";
 	    output Real rtau "reciprocal of time constant for engine";
@@ -68,9 +98,20 @@ protected
 	    elseif (dp >= 50.0) then
 		rtau := 0.1;
 	    else
-		rtau := 1.9-0.36*dp;
+		rtau := 1.9-0.036*dp;
 	    end if;
 	end rtau;
+
+  model test_rtau
+    Real dp(start=0);
+    Real tau;
+    Modelica.Blocks.Sources.Ramp ramp1(height=100,duration=1);
+  algorithm
+    assert(tau > 0, "tau must be > 0");
+  equation
+    connect(ramp1.y,dp);
+    tau = rtau(dp);
+  end test_rtau;
 
 	function powerDerivative "computer derivative of power"
 	    input Real power "engine power";
@@ -81,24 +122,31 @@ protected
 	    Real t "reciprocal of time constant, 1/T";
 	algorithm
 	    if (powerCmd >= 50.0) then
-		if (power >= 50.0) then
-		    p := powerCmd;
-		    t := 5.0;
-		else
-		    p := 60.0;
-		    t := rtau(p-power);
-		end if;
+		    if (power >= 50.0) then
+		        p := powerCmd;
+		        t := 5.0;
+		    else
+		        p := 60.0;
+		        t := rtau(p-power);
+		    end if;
 	    else
-		if (power >= 50.0 ) then
-		    p := 40.0;
-		    t := 5.0;
-		else
-		    p := powerCmd;
-		    t := rtau(p-power);
-		end if;
+		    if (power >= 50.0 ) then
+		        p := 40.0;
+		        t := 5.0;
+		    else
+		        p := powerCmd;
+		        t := rtau(p-power);
+		    end if;
 	    end if;
 	    powerDerivative := t*(p-power);
 	end powerDerivative;
+  
+  model test_powerDerivative
+    Real power;
+    parameter Real powerCmd = 100;
+  equation
+    der(power) = powerDerivative(power, powerCmd); 
+  end test_powerDerivative;
 
  	function computeThrust
 	  input Real power "engine power";
@@ -108,11 +156,10 @@ protected
 	  output Real thrust "engne thrust";
 	algorithm
     if power < 50.0
-  then
-          thrust:=t_idle + (t_military - t_idle) * power * 0.02;
-  else
-         thrust:= t_military + (t_maximum-t_military) * (power-50.0) * 0.02;
-          //thrust := 0;
+    then
+      thrust:=t_idle + (t_military - t_idle) * power * 0.02;
+    else
+      thrust:= t_military + (t_maximum-t_military) * (power-50.0) * 0.02;
     end if;
 	end computeThrust;
 
@@ -120,6 +167,7 @@ algorithm
   cPow := throttleGearing(throttle);
   thrust := computeThrust(power,alt,mach, t_idle, t_military, t_maximum);
 equation
+  der(power) = powerDerivative(power,cPow);
   //Table connections, input
   connect(mach, idleTable.u1);
   connect(alt, idleTable.u2);
@@ -132,6 +180,12 @@ equation
   connect(idleTable.y, t_idle);
   connect(militaryTable.y, t_military);
   connect(maximumTable.y, t_maximum);
-  der(power) = powerDerivative(power,cPow);
+
 end F100_PW_200;
+
+model test_F100_PW_200
+  F100_PW_200 engine(throttle=1.0,alt=0,mach=0);
+algorithm
+  assert(engine.thrust > 0, "engine doesn't produce thrust");
+end test_F100_PW_200;
 // vim:sw=2:ts=2:expandtab:

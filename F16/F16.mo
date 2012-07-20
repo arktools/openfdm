@@ -1,20 +1,40 @@
 model F16
 
   // control variables
-  input Real throttle;
+  /*
+  input Real throttle(start = init.throttle);
   input Real elevator;
   input Real aileron;
   input Real rudder;
+  */
 
-  Airframe airframe;
-  F100_PW_200 engine;
+  
+  Airframe airframe(
+    vt(start=init.vt),
+    alpha(start=init.alpha),
+    beta(start=init.beta),
+    phi(start=init.phi),
+    theta(start=init.theta),
+    psi(start=init.psi),
+    p(start=init.p),
+    q(start=init.q),
+    r(start=init.r),
+    posNorth(start=init.posNorth),
+    posEast(start=init.posEast),
+    alt(start=init.alt)
+  );
+  //F100_PW_200 engine(power(start=init.power));
+  NullEngine engine;
   StandardAtmosphere atmosphere;
   Aerodynamics aerodynamics;
+  //AerodynamicsNull aerodynamics;
+  Controls controls;
+  StateInit init;
 
 equation
-
+  
   // propulsion
-  connect(throttle,engine.throttle);
+  connect(controls.throttle,engine.throttle);
   connect(atmosphere.mach,engine.mach);
   connect(airframe.alt,engine.alt);
   connect(engine.thrust,airframe.thrust); 
@@ -42,15 +62,15 @@ equation
   connect(airframe.cbar, aerodynamics.cbar);
   connect(airframe.xcg, aerodynamics.xcg);
   connect(airframe.xcgr, aerodynamics.xcgr);
-  connect(elevator, aerodynamics.elevator);
-  connect(aileron, aerodynamics.aileron);
-  connect(rudder, aerodynamics.rudder);
-
+  connect(controls.elevator, aerodynamics.elevator);
+  connect(controls.aileron, aerodynamics.aileron);
+  connect(controls.rudder, aerodynamics.rudder);
   // control
-  connect(throttle,airframe.throttle);
-  connect(elevator,airframe.elevator);
-  connect(aileron,airframe.aileron);
-  connect(rudder,airframe.rudder);
+  connect(controls.throttle,airframe.throttle);
+  connect(controls.elevator,airframe.elevator);
+  connect(controls.aileron,airframe.aileron);
+  connect(controls.rudder,airframe.rudder);
+  //connect(init.throttle, throttle);
 
 end F16;
 
