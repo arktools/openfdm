@@ -1,0 +1,4 @@
+loadModel(Modelica);
+loadModel(Datcom);
+simulate(Datcom.ForceMoment);
+val(L,0);

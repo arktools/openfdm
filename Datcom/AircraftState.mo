@@ -1,4 +1,4 @@
-within OpenFDM.Aerodynamics;
+within Datcom;
 
 expandable connector AircraftState
   Real p "roll rate [deg/s]";
