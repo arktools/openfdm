@@ -29,37 +29,51 @@ algorithm
   ecef[3] := 0;
 end GeodeticToECEF;
 
-model World
-  import Modelica.Mechanics.MultiBody;
-  extends MultiBody.World;
-
-end World;
-
-model Environment
+model Atmosphere "atmosphere for multibody frame"
   import SI = Modelica.SIunits;
   import Modelica.Math.Vectors;
   import Modelica.Mechanics.MultiBody;
   MultiBody.Interfaces.Frame frame;
   SI.Density rho "air density";  
   SI.Velocity airspeed "true airspeed";
+  SI.Angle alpha "angle of attack";
+  SI.Angle beta "side slip angle";
+  SI.Pressure qBar "average dynamics pressure";
 protected
-  SI.Velocity windECEF[3];
+  SI.Velocity wind_ECEF[3];
+  SI.Velocity vRelative_ECEF[3];
+  SI.Velocity vRelative_XYZ[3];
 equation
-  windECEF = {0,0,0}; // TODO
-  rho = 1.225; // TODO
-  airspeed = Vectors.norm(der(frame.r_0) - windECEF);
-  // environment exerts no force torques
+  rho = 1.225;
+  wind_ECEF = {0,0,0};
+  vRelative_ECEF = der(frame.r_0) - wind_ECEF;
+  vRelative_XYZ = MultiBody.Frames.resolve2(frame.R,vRelative_ECEF);
+  airspeed = Vectors.norm(vRelative_ECEF);
+
+  // if negligible airspeed, set wind angles to zero
+  // to avoid singularity
+  if (airspeed < 0.01) then
+    alpha = 0;
+    beta = 0;
+  else
+    alpha = atan2(vRelative_XYZ[3],sqrt(vRelative_XYZ[1]^2+vRelative_XYZ[2]^2));
+    beta = atan2(vRelative_XYZ[2],vRelative_XYZ[1]);
+  end if;
+
+  qBar = 0.5*rho*airspeed^2;
+
+  // atmosphere exerts no force torques directly
   // only provides state dependent info for frame
   frame.f = {0,0,0};
   frame.t = {0,0,0};
-end Environment;
+end Atmosphere;
 
-partial model Aerodynamics "abstract aerodynamics description, extends world force and torque from multibody"
+partial model Aerodynamics "aerodynamic force/torque with multibody frame connector"
   import SI = Modelica.SIunits;
   import Modelica.Mechanics.MultiBody;
   MultiBody.Interfaces.Frame_b frame_b;
 protected
-  Environment environment;
+  Atmosphere atmosphere;
   MultiBody.Forces.WorldForceAndTorque forceTorque;
   SI.Force lift;
   SI.Force drag;
@@ -67,27 +81,17 @@ protected
   SI.Torque rollMoment;
   SI.Torque pitchMoment;
   SI.Torque yawMoment;
-
-  SI.Pressure qBar "average dynamics pressure";
-  SI.Angle alpha "angle of attack";
-  SI.AngularVelocity alphaDot "angle of attack derivative";
-  SI.Angle beta "side slip angle";
-
 equation
-  connect(environment.frame,frame_b);
+  connect(atmosphere.frame,frame_b);
   connect(frame_b,forceTorque.frame_b);
-  // TODO
-  qBar = 0.5*environment.rho*environment.airspeed^2;
-  alpha = 0.1;
-  alphaDot = 0.0;
-  beta = 0.1;
-
   // right hand set (forward, right, down)
+  // TODO check frames, gravity currently in 2nd comp
+  // of world frame, this doesn't match NED
   forceTorque.force = {-drag,sideForce,-lift};
   forceTorque.torque = {rollMoment,pitchMoment,yawMoment};
 end Aerodynamics;
 
-partial model AerodynamicsCoefficientBased "abstract coefficient based aerodynamics"
+partial model AerodynamicsCoefficientBased "coefficient based aerodynamics"
   import SI = Modelica.SIunits;
   extends Aerodynamics;
   parameter SI.Area s "reference area";
@@ -101,12 +105,12 @@ protected
   Real cm "pitch moment coefficient";
   Real cn "yaw moment coefficient";
 equation
-  lift = cL*qBar*s;
-  drag = cD*qBar*s;
-  sideForce = cC*qBar*s;
-  rollMoment = cl*qBar*b*s;
-  pitchMoment = cm*qBar*cBar*s;
-  yawMoment = cn*qBar*b*s;
+  lift = cL*atmosphere.qBar*s;
+  drag = cD*atmosphere.qBar*s;
+  sideForce = cC*atmosphere.qBar*s;
+  rollMoment = cl*atmosphere.qBar*b*s;
+  pitchMoment = cm*atmosphere.qBar*cBar*s;
+  yawMoment = cn*atmosphere.qBar*b*s;
 end AerodynamicsCoefficientBased;
 
 block AerodynamicsCoefficientBasedBlock
@@ -117,30 +121,36 @@ equation
   u = {cL,cD,cC,cl,cm,cn};
 end AerodynamicsCoefficientBasedBlock;
 
+block AerodynamicCoefficientsTable
+end AerodynamicCoefficientsTable;
+
 model TestAerodynamics
   import Modelica.Mechanics.MultiBody;
-  inner World world;
-  MultiBody.Parts.BodyShape body;
-  AerodynamicsCoefficientBasedBlock aerodynamics(cBar=1,b=1,s=1);
-  Modelica.Blocks.Sources.Constant coefs[6](k=0.0001*{1,1,1,1,1,1});
+  inner MultiBody.World world;
+  MultiBody.Parts.BodyShape body(
+    m=1,
+    I_11=1,
+    I_22=1,
+    I_33=1,
+    r={0.4,0,0},
+    r_CM={0.2,0,0},
+    width=0.05,
+    r_0(start={0.2,-0.5,0.1}, fixed=true),
+    v_0(fixed=true),
+    angles_fixed=true,
+    w_0_fixed=true,
+    angles_start={0,0,0}*0.174532925199433);
+  AerodynamicsCoefficientBasedBlock aerodynamics(
+    cBar=1,
+    b=1,
+    s=1);
+  Modelica.Blocks.Sources.Constant coefs[6](
+    k=0.0*{1,1,1,1,1,1});
 equation
   connect(body.frame_a,aerodynamics.frame_b);
   connect(coefs.y,aerodynamics.u);
 end TestAerodynamics;
 
-//model Aircraft
-//
-//  import Modelica.Mechanics.MultiBody.World;
-//  import Modelica.Mechanics.MultiBody.Parts.BodyShape;
-//  import Modelica.Mechanics.MultiBody.Forces.WorldForceAndTorque;
-//
-//  inner World world;
-//  BodyShape body;
-//  WorldForceAndTorque aerodynamics(force={0,0,0},torque={0,0,0});
-//equation
-//  connect(aerodynamics.frame_b,body.frame_a);
-//end Test1;
-//
 //model F16 extends Aircraft(
 //  body(m=1
 //    I_11=1,
