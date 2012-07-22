@@ -112,7 +112,13 @@ partial model Aerodynamics "aerodynamic force/torque with multibody frame connec
   import Modelica.Math.Vectors;
   import Modelica.Mechanics.MultiBody;
   import Modelica.Mechanics.MultiBody.Frames.*;
+  import Modelica.Blocks.Interfaces.RealInput;
   MultiBody.Interfaces.Frame_b frame_b;
+  RealInput aileron;
+  RealInput elevator;
+  RealInput rudder;
+  RealInput throttle;
+  RealInput flap;
 protected
   Environment env;
   MultiBody.Forces.WorldForceAndTorque forceTorque;
@@ -210,8 +216,8 @@ model AerodynamicsDatcom
   import Modelica.Blocks.Tables.CombiTable1Ds;
   import Conversions.NonSIunits.*;
 
-  // generic table types 
-  block Table1Ds
+  // generic 1D table types 
+  partial block Table1Ds
     import Modelica.Blocks.Interfaces.RealOutput;
     RealOutput y;
     parameter Real table[:, 2]=fill(0.0,0,2)
@@ -244,34 +250,96 @@ model AerodynamicsDatcom
     input Angle_deg elevator;
   equation
     table.u = elevator;
-  end Table1DsElevator
+  end Table1DsElevator;
 
-  block Table1DsFlaps
-    input Angle_deg flaps;
+  block Table1DsFlap
+    input Angle_deg flap;
   equation
-    table.u = flaps;
-  end Table1DsFlaps
+    table.u = flap;
+  end Table1DsFlap;
 
-  // actual table definitions
+  // generic 2D table types
+  partial block Table2Ds
+    import Modelica.Blocks.Interfaces.RealOutput;
+    RealOutput y;
+    parameter Real table[:, :]=fill(0.0,0,2)
+    CombiTable2D table(table=data);
+  equation
+    table.y = y[1];
+  end Table2Ds;
+
+  block Table2DAlphaFlap
+    input Angle_deg alpha;   
+    input Angle_deg flap;   
+  equation
+    table.u1 = alpha;
+    table.u2 = flap;
+  end Table2DAlphaFlap;
+
+  block Table2DAlphaElevator
+    input Angle_deg alpha;   
+    input Angle_deg elevator;   
+  equation
+    table.u1 = alpha;
+    table.u2 = elevator;
+  end Table2DAlphaElevator;
+
+  // lift coefficient tables
   CLge Table1DsHeight CLge;
-  Table1DsHeight CDge;
   Table1DsAlpha CLwbh;
   Table1DsAlpha CLq;
   Table1DsAlpha CLad;
-  Table1DsAlpha CLdF1L;
+  Table1DsFlap CLdF1L;
+  Table1DsFlap CLdF1R;
+  Table1DsFlap CLdF2L;
+  Table1DsFlap CLdF2R;
+  Table1DsElevator CLDe;
+
+  // drag coefficient tables
+  Table1DsHeight CDge;
+  Table1DsAlpha CD;
+  Table2DAlphaFlap CdDf1L;
+  Table2DAlphaFlap CdDf1R;
+  Table2DAlphaFlap CdDf2L;
+  Table2DAlphaFlap CdDf2R;
+  Table2DAlphaElevator CdDe;
 
 equation
+  // lift
   connect(CLge.height,to_ft(env.agl));  
   connect(CDge.height,to_deg(env.agl));  
   connect(CLwbh.alpha,to_deg(alpha));  
   connect(CLq.alpha,to_deg(alpha));  
   connect(CLad.alpha,to_deg(alpha));  
   connect(CLad.alpha,to_deg(alpha));  
-  cL = cLge.y*cLalpha.y +
-       cLq.y*to_degs(q)*c/(2*vt) +
-       cLad*to_degs(alphaDot)*c/(2*vt) +
-       cLdF1L = ;
-  cD = cDge*;
+  connect(CLdF1L.flap,to_deg(flap));  
+  connect(CLdF1R.flap,to_deg(flap));  
+  connect(CLdF2L.flap,to_deg(flap));  
+  connect(CLdF2R.flap,to_deg(flap));  
+  connect(CLDe.elevator,to_deg(elevator));  
+  cL = CLge.y*CLwbh.y +
+       CLq.y*to_degs(q)*c/(2*vt) +
+       CLad.y*to_degs(alphaDot)*c/(2*vt) +
+       CLdF1L.y + CLdF1R.y +
+       CLdF2L.y + CLdF2R.y +
+       CLDe.y;
+  // drag
+  connect(CDge.height,to_ft(env.agl));
+  connect(CD.alpha,to_deg(alpha));
+  connect(CdDf1L.alpha,to_deg(alpha));
+  connect(CdDf1L.flap,to_deg(flap));
+  connect(CdDf1R.alpha,to_deg(alpha));
+  connect(CdDf1R.flap,to_deg(flap));
+  connect(CdDf2L.alpha,to_deg(alpha));
+  connect(CdDf2L.flap,to_deg(flap));
+  connect(CdDf2R.alpha,to_deg(alpha));
+  connect(CdDf2R.flap,to_deg(flap));
+  connect(CdDe.alpha,to_deg(alpha));
+  connect(CdDe.elevator,to_deg(elevator));
+  cD = CDge.y*CD.y + 
+       CdDf1L.y + CdDf1R.y +
+       CdDf2L.y + CdDf2R.y + CdDe.y;
+  // side force
   cC = 0;
   cl = 0;
   cm = 0;
