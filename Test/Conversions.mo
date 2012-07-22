@@ -4,23 +4,25 @@ package Conversions
 
   package NonSIunits
 
+    import SI = Modelica.SIunits;
+
     type Length_ft = Real(
       final quantity="Length",
       final unit="ft") "Length in feet";
 
-    function to_feet
-      input Length meters;
+    function to_ft
+      input SI.Length meters;
       output Length_ft feet;
     algorithm
-      feet = meters * 3.281;
-    end to_feet;
+      feet := meters * 3.281;
+    end to_ft;
 
-    function from_feet
+    function from_ft
       input Length_ft feet;
-      output Length meters;
+      output SI.Length meters;
     algorithm
-      meters = 0.3048*feet;
-    end from_feet;
+      meters := 0.3048*feet;
+    end from_ft;
 
     type AngularVelocity_degs = Real (
       final quantity="AngularVelocity",
@@ -28,7 +30,7 @@ package Conversions
       "Angular velocity in degrees per second";
 
     function to_degs
-      input AngularVelocity rads;
+      input SI.AngularVelocity rads;
       output AngularVelocity_degs degs;
     algorithm
       degs := 57.2957795*rads;
@@ -36,7 +38,7 @@ package Conversions
 
     function from_degs
       input AngularVelocity_degs degs;
-      output AngularVelocity rads;
+      output SI.AngularVelocity rads;
     algorithm
       rads := 0.0174532925*degs;
     end from_degs;

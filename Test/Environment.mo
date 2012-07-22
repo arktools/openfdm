@@ -18,7 +18,7 @@ equation
   // TODO
   rho = 1.225;
   wind_ECEF = {0,0,0};
-  groundAltitude = 0;
+  groundAsl = 0;
 
   // envronment exerts no force torques directly
   // only provides state dependent info for frame
