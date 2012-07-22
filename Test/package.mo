@@ -28,12 +28,12 @@ package Conversions
       final unit="deg/s")
       "Angular velocity in degrees per second";
 
-    function to_degs
+    function to_deg
       input AngularVelocity rads;
       output AngularVelocity_degs degs;
     algorithm
       degs := 57.2957795*rads;
-    end to_degs;
+    end to_deg;
 
     function from_degs
       input AngularVelocity_degs degs;
@@ -304,6 +304,13 @@ model AerodynamicsDatcom
   Table2DAlphaFlap CdDf2R;
   Table2DAlphaElevator CdDe;
 
+  // side force coefficient tables
+  Table1DsAlpha Cyb;
+  Table1DsAlpha Cyp;
+  
+  // roll moment coefficient tables
+  Table1DsAlpha Clb;
+
 equation
   // lift
   connect(CLge.height,to_ft(env.agl));  
@@ -318,8 +325,8 @@ equation
   connect(CLdF2R.flap,to_deg(flap));  
   connect(CLDe.elevator,to_deg(elevator));  
   cL = CLge.y*CLwbh.y +
-       CLq.y*to_degs(q)*c/(2*vt) +
-       CLad.y*to_degs(alphaDot)*c/(2*vt) +
+       CLq.y*to_deg(q)*c/(2*vt) +
+       CLad.y*to_deg(alphaDot)*c/(2*vt) +
        CLdF1L.y + CLdF1R.y +
        CLdF2L.y + CLdF2R.y +
        CLDe.y;
@@ -340,8 +347,18 @@ equation
        CdDf1L.y + CdDf1R.y +
        CdDf2L.y + CdDf2R.y + CdDe.y;
   // side force
-  cC = 0;
-  cl = 0;
+  connect(Cyb.alpha, to_deg(alpha));
+  connect(Cyp.alpha, to_deg(alpha));
+  
+  cC = Cyb.y*to_deg(beta) +
+       Cyp.y*to_deg(p)*b/(2*vt); 
+  //3 more values not calculated by datcom: Cyr, CyDr, CyDa.
+  
+  // roll moment coefficient
+  connect(Clb.alpha, to_deg(alpha));
+
+  cl = Clb.y*b*to_deg(beta) +
+       Clp.y*to_deg(p)*b*;
   cm = 0;
   cn = 0;
 end AerodynamicsDatcom;
