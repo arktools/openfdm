@@ -116,7 +116,7 @@ module f16
             else if (dp >= 50.0) then
                 rtau = 0.1
             else
-                rtau = 1.9-0.36*dp
+                rtau = 1.9-0.036*dp
             end if
             return
         end function rtau
