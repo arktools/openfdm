@@ -101,17 +101,6 @@ equation
   yawMoment = cn*qBar*b*s;
 end AerodynamicBodyCoefficientBased;
 
-model AerodynamicBodyCoefficientBased_Null
-  extends AerodynamicBodyCoefficientBased;
-equation
-  cL = 0;
-  cD = 0;
-  cC = 0;
-  cl = 0;
-  cm = 0;
-  cn = 0;
-end AerodynamicBodyCoefficientBased_Null;
-
 block AerodynamicBodyCoefficientBasedBlock
   extends AerodynamicBodyCoefficientBased;
   import Modelica.Blocks.Interfaces.RealInput;
@@ -120,18 +109,18 @@ equation
   u = {cL,cD,cC,cl,cm,cn};
 end AerodynamicBodyCoefficientBasedBlock;
 
-model TestAerodynamicBody
+model TestAerodynamicBodyBlock
   inner Modelica.Mechanics.MultiBody.World world;
-  //AerodynamicBodyDatcom_Null body(
-  AerodynamicBodyCoefficientBased_Null body(
+  Modelica.Blocks.Sources.Constant coefs[6](k={1,1,1,1,1,1}*.00000000001);
+  AerodynamicBodyCoefficientBasedBlock body(
     rudder = 0,
     aileron = 0,
     elevator = 0,
     flap = 0,
     aero_rp = {1,0,0},
-    s = 0,
-    b = 0,
-    cBar = 0,
+    s = 1,
+    b = 1,
+    cBar = 1,
     m=1,
     I_11=1,
     I_22=1,
@@ -144,6 +133,8 @@ model TestAerodynamicBody
     angles_fixed=true,
     w_0_fixed=true,
     angles_start={90,0,0}*0.174532925199433);
-end TestAerodynamicBody;
+equation
+  connect(coefs.y,body.u);
+end TestAerodynamicBodyBlock;
 
 // vim:ts=2:sw=2:expandtab:

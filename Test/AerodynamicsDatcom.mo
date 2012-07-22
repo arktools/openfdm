@@ -269,7 +269,7 @@ algorithm
 end AerodynamicBodyDatcom;
 
 
-model AerodynamicBodyDatcom_Null
+model AerodynamicBodyDatcomExample
   constant Real test1D[:,:] = {{0,0},
                               {1,1}};
   constant Real test2D[:,:] =  {{0,0,1},
@@ -328,4 +328,29 @@ model AerodynamicBodyDatcom_Null
     CnDa.data = test2D,
     CnDr = 0 
     );
-end AerodynamicBodyDatcom_Null;
+end AerodynamicBodyDatcomExample;
+
+model TestAerodynamicBodyDatcom
+  inner Modelica.Mechanics.MultiBody.World world;
+  AerodynamicBodyDatcomExample body(
+    rudder = 0,
+    aileron = 0,
+    elevator = 0,
+    flap = 0,
+    aero_rp = {1,0,0},
+    s = 1,
+    b = 1,
+    cBar = 1,
+    m=1,
+    I_11=1,
+    I_22=1,
+    I_33=1,
+    r={0.4,0,0},
+    r_CM={0.2,0,0},
+    width=0.05,
+    r_0(start={0.2,-0.5,0.1}, fixed=true),
+    v_0(start={0,0,0}, fixed=true),
+    angles_fixed=true,
+    w_0_fixed=true,
+    angles_start={90,0,0}*0.174532925199433);
+end TestAerodynamicBodyDatcom;
