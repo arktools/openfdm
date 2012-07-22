@@ -270,58 +270,62 @@ end AerodynamicBodyDatcom;
 
 
 model AerodynamicBodyDatcom_Null
-  constant Real empty[:,:] = {{0,0},{1,0}};
+  constant Real test1D[:,:] = {{0,0},
+                              {1,1}};
+  constant Real test2D[:,:] =  {{0,0,1},
+                                {1,0,1},
+                                {2,1,2}};
   extends AerodynamicBodyDatcom(  
     // lift coefficient tables
-    CLge.data = empty,
-    CLwbh.data = empty,
-    CLq.data = empty,
-    CLad.data = empty,
-    CLdF1L.data = empty,
-    CLdF1R.data = empty,
-    CLdF2L.data = empty,
-    CLdF2R.data = empty,
-    CLDe.data = empty,
+    CLge.data = test1D,
+    CLwbh.data = test1D,
+    CLq.data = test1D,
+    CLad.data = test1D,
+    CLdF1L.data = test1D,
+    CLdF1R.data = test1D,
+    CLdF2L.data = test1D,
+    CLdF2R.data = test1D,
+    CLDe.data = test1D,
 
     // drag coefficient tables
-    CDge.data = empty,
-    CD.data = empty,
-    CdDf1L.data = empty,
-    CdDf1R.data = empty,
-    CdDf2L.data = empty,
-    CdDf2R.data = empty,
-    CdDe.data = empty,
+    CDge.data = test1D,
+    CD.data = test1D,
+    CdDf1L.data = test2D,
+    CdDf1R.data = test2D,
+    CdDf2L.data = test2D,
+    CdDf2R.data = test2D,
+    CdDe.data = test2D,
      
     // side force coefficient tables
-    Cyb.data = empty,
-    Cyp.data = empty,
+    Cyb.data = test1D,
+    Cyp.data = test1D,
 
     // roll moment coefficient tables
-    Clb.data = empty,
-    Clp.data = empty,
-    Clr.data = empty,
-    ClDs4.data = empty,
+    Clb.data = test1D,
+    Clp.data = test1D,
+    Clr.data = test1D,
+    ClDs4.data = test1D,
     CldF1 = 0,
     CldF2 = 0,
     ClDr = 0, 
     
     // pitch moment coefficient tables
-    Cm_basic.data = empty,
-    Cmq.data = empty,
-    Cmadot.data = empty,
-    CmDe.data = empty,
-    CmDf1L.data = empty,
-    CmDf1R.data = empty,
-    CmDf2L.data = empty,
-    CmDf2R.data = empty,
+    Cm_basic.data = test1D,
+    Cmq.data = test1D,
+    Cmadot.data = test1D,
+    CmDe.data = test1D,
+    CmDf1L.data = test1D,
+    CmDf1R.data = test1D,
+    CmDf2L.data = test1D,
+    CmDf2R.data = test1D,
 
     // yaw moment coefficient tables
-    Cnb.data = empty,
-    Cnp.data = empty,
-    Cnr.data = empty,
+    Cnb.data = test1D,
+    Cnp.data = test1D,
+    Cnr.data = test1D,
     CnDf1 = 0,
     CnDf2 = 0,
-    CnDa.data = empty,
-    CnDr = -0.1047e-2
+    CnDa.data = test2D,
+    CnDr = 0 
     );
 end AerodynamicBodyDatcom_Null;

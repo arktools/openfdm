@@ -122,8 +122,8 @@ end AerodynamicBodyCoefficientBasedBlock;
 
 model TestAerodynamicBody
   inner Modelica.Mechanics.MultiBody.World world;
-  AerodynamicBodyDatcom_Null body(
-  //AerodynamicBodyCoefficientBased_Null body(
+  //AerodynamicBodyDatcom_Null body(
+  AerodynamicBodyCoefficientBased_Null body(
     rudder = 0,
     aileron = 0,
     elevator = 0,
