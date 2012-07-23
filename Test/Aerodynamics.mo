@@ -7,12 +7,14 @@ partial model AerodynamicBody "aerodynamic force/torque with multibody frame con
   import Modelica.Mechanics.MultiBody;
   import Modelica.Mechanics.MultiBody.Frames.*;
   import Modelica.Blocks.Interfaces.RealInput;
+  import Modelica.SIunits.Conversions.*;
+  import Test.Conversions.NonSIunits.*;
   RealInput aileron;
   RealInput elevator;
   RealInput rudder;
   RealInput flap;
   parameter Real aero_rp[3];
-  parameter Real vtTol=0.1 "Velocity above which aerodynamics are enabled";
+  parameter Real vtTol=0.001 "Velocity above which aerodynamics are enabled";
   MultiBody.Interfaces.Frame_b frame_aero "aerodynamic reference frame";
   MultiBody.Parts.FixedTranslation aero_trans(r=aero_rp) "aerodynamic reference frame translation";
 protected
@@ -38,8 +40,27 @@ protected
   SI.Velocity vRelative_XYZ[3];
   SI.Velocity aRelative_ECEF[3];
   SI.Velocity aRelative_XYZ[3];
+
+  Angle_deg alpha_deg;
+  Angle_deg beta_deg;
+  Angle_deg beta_deg_abs;
+  Angle_deg aileron_deg;
+  Angle_deg elevator_deg;
+  Angle_deg flap_deg;
+  Angle_deg rudder_deg;
+  Length_ft agl_ft;
   
 equation
+
+  // conversion
+  alpha_deg = to_deg(alpha); 
+  beta_deg = to_deg(beta);
+  beta_deg_abs = abs(beta_deg);
+  flap_deg = to_deg(flap); 
+  elevator_deg = to_deg(elevator); 
+  aileron_deg = to_deg(aileron);
+  rudder_deg = to_deg(rudder); 
+  agl_ft = Conversions.NonSIunits.to_ft(env.agl);
 
   connect(aero_trans.frame_a,frame_a);
   connect(aero_trans.frame_b,frame_aero);
@@ -52,12 +73,12 @@ equation
   vt = Vectors.norm(vRelative_XYZ);
   {aero_p,aero_q,aero_r} = angularVelocity2(frame_aero.R);
 
-  alpha = atan2(vRelative_XYZ[3],vRelative_XYZ[1]);
+  alpha = 0; //atan2(vRelative_XYZ[3],vRelative_XYZ[1]);
   qBar = 0.5*env.rho*vt^2;
 
   // avoid singularity in side slip angle calc
   if (vt > vtTol) then
-    beta = asin(vRelative_XYZ[2]/vt);
+    beta = 0; //beta = asin(vRelative_XYZ[2]/vt);
   else
     beta = 0;
   end if;
@@ -65,7 +86,7 @@ equation
   // if negligible airspeed, set wind angles to zero
   // to avoid singularity
   if ( (vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2) > vtTol) then
-    alphaDot = (vRelative_XYZ[1]*aRelative_XYZ[3]-vRelative_XYZ[3]*aRelative_XYZ[1])/(vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2); //stevens & lewis pg 78
+    alphaDot = 0; //alphaDot = (vRelative_XYZ[1]*aRelative_XYZ[3]-vRelative_XYZ[3]*aRelative_XYZ[1])/(vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2); //stevens & lewis pg 78
   else
     alphaDot = 0;
   end if;

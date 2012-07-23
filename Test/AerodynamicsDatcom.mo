@@ -5,8 +5,6 @@ model AerodynamicBodyDatcom
   extends AerodynamicBodyCoefficientBased;
   import Modelica.Blocks.Tables.CombiTable1Ds;
   import Modelica.Blocks.Tables.CombiTable2D;
-  import Conversions.NonSIunits.*;
-  import Conversions.NonSIunits.to_ft;
   import Modelica.SIunits.Conversions.*;
   import Test.Conversions.NonSIunits.*;
 
@@ -17,7 +15,9 @@ protected
     import Modelica.Blocks.Interfaces.RealOutput;
     RealOutput y;
     parameter Real data[:, :] = fill(0.0,0,2);
-    CombiTable1Ds table(table=data);
+    CombiTable1Ds table(
+        table=data,
+        smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative);
   equation
     table.y[1] = y;
   end Table1Ds;
@@ -69,7 +69,9 @@ protected
     import Modelica.Blocks.Interfaces.RealOutput;
     parameter Real data[:, :]  = fill(0.0,0,2);
     RealOutput y;
-    CombiTable2D table(table=data);
+    CombiTable2D table(
+        table=data,
+        smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative);
   equation
     table.y = y;
   end Table2Ds;
@@ -152,21 +154,8 @@ protected
   parameter Real CnDf2;
   Table2DAlphaAileron CnDa;
   parameter Real CnDr;
-  
-  Angle_deg alpha_deg;
-  Angle_deg aileron_deg;
-  Angle_deg elevator_deg;
-  Angle_deg flap_deg;
-  Length_ft agl_ft;
-  
-equation
 
-  // conversion
-  alpha_deg = to_deg(alpha); 
-  flap_deg = to_deg(flap); 
-  elevator_deg = to_deg(elevator); 
-  aileron_deg = to_deg(aileron); 
-  agl_ft = Conversions.NonSIunits.to_ft(env.agl);
+equation  
 
   // lift tables
   connect(CLge.height,agl_ft);  
@@ -223,7 +212,7 @@ equation
   connect(CnDa.alpha, aileron_deg);
 
 algorithm
-  if (vt>vtTol) then 
+    if (vt>vtTol) then 
     cL := CLge.y*CLwbh.y +
        CLq.y*to_degs(aero_q)*cBar/(2*vt) +
        CLad.y*to_degs(alphaDot)*cBar/(2*vt) +
@@ -267,7 +256,6 @@ algorithm
     cn := 0;
   end if;
 end AerodynamicBodyDatcom;
-
 
 model AerodynamicBodyDatcomExample
   constant Real test1D[:,:] = {{0,0},
@@ -338,9 +326,9 @@ model TestAerodynamicBodyDatcom
     elevator = 0,
     flap = 0,
     aero_rp = {1,0,0},
-    s = 1,
-    b = 1,
-    cBar = 1,
+    s = 0,
+    b = 0,
+    cBar = 0,
     m=1,
     I_11=1,
     I_22=1,
