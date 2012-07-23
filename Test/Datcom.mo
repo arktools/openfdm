@@ -134,7 +134,7 @@ protected
   Table1DsAileron ClDs4;
   parameter Real CldF1;
   parameter Real CldF2;
-  parameter Real ClDr; 
+  parameter Real ClDr;
   
   // pitch moment coefficient tables
   Table1DsAlpha Cm_basic;
@@ -159,7 +159,6 @@ equation
 
   // lift tables
   connect(CLge.height,agl_ft);  
-  connect(CDge.height,agl_ft);  
   connect(CLwbh.alpha,alpha_deg);  
   connect(CLq.alpha,alpha_deg);  
   connect(CLad.alpha,alpha_deg);  
@@ -209,21 +208,22 @@ equation
   connect(Cnp.alpha, alpha_deg);
   connect(Cnr.alpha, alpha_deg);
   connect(CnDa.alpha, alpha_deg);
-  connect(CnDa.alpha, aileron_deg);
+  connect(CnDa.aileron, aileron_deg);
 
 algorithm
-    if (vt>vtTol) then 
+
+  if (vt>vtTol) then 
     cL := CLge.y*CLwbh.y +
        CLq.y*to_degs(aero_q)*cBar/(2*vt) +
        CLad.y*to_degs(alphaDot)*cBar/(2*vt) +
        CLdF1L.y + CLdF1R.y +
        CLdF2L.y + CLdF2R.y +
        CLDe.y;
-    cD := CDge.y*CD.y + 
+    cD := CDge.y*CD.y +
        CdDf1L.y + CdDf1R.y +
        CdDf2L.y + CdDf2R.y + CdDe.y;
     cC := Cyb.y*to_deg(beta) +
-       Cyp.y*to_degs(aero_p)*b/(2*vt); 
+       Cyp.y*to_degs(aero_p)*b/(2*vt);
        //3 more values not calculated by datcom: Cyr, CyDr, CyDa.
     cl := Clb.y*b*to_deg(beta) +
        Clp.y*aero_p*b^2/(2*vt) + //p in rad?? TODO
@@ -243,7 +243,7 @@ algorithm
     cn := Cnb.y*b*to_deg(beta) +
        Cnp.y*b^2/(2*vt)*aero_p +
        Cnr.y*b^2/(2*vt)*aero_r +
-       CnDf1*(CdDf1R.y - CdDf1L.y) + 
+       CnDf1*(CdDf1R.y - CdDf1L.y) +
        CnDf2*(CdDf2R.y - CdDf2L.y) +
        CnDa.y*b +
        CnDr*b*rudder; //CnDr is not calculated by DATCOM
@@ -257,12 +257,12 @@ algorithm
   end if;
 end AerodynamicBodyDatcom;
 
-model AerodynamicBodyDatcomExample
-  constant Real test1D[:,:] = {{0,0},
-                              {1,1}};
-  constant Real test2D[:,:] =  {{0,0,1},
-                                {1,0,1},
-                                {2,1,2}};
+model AerodynamicBodyDatcom_Null
+  constant Real test1D[:,:] = {{ 0,   0},
+                               {90,   0}};
+  constant Real test2D[:,:] =  {{ 0,  0, 90},
+                                { 0,  0,  0},
+                                {90,  0,  0}};
   extends AerodynamicBodyDatcom(  
     // lift coefficient tables
     CLge.data = test1D,
@@ -295,7 +295,7 @@ model AerodynamicBodyDatcomExample
     ClDs4.data = test1D,
     CldF1 = 0,
     CldF2 = 0,
-    ClDr = 0, 
+    ClDr = 0,
     
     // pitch moment coefficient tables
     Cm_basic.data = test1D,
@@ -314,21 +314,21 @@ model AerodynamicBodyDatcomExample
     CnDf1 = 0,
     CnDf2 = 0,
     CnDa.data = test2D,
-    CnDr = 0 
+    CnDr = 0
     );
-end AerodynamicBodyDatcomExample;
+end AerodynamicBodyDatcom_Null;
 
 model TestAerodynamicBodyDatcom
-  inner Modelica.Mechanics.MultiBody.World world;
-  AerodynamicBodyDatcomExample body(
+  inner Modelica.Mechanics.MultiBody.World world(n={0,0,1});
+  AerodynamicBodyDatcom_B_737 body(
     rudder = 0,
     aileron = 0,
     elevator = 0,
     flap = 0,
     aero_rp = {1,0,0},
-    s = 0,
-    b = 0,
-    cBar = 0,
+    s = 1,
+    b = 1,
+    cBar = 1,
     m=1,
     I_11=1,
     I_22=1,
@@ -337,8 +337,11 @@ model TestAerodynamicBodyDatcom
     r_CM={0.2,0,0},
     width=0.05,
     r_0(start={0.2,-0.5,0.1}, fixed=true),
-    v_0(start={0,0,0}, fixed=true),
+    v_0(start={1,0,0}, fixed=true),
     angles_fixed=true,
     w_0_fixed=true,
-    angles_start={90,0,0}*0.174532925199433);
+    angles_start={0,0,0}*0.174532925199433,
+    sequence_angleStates = {3,2,1},
+    sequence_start = {3,2,1},
+    useQuaternions = false);
 end TestAerodynamicBodyDatcom;

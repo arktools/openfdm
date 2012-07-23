@@ -97,7 +97,10 @@ if args.script:
             print result
             error = OMPython.execute('''getErrorString()''').strip()[1:-1]
             if error:
-                raise Exception(error)
+                print error
+                if args.terminal:
+                    OMPython.run()
+                break
 
 if args.terminal:
     OMPython.run()

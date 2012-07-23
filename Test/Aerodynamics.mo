@@ -13,7 +13,7 @@ partial model AerodynamicBody "aerodynamic force/torque with multibody frame con
   RealInput elevator;
   RealInput rudder;
   RealInput flap;
-  parameter Real aero_rp[3];
+  parameter Real aero_rp[3] = {0,0,0};
   parameter Real vtTol=0.001 "Velocity above which aerodynamics are enabled";
   MultiBody.Interfaces.Frame_b frame_aero "aerodynamic reference frame";
   MultiBody.Parts.FixedTranslation aero_trans(r=aero_rp) "aerodynamic reference frame translation";
@@ -73,12 +73,12 @@ equation
   vt = Vectors.norm(vRelative_XYZ);
   {aero_p,aero_q,aero_r} = angularVelocity2(frame_aero.R);
 
-  alpha = 0; //atan2(vRelative_XYZ[3],vRelative_XYZ[1]);
+  alpha = atan2(vRelative_XYZ[3],vRelative_XYZ[1]);
   qBar = 0.5*env.rho*vt^2;
 
   // avoid singularity in side slip angle calc
   if (vt > vtTol) then
-    beta = 0; //beta = asin(vRelative_XYZ[2]/vt);
+    beta = asin(vRelative_XYZ[2]/vt);
   else
     beta = 0;
   end if;
@@ -86,7 +86,7 @@ equation
   // if negligible airspeed, set wind angles to zero
   // to avoid singularity
   if ( (vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2) > vtTol) then
-    alphaDot = 0; //alphaDot = (vRelative_XYZ[1]*aRelative_XYZ[3]-vRelative_XYZ[3]*aRelative_XYZ[1])/(vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2); //stevens & lewis pg 78
+    alphaDot = (vRelative_XYZ[1]*aRelative_XYZ[3]-vRelative_XYZ[3]*aRelative_XYZ[1])/(vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2); //stevens & lewis pg 78
   else
     alphaDot = 0;
   end if;
@@ -132,7 +132,7 @@ end AerodynamicBodyCoefficientBasedBlock;
 
 model TestAerodynamicBodyBlock
   inner Modelica.Mechanics.MultiBody.World world;
-  Modelica.Blocks.Sources.Constant coefs[6](k={1,1,1,1,1,1}*.00000000001);
+  Modelica.Blocks.Sources.Constant coefs[6](k={1,1,1,1,1,1}*0.000000001);
   AerodynamicBodyCoefficientBasedBlock body(
     rudder = 0,
     aileron = 0,
@@ -153,7 +153,10 @@ model TestAerodynamicBodyBlock
     v_0(start={0,0,0}, fixed=true),
     angles_fixed=true,
     w_0_fixed=true,
-    angles_start={90,0,0}*0.174532925199433);
+    sequence_angleStates = {3,2,1},
+    sequence_start = {3,2,1},
+    angles_start={0,0,0}*0.174532925199433,
+    useQuaternions=false);
 equation
   connect(coefs.y,body.u);
 end TestAerodynamicBodyBlock;
