@@ -7,12 +7,12 @@ model Environment "environment for multibody frame"
   import Modelica.Mechanics.MultiBody.Frames.*;
   MultiBody.Interfaces.Frame frame;
   SI.Density rho "air density";  
-  SI.Distance asl "altitude above sea level";
-  SI.Distance agl "altitude above ground level";
-  SI.Distance groundAsl "altitude of ground above sea level";
+  SI.Position asl "altitude above sea level";
+  SI.Position agl "altitude above ground level";
+  SI.Position groundAsl "altitude of ground above sea level";
   SI.Velocity wind_ECEF[3] "wind vector";
 equation
-  asl = frame.r_0[3]; // TODO: should subtract radius of earth
+  asl = -frame.r_0[3]; // TODO: should subtract radius of earth
   agl = asl - groundAsl; 
 
   // TODO

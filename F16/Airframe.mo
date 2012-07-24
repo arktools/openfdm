@@ -65,12 +65,14 @@ model Airframe
   Real posEast "east position";
   Real alt "altitude";
 
+  parameter Real vtTol = .01;
+
 protected
 
   // temporary variables
   Real c_beta, u, v, w, s_theta, c_theta, s_phi, c_phi,
     s_psi, c_psi, qs, qsb, rmqs, g_c_theta, q_s_phi, ay,
-    az, udot, vdot, wdot, dum, pq, qr, qhx, roll_m, pitch_m, 
+    az, udot, vdot, wdot, dum, dum2, pq, qr, qhx, roll_m, pitch_m, 
     yaw_m, t1, t2, t3, s1, s2, s3, s4, s5, s6, s7, s8; 
 
 equation
@@ -98,10 +100,14 @@ equation
   udot = r*v - q*w - gd * s_theta + (qs * cx + thrust)/mass;
   vdot = p*w - r*u + g_c_theta * s_phi + ay;
   wdot = q*u - p*v + g_c_theta * c_phi + az;
+
   dum = u*u + w*w;
-  der(vt) = (u*udot + v*vdot + w*wdot)/vt;
+  dum2 = vt;
+
+  der(vt) = (u*udot + v*vdot + w*wdot) / dum2;
   der(alpha) = (u*wdot - w*udot) / dum;
   der(beta) = (vt*vdot - v*der(vt)) * c_beta / dum;
+
 
   // kinematics
   der(phi) = p + (s_theta/c_theta)*(q_s_phi + r*c_phi);
