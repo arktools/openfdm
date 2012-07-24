@@ -148,7 +148,6 @@ model AerodynamicBodySimple
 
   // stall
   parameter Real alphaStall_deg = 20;
-  parameter Real betaStall_deg = 20;
 
   // lift
   parameter Real cL0 = 0.1 "cl vs. aoa y-intercept";
