@@ -1,3 +1,0 @@
-package OpenFDM
-
-end OpenFDM;
