@@ -5,6 +5,9 @@ partial model AerodynamicBody "aerodynamic force/torque with multibody frame con
     r = aero_rp,
     angles_fixed=true,
     w_0_fixed=true,
+    width=0.05,
+    angles_fixed=true,
+    w_0_fixed=true,
     sequence_angleStates = {3,2,1},
     sequence_start = {3,2,1},
     useQuaternions = false);
@@ -21,6 +24,9 @@ partial model AerodynamicBody "aerodynamic force/torque with multibody frame con
   RealInput flap;
   parameter Real[3] aero_rp "aerodynamic reference point";
   parameter Real vtTol=0.001 "Velocity above which aerodynamics are enabled";
+  parameter SI.AngularVelocity w_max = 2 "maximum rotational rate before structural failure";
+  parameter Real g_max = 3 "maximum acceleration in g's before structural failure";
+
 protected
   Environment env;
   MultiBody.Forces.WorldForceAndTorque forceTorque(
@@ -58,6 +64,9 @@ protected
   Angle_deg flap_deg;
   Angle_deg rudder_deg;
   Length_ft agl_ft;
+
+  Real accelNorm_g;
+  Real wNorm;
   
 equation
   // conversion
@@ -72,6 +81,12 @@ equation
   aileron_deg = to_deg(aileron);
   rudder_deg = to_deg(rudder); 
   agl_ft = Conversions.NonSIunits.to_ft(env.agl);
+
+  // structural failure check
+  accelNorm_g =  Vectors.norm(a_0)/world.g;
+  wNorm = Vectors.norm(angularVelocity2(frame_b.R));
+  assert(accelNorm_g < g_max, "acceleration too high");
+  assert(wNorm < w_max, "rotating too fast");
 
   // TODO
   vRelative_ECEF = v_0 - env.wind_ECEF;
@@ -148,7 +163,7 @@ model AerodynamicBodySimple
 
   // roll moment
   parameter Real clp = 0.1 "roll damping";
-  parameter Real cldA = .01/20.0 "aileron effect on roll";
+  parameter Real cldA = 0.01/20.0 "aileron effect on roll";
 
   // pitch moment
   parameter Real cmq = 0.1 "pitch damping";
@@ -156,7 +171,7 @@ model AerodynamicBodySimple
   parameter Real cmdE = 0.1/20.0 "elevator effect on pitch";
 
   // yaw moment
-  parameter Real cnb = 0.1/20.0 "weather cocking stability";
+  parameter Real cnb = 1/20.0 "weather cocking stability";
   parameter Real cnr = 0.1 "yaw damping";
   parameter Real cndr = 0.1/20.0 "rudder effect on yaw";
 
@@ -175,15 +190,12 @@ protected
   end stallModel;
 
   Real alpha_deg_effective;
-  Real beta_deg_effective;
 
 equation
 
   // modify effective alpha/ beta for stall model
   alpha_deg_effective = stallModel(
     alpha_deg,alphaStall_deg);
-  beta_deg_effective = stallModel(
-    beta_deg,betaStall_deg);
 
   cL = // lift  
     cLa*alpha_deg_effective + cL0 + // aoa effect
@@ -194,7 +206,7 @@ equation
     0; // allows other lines to be commented out
 
   cC = // side force
-    cCb*beta_deg_effective + // beta effect
+    cCb*beta_deg+ // beta effect
     0; // allows other lines to be commented out
 
   cl = // roll moment 
@@ -209,7 +221,7 @@ equation
     0; // allows other lines to be commented out
 
   cn = // yaw moment
-    (-cnb)*beta_deg_effective + // weather cocking
+    (cnb)*beta_deg + // weather cocking
     (-cnr)*aero_r + // damping 
     cndr*rudder_deg + // control input
     0; // allows other lines to be commented out
@@ -225,10 +237,12 @@ equation
 end AerodynamicBodyCoefficientBasedBlock;
 
 model TestAerodynamicBodyBlock
-  inner Modelica.Mechanics.MultiBody.World world(
-    n={0,0,1});
+  import Modelica.Blocks.Sources.Constant;
+  import Modelica.Mechanics.MultiBody.World;
 
-  Modelica.Blocks.Sources.Constant coefs[6](k={1,1,1,1,1,1}*0.000000001);
+  inner World world(n={0,0,1});
+
+  Constant coefs[6](k={1,1,1,1,1,1}*0.000000001);
   AerodynamicBodyCoefficientBasedBlock body(
     rudder = 0,
     aileron = 0,
@@ -243,45 +257,47 @@ model TestAerodynamicBodyBlock
     I_22=1,
     I_33=1,
     r_CM={0,0,0},
-    width=0.05,
-    r_0(start={0,0,0}, fixed=true),
+    r_0(start={0,0,-10000}, fixed=true),
     v_0(start={10,0,0}, fixed=true),
     angles_fixed=true,
     w_0_fixed=true,
-    sequence_angleStates = {3,2,1},
-    sequence_start = {3,2,1},
-    angles_start={0,0,0}*0.174532925199433,
-    useQuaternions=false);
+    angles_start={0,0,0}*0.174532925199433);
 equation
   connect(coefs.y,body.u);
 end TestAerodynamicBodyBlock;
 
 model TestAerodynamicBodySimple
-  inner Modelica.Mechanics.MultiBody.World world(
-    n={0,0,1});
+  import Modelica.SIunits.Conversions.from_deg;
+  import Modelica.Blocks.Sources.Sine;
+  import Modelica.Mechanics.MultiBody.World;
+
+  inner World world(n={0,0,1});
+
+  // sine generators for simulating pilot input
+  Sine aileron(amplitude = 0.1, freqHz = 0.1);
+  Sine elevator(amplitude = 0.1, freqHz = 0.1);
+  Sine rudder(amplitude = 0.1, freqHz = 0.1);
+  Sine flap(amplitude = 0.1, freqHz = 0.1);
+
   AerodynamicBodySimple body(
-    rudder = 0,
-    aileron = 0,
-    elevator = 0,
-    flap = 0,
-    r = {0,0,0}, // aerodynamic reference point
-    s = 1,
-    b = 1,
-    cBar = 1,
-    m=1,
-    I_11=1,
-    I_22=1,
-    I_33=1,
-    r_CM={0,0,0},
-    width=0.05,
-    r_0(start={0,0,0}, fixed=true),
-    v_0(start={10,0,0}, fixed=true),
-    angles_fixed=true,
-    w_0_fixed=true,
-    sequence_angleStates = {3,2,1},
-    sequence_start = {3,2,1},
-    angles_start={0,0,0}*0.174532925199433,
-    useQuaternions=false);
+    r={0,0,0}, // aerodynamic reference point
+    r_CM={0,0,0}, // center of mass
+    s=1, // wing area
+    b=1, // span
+    cBar=1, // avg. chord
+    m=1, // mass
+    I_11=1, I_22=1, I_33=1, // inertia
+    r_0(start={0,0,-10000}, fixed=true), // position
+    v_0(start={10,0,0}, fixed=true), // velocity
+    angles_start=from_deg({0,0,0}));
+
+equation
+
+  connect(body.aileron, aileron.y);
+  connect(body.elevator, elevator.y);
+  connect(body.rudder, rudder.y);
+  connect(body.flap, flap.y);
+
 end TestAerodynamicBodySimple;
 
 // vim:ts=2:sw=2:expandtab:

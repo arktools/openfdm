@@ -12,6 +12,8 @@ model Environment "environment for multibody frame"
   SI.Position groundAsl "altitude of ground above sea level";
   SI.Velocity wind_ECEF[3] "wind vector";
 equation
+
+  assert(agl > 0, "altitude below ground level");
   asl = -frame.r_0[3]; // TODO: should subtract radius of earth
   agl = asl - groundAsl; 
 
