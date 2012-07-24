@@ -89,7 +89,7 @@ if args.script:
         while True:
             line = get_next_line(script_file)
             if not line:
-                logging.info('%s completed successfully without errors' % script_path)
+                logging.info('%s completed successfully' % script_path)
                 break
             if args.echo:
                 print line
