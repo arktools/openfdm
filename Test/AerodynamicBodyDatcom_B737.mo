@@ -2,9 +2,9 @@ within Test;
 
 model AerodynamicBodyDatcom_B_737
   extends AerodynamicBodyDatcom(
-    cBar = 14.30,
-    b = 93.80,
-    s = 1341.34,
+    cBar = 14.30*0.3048,
+    b = 93.80*0.3048,
+    s = 1341.34*0.3048^2,
     CD.data=
     {
       {-16.00,  9.100e-02},
@@ -403,12 +403,16 @@ model AerodynamicBodyDatcom_B_737
 
 
     // missing tables
-    CLdF2L.data = {{0,0},{0,0}},
-    CmDf2L.data = {{0,0},{0,0}},
-    CdDf2L.data = {{0,0},{0,0}},
+    CLdF2L.data = {{0,0},
+                   {1,0}},
+    CmDf2L.data = {{0,0},
+                   {1,0}},
+    CdDf2L.data = {{0,0},
+                   {1,0}},
     CldF2 = 0.0, //Guess Value
     CnDf2 = 0.0, //Guess Value
-    ClDs4.data = {{0,0},{0,0}},
+    ClDs4.data = {{0,0},
+                  {0,0}},
 
 
     CLdF1R.data = CLdF1L.data,
@@ -419,12 +423,17 @@ model AerodynamicBodyDatcom_B_737
     CmDf2R.data = CmDf2L.data,
     CldF1 = 7.000, //Guess Value
     CnDf1 = 7.000, //Guess Value
-    CnDa.data = {{0,0},{1,0}}, //Not in .out file
-    CLge.data = {{0,0},{1,0}}, //Not in .out file
-    CLwbh.data = {{0,0},{1,0}}, //Not in .out file
-    CDge.data = {{0,0},{1,0}}, //Not in .out file
+    CnDa.data = {{0,0},
+                 {1,0}}, //Not in .out file
+    CLge.data = {{0,1},
+                 {1,1}}, //Not in .out file
+    CLwbh.data = {{0,0},
+                  {1,0}}, //Not in .out file
+    CDge.data = {{0,1},
+                 {1,1}}, //Not in .out file
     ClDr = 0, //Not calculated in Datcom
-    Cm_basic.data = {{0,0},{1,0}},//Not in .out file
+    Cm_basic.data = {{0,0},
+                     {1,0}},//Not in .out file
     CnDr = 0 //Not in .out file
   );
 end AerodynamicBodyDatcom_B_737;

@@ -1,26 +1,23 @@
 within Test;
 
 model AerodynamicBodyF16
-    import Modelica.Blocks.Tables.CombiTable1D;
-    import Modelica.Blocks.Tables.CombiTable2D;
+  import Modelica.Blocks.Tables.CombiTable1D;
+  import Modelica.Blocks.Tables.CombiTable2D;
   extends AerodynamicBodyCoefficientBased;
 
   constant Real test1D[:,:] = {{0,0},
-                              {1,1}};
+                              {1,0}};
   constant Real test2D[:,:] =  {{0,0,1},
-                                {1,0,1},
-                                {2,1,2}};
+                                {1,0,0},
+                                {2,0,0}};
 
   // inputs
   input Real xcg;
   input Real xcgr;
 
-  // Debugging:
-  Real bodyAngles[3];
   // 2D tables must have more columns than rows. 
   // u1 is first column, u2 is first row.
   // some were transposed to have tables going vertically i.e. first column is input 
-/*
   CombiTable1D cxqTable(columns={2}, table = transpose(
    {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
     {-0.267, -0.110,  0.308,   1.34,   2.08,   2.91,   2.76,   2.05,   1.50,   1.49,   1.83,   1.21}}))
@@ -149,7 +146,8 @@ model AerodynamicBodyF16
     {    20,   -0.052, -0.034, -0.036, -0.036, -0.035, -0.028, -0.024, -0.023, -0.020, -0.016, -0.010, -0.014},
     {    30,   -0.062, -0.034, -0.027, -0.028, -0.027, -0.027, -0.023, -0.023, -0.019, -0.009, -0.025, -0.010}})
     "change in yaw moment coefficient due to rudder table(aoa[deg],abs(beta)[deg])";
-*/
+
+/*
   CombiTable1D cxqTable(table=test1D);
   CombiTable1D cyrTable(table=test1D);
   CombiTable1D cypTable(table=test1D);
@@ -168,6 +166,7 @@ model AerodynamicBodyF16
   CombiTable2D dldaTable(table=test2D);
   CombiTable2D dndaTable(table=test2D);
   CombiTable2D dndrTable(table=test2D);
+*/
 
   //table output
   Real cx, cy, cz, cxq, cyr, cyp, czp, clr, clp, cmq, cnr, cnp;
@@ -182,25 +181,6 @@ algorithm
   drudder := rudder_deg/30.0;
   dbeta := beta_deg/57.3;
   delevator := elevator_deg/25.0;
-
-  //cxq := 0;
-  //cyr := 0;
-  //cyp := 0;
-  //czp := 0;
-  //clr := 0;
-  //clp := 0;
-  //cmq := 0;
-  //cnr := 0;
-  //cnp := 0;
-  //cx0 :=0;
-  //cz0 := 0;
-  //cl0 :=0;
-  //cm0 :=0;
-  //cn0:= 0;
-  //dlda := 0;
-  //dldr := 0;
-  //dnda := 0;
-  //dndr := 0;
 
 
   //Calculate local variables
@@ -233,12 +213,20 @@ algorithm
     cm := cm0 + cq * cmq + cz * (xcgr - xcg);
     cn := cn0*sign(beta_deg) + dnda*daileron + dndr*drudder + 
         b2v * ( cnr*aero_r + cnp*aero_p ) - cy*(xcgr-xcg) * cBar/b;
+
+    //cx := 0;
+    //cy := 0;
+    //cz := 0;
+    //cl := 0;
+    //cm := 0;
+    //cn := 0;
+
   end if;
 
 equation
 
   // convert xyz to lift,drag,sideforce coefficients
-  cL = -cz;
+  cL = cz;
   cD = -cx;
   cC = cy;
   
@@ -290,65 +278,31 @@ equation
   connect(dndaTable.y, dnda);
   connect(dndrTable.y, dndr);
   
-  bodyAngles = Modelica.Mechanics.MultiBody.Frames.axesRotationsAngles(frame_aero.R, {3,2,1});
-
-/*
-CombiTable2D cxTable(table = 
-   {{     0,      -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45},
-    {   -24,   -0.099, -0.081, -0.081,  0.063, -0.025,  0.044,  0.097,  0.113,  0.145,  0.167,  0.174,  0.166},
-    {   -12,   -0.048,  0.038, -0.040, -0.021,  0.016,  0.083,  0.127,  0.137,  0.162,  0.177,  0.179,  0.167},
-    {     0,   -0.022, -0.020, -0.021, -0.004,  0.032,  0.094,  0.128,  0.130,  0.154,  0.161,  0.155,  0.138},
-    {    12,   -0.040, -0.038, -0.039, -0.025,  0.006,  0.062,  0.087,  0.085,  0.100,  0.110,  0.104,  0.091},
-    {    24,   -0.083, -0.073, -0.076, -0.072, -0.046,  0.012,  0.024,  0.025,  0.043,  0.053,  0.047,  0.040}})
-    "drag coefficient table(aoa[deg],elev[deg])";
-CombiTable1D czTable(columns={2}, table = transpose(
-   {{   -10,     -5,      0,      5,     10,     15,     20,     25,     30,     35,     40,     45}, 
-    { 0.770,  0.241, -0.100, -0.416, -0.731, -1.053, -1.366, -1.646, -1.917, -2.120, -2.248, -2.229}}))
-    "lift coefficient table(aoa[deg])";
-  
-
-    
-equation
-    connect(cxTable.u1, elevator);
-    connect(cxTable.u2, alpha_deg);
-    connect(czTable.u[1], alpha_deg);
-    cL = czTable.y;
-    cD = cxTable.y;
-    cC = 0;
-    cl = 0;
-    cm = 0;
-    cn = 0;
-*/
 end AerodynamicBodyF16;
 
 model TestF16
-  inner Modelica.Mechanics.MultiBody.World world(n={0,0,1});
+  inner Modelica.Mechanics.MultiBody.World world(
+    n={0,0,1});
   AerodynamicBodyF16 body(
     rudder = 0,
     aileron = 0,
     elevator = 0,
     flap = 0,
-    aero_rp = {1,0,0},
-    s = 1,
-    b = 1,
-    cBar = 1,
-    m=1,
-    I_11=1,
-    I_22=1,
-    I_33=1,
-    r={0.4,0,0},
-    r_CM={0.2,0,0},
-    width=0.05,
-    r_0(start={0.2,-0.5,0.1}, fixed=true),
-    v_0(start={1,0,0}, fixed=true),
-    angles_fixed=true,
-    w_0_fixed=true,
+    s = 27.87,
+    b = 9.144,
+    cBar = 3.45,
+    m=9294.31,
+    I_11=400.0,
+    I_22=2352.0,
+    I_33=2659,
+    I_31=41.38,
+    aero_rp={0,0,0},
+    r_CM={0,0,0},
+    r_0(start={0,0,-10000}, fixed=true),
+    v_0(start={100,0,0}, fixed=true),
     angles_start={0,0,0}*0.174532925199433,
     xcg = 0.35,
-    xcgr = 0.4,
-    sequence_angleStates = {3,2,1},
-    sequence_start = {3,2,1},
-    useQuaternions = false);
+    xcgr = 0.4);
 end TestF16;
 
 // vim:ts=2:sw=2:expandtab:

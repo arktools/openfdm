@@ -213,40 +213,53 @@ equation
 algorithm
 
   if (vt>vtTol) then 
-    cL := CLge.y*CLwbh.y +
-       CLq.y*to_degs(aero_q)*cBar/(2*vt) +
-       CLad.y*to_degs(alphaDot)*cBar/(2*vt) +
-       CLdF1L.y + CLdF1R.y +
-       CLdF2L.y + CLdF2R.y +
-       CLDe.y;
-    cD := CDge.y*CD.y +
-       CdDf1L.y + CdDf1R.y +
-       CdDf2L.y + CdDf2R.y + CdDe.y;
-    cC := Cyb.y*to_deg(beta) +
-       Cyp.y*to_degs(aero_p)*b/(2*vt);
+    cL :=
+//        CLge.y*CLwbh.y +
+//        CLq.y*to_degs(aero_q)*cBar/(2*vt) +
+//        CLad.y*to_degs(alphaDot)*cBar/(2*vt) +
+//        CLdF1L.y + CLdF1R.y +
+//        CLdF2L.y + CLdF2R.y +
+//        CLDe.y +
+        0;
+    cD := 
+//        CDge.y*CD.y +
+//        CdDf1L.y + CdDf1R.y +
+//        CdDf2L.y + CdDf2R.y + CdDe.y +
+        0;
+    cC :=
+//        Cyb.y*to_deg(beta) +
+//        Cyp.y*to_degs(aero_p)*b/(2*vt) +
+        0;
        //3 more values not calculated by datcom: Cyr, CyDr, CyDa.
-    cl := Clb.y*b*to_deg(beta) +
-       Clp.y*aero_p*b^2/(2*vt) + //p in rad?? TODO
-       Clr.y*aero_r*b^2/(2*vt) +
-       ClDs4.y*b +
-       CldF1 * (CLdF1R.y - CLdF1L.y) +
-       CldF2 * (CLdF2R.y - CLdF2L.y) +
-       ClDr*to_deg(rudder)*b;//ClDr not calculated by datcom
-    cm := Cm_basic.y*cBar +
-       Cmq.y*aero_q*cBar^2/(2*vt) +
-       Cmadot.y*cBar^2/(2*vt)*to_degs(alphaDot) +
-       CmDe.y*cBar +
-       CmDf1L.y* cBar +
-       CmDf1R.y* cBar +
-       CmDf2L.y* cBar +
-       CmDf2R.y* cBar;
-    cn := Cnb.y*b*to_deg(beta) +
-       Cnp.y*b^2/(2*vt)*aero_p +
-       Cnr.y*b^2/(2*vt)*aero_r +
-       CnDf1*(CdDf1R.y - CdDf1L.y) +
-       CnDf2*(CdDf2R.y - CdDf2L.y) +
-       CnDa.y*b +
-       CnDr*b*rudder; //CnDr is not calculated by DATCOM
+    cl := 
+//       Clb.y*b*to_deg(beta) +
+//       Clp.y*aero_p*b^2/(2*vt) + //p in rad?? TODO
+//       Clr.y*aero_r*b^2/(2*vt) +
+//       ClDs4.y*b +
+//       CldF1 * (CLdF1R.y - CLdF1L.y) +
+//       CldF2 * (CLdF2R.y - CLdF2L.y) +
+//       ClDr*to_deg(rudder)*b + 
+//          ClDr not calculated by datcom
+       0;
+    cm := 
+//       Cm_basic.y*cBar +
+//       Cmq.y*aero_q*cBar^2/(2*vt) +
+//       Cmadot.y*cBar^2/(2*vt)*to_degs(alphaDot) +
+//       CmDe.y*cBar +
+//       CmDf1L.y* cBar +
+//       CmDf1R.y* cBar +
+//       CmDf2L.y* cBar +
+//       CmDf2R.y* cBar +
+       0;
+    cn := 
+//       Cnb.y*b*to_deg(beta) +
+//       Cnp.y*b^2/(2*vt)*aero_p +
+//       Cnr.y*b^2/(2*vt)*aero_r +
+//       CnDf1*(CdDf1R.y - CdDf1L.y) +
+//       CnDf2*(CdDf2R.y - CdDf2L.y) +
+//       CnDa.y*b +
+//       CnDr*b*rudder + //CnDr is not calculated by DATCOM
+       0;
   else
     cL := 0;
     cD := 0;
