@@ -7,7 +7,7 @@ model SensorNoise
 	input Real sig;
 	input Real seed;
 	
-	output sensorValue;
+	output Real sensorValue;
 	
 	normalvariate Noise(mu=0, sigma=sig, si=seed);
 	

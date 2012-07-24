@@ -1,8 +1,8 @@
-within Test;
+within OpenFDM;
 
-package Conversions
+package SIunits
 
-  package NonSIunits
+  package Conversions
 
     import SI = Modelica.SIunits;
 
@@ -43,7 +43,6 @@ package Conversions
       rads := 0.0174532925*degs;
     end from_degs;
 
-  end NonSIunits;
-
-end Conversions;
-
+  end Conversions;
+  
+end SIunits;

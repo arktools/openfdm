@@ -1,4 +1,4 @@
-within Test;
+within OpenFDM;
 
 model Environment "environment for multibody frame"
   import SI = Modelica.SIunits;

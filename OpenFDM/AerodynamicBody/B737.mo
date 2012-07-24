@@ -1,7 +1,7 @@
-within Test;
+within OpenFDM.AerodynamicBody;
 
-model AerodynamicBodyDatcom_B_737
-  extends AerodynamicBodyDatcom(
+model B737
+  extends DatcomBased (
     cBar = 14.30*0.3048,
     b = 93.80*0.3048,
     s = 1341.34*0.3048^2,
@@ -436,4 +436,4 @@ model AerodynamicBodyDatcom_B_737
                      {1,0}},//Not in .out file
     CnDr = 0 //Not in .out file
   );
-end AerodynamicBodyDatcom_B_737;
+end B737;

@@ -1,9 +1,9 @@
-within Test;
+within OpenFDM.AerodynamicBody;
 
-model AerodynamicBodyF16
+model F16
   import Modelica.Blocks.Tables.CombiTable1D;
   import Modelica.Blocks.Tables.CombiTable2D;
-  extends AerodynamicBodyCoefficientBased;
+  extends CoefficientBased;
 
   constant Real test1D[:,:] = {{0,0},
                               {1,0}};
@@ -278,31 +278,6 @@ equation
   connect(dndaTable.y, dnda);
   connect(dndrTable.y, dndr);
   
-end AerodynamicBodyF16;
-
-model TestF16
-  inner Modelica.Mechanics.MultiBody.World world(
-    n={0,0,1});
-  AerodynamicBodyF16 body(
-    rudder = 0,
-    aileron = 0,
-    elevator = 0,
-    flap = 0,
-    s = 27.87,
-    b = 9.144,
-    cBar = 3.45,
-    m=9294.31,
-    I_11=400.0,
-    I_22=2352.0,
-    I_33=2659,
-    I_31=41.38,
-    aero_rp={0,0,0},
-    r_CM={0,0,0},
-    r_0(start={0,0,-10000}, fixed=true),
-    v_0(start={100,0,0}, fixed=true),
-    angles_start={0,0,0}*0.174532925199433,
-    xcg = 0.35,
-    xcgr = 0.4);
-end TestF16;
+end F16;
 
 // vim:ts=2:sw=2:expandtab:

@@ -1,12 +1,12 @@
-within Test;
+within OpenFDM.AerodynamicBody;
 
-model AerodynamicBodyDatcom
+partial model DatcomBased
 
-  extends AerodynamicBodyCoefficientBased;
+  extends CoefficientBased;
   import Modelica.Blocks.Tables.CombiTable1Ds;
   import Modelica.Blocks.Tables.CombiTable2D;
   import Modelica.SIunits.Conversions.*;
-  import Test.Conversions.NonSIunits.*;
+  import OpenFDM.SIunits.Conversions.*;
 
 protected
 
@@ -268,15 +268,15 @@ algorithm
     cm := 0;
     cn := 0;
   end if;
-end AerodynamicBodyDatcom;
+end DatcomBased;
 
-model AerodynamicBodyDatcom_Null
+model DatcomNull
   constant Real test1D[:,:] = {{ 0,   0},
                                {90,   0}};
   constant Real test2D[:,:] =  {{ 0,  0, 90},
                                 { 0,  0,  0},
                                 {90,  0,  0}};
-  extends AerodynamicBodyDatcom(  
+  extends DatcomBased(  
     // lift coefficient tables
     CLge.data = test1D,
     CLwbh.data = test1D,
@@ -329,32 +329,6 @@ model AerodynamicBodyDatcom_Null
     CnDa.data = test2D,
     CnDr = 0
     );
-end AerodynamicBodyDatcom_Null;
+end DatcomNull;
 
-model TestAerodynamicBodyDatcom
-  inner Modelica.Mechanics.MultiBody.World world(n={0,0,1});
-  AerodynamicBodyDatcom_B_737 body(
-    rudder = 0,
-    aileron = 0,
-    elevator = 0,
-    flap = 0,
-    aero_rp = {1,0,0},
-    s = 1,
-    b = 1,
-    cBar = 1,
-    m=1,
-    I_11=1,
-    I_22=1,
-    I_33=1,
-    r={0.4,0,0},
-    r_CM={0.2,0,0},
-    width=0.05,
-    r_0(start={0.2,-0.5,0.1}, fixed=true),
-    v_0(start={1,0,0}, fixed=true),
-    angles_fixed=true,
-    w_0_fixed=true,
-    angles_start={0,0,0}*0.174532925199433,
-    sequence_angleStates = {3,2,1},
-    sequence_start = {3,2,1},
-    useQuaternions = false);
-end TestAerodynamicBodyDatcom;
+// vim:ts=2:sw=2:expandtab:
