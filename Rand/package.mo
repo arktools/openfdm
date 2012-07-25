@@ -1,0 +1,2 @@
+package Rand
+end Rand;
