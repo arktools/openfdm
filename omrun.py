@@ -109,7 +109,7 @@ class OMInterface(object):
                         if not re_stdlib_warning.match(v):
                             if re_error.match(v):
                                 hasError = True
-                            print v
+                            print "%s : %s" % (k,v)
                     else:
                         print "%s : %s" % (k,v)
                 if hasError:
