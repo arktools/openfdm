@@ -11,4 +11,4 @@ then
 else
     echo no omc processes to kill
 fi
-OMShell-terminal
+ OMShell-terminal

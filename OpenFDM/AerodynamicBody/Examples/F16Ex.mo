@@ -1,6 +1,6 @@
 within OpenFDM.AerodynamicBody.Examples;
 
-model F16
+model F16Ex
   import Modelica.Mechanics.MultiBody.World;
   import Modelica.SIunits.Conversion.from_deg;
   inner Modelica.Mechanics.MultiBody.World world(
@@ -25,6 +25,6 @@ model F16
     angles_start=from_deg({0,0,0}),
     xcg = 0.35,
     xcgr = 0.4);
-end F16;
+end F16Ex;
 
 // vim:ts=2:sw=2:expandtab:

@@ -1,6 +1,6 @@
 within OpenFDM.AerodynamicBody.Examples;
 
-model DatcomNull
+model DatcomNullEx
   inner Modelica.Mechanics.MultiBody.World world(n={0,0,1});
   OpenFDM.AerodynamicBody.DatcomNull body(
     rudder = 0,
@@ -20,6 +20,6 @@ model DatcomNull
     r_0(start={0,0,-10000}, fixed=true),
     v_0(start={10,0,0}, fixed=true),
     angles_start=from_deg({0,0,0}));
-end DatcomNull;
+end DatcomNullEx;
 
 // vim:ts=2:sw=2:expandtab:
