@@ -1,4 +1,3 @@
-from pyopenfdm import OMInterface
 import os
 import inspect
 from os.path import join, getsize
