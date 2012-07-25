@@ -1,4 +1,4 @@
-within Test;
+within OpenFDM.Test;
 
 model TableTest
     import Modelica.Blocks.Tables.CombiTable2D;

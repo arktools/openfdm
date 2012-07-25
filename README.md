@@ -10,6 +10,10 @@
 
 * Using eclipse MDT plugin: https://www.openmodelica.org/index.php/developer/tools/133
 * MDT/ OpenModelica Users Guide: https://www.openmodelica.org/images/docs/userdocs/OpenModelicaUsersGuide.pdf
+* A test suite is provided using python. It can be run using python nose:
+``` bash
+nosetests -v
+```
 
 ## Scripts
 
