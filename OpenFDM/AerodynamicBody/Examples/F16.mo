@@ -1,6 +1,8 @@
 within OpenFDM.AerodynamicBody.Examples;
 
 model F16
+  import Modelica.Mechanics.MultiBody.World;
+  import Modelica.SIunits.Conversion.from_deg;
   inner Modelica.Mechanics.MultiBody.World world(
     n={0,0,1});
   OpenFDM.AerodynamicBody.F16 body(
@@ -20,7 +22,7 @@ model F16
     r_CM={0,0,0},
     r_0(start={0,0,-10000}, fixed=true),
     v_0(start={100,0,0}, fixed=true),
-    angles_start={0,0,0}*0.174532925199433,
+    angles_start=from_deg({0,0,0}),
     xcg = 0.35,
     xcgr = 0.4);
 end F16;

@@ -22,6 +22,13 @@ import inspect
 import tempfile
 import argparse
 import logging
+import re
+
+# find root path or project
+root_path = os.path.abspath(os.path.join(inspect.getfile(inspect.currentframe()),os.path.pardir))
+
+# set enviornment to include project root
+os.environ['OPENMODELICALIBRARY'] = os.getenv('OPENMODELICALIBRARY') + ':' + root_path
 
 class OMInterface(object):
 
@@ -38,6 +45,7 @@ class OMInterface(object):
         else:
             log_level = logging.INFO
         logging.basicConfig(format='%(message)s',level=log_level)
+
 
     @classmethod
     def from_argv(cls,argv):
@@ -61,29 +69,35 @@ class OMInterface(object):
             if not os.path.isfile(script_path):
                 raise IOError("script %s not found" % script_path)
 
-        # find root path or project
-        root_path = os.path.abspath(os.path.join(inspect.getfile(inspect.currentframe()),os.path.pardir))
-
-        # set enviornment to include project root
-        os.environ['OPENMODELICALIBRARY'] = os.getenv('OPENMODELICALIBRARY') + ':' + root_path
-
         # create build directory and move to it
         build_path = os.path.join(tempfile.gettempdir(),'ompython')
         if not os.path.isdir(build_path):
             os.makedirs(build_path)
         os.chdir(build_path)
 
-        # import OMPython now that the environment is setup correctly and we have a script
         import OMPython
 
-        # check paths
-        logging.info('OPENMODELICALIBRARY: %s' % OMPython.execute('''getEnvironmentVar("OPENMODELICALIBRARY")''').strip())
-        logging.info('working directory: %s' % OMPython.execute('''cd()''').strip())
+        def execute(command):
+            if self.echo:
+                print command
+            string = OMPython.execute(command)
+            error = OMPython.execute('''getErrorString()''').strip()[1:-1]
+            re_error = re.compile('error',re.I)
+            if re_error.match(error):
+                if self.terminal:
+                    print error
+                    OMPython.run()
+                else:
+                    raise Exception(error)
+            return string
+
+         # check paths
+        logging.info('OPENMODELICALIBRARY: %s' % execute('''getEnvironmentVar("OPENMODELICALIBRARY")'''))
+        logging.info('working directory: %s' % execute('''cd()'''))
 
         # run script
         if self.script:
             logging.info('script path: "%s"' % script_path)
-            #print 'running script: \n', OMPython.execute('''runScript("%s")''' % script_path).strip()[1:-1]
 
             # get next line of script
             def get_next_line(stringio):
@@ -100,21 +114,14 @@ class OMInterface(object):
 
             # run script line by line checking for error
             with open(script_path,'r') as script_file:
+                re_error = re.compile('error',re.I)
                 while True:
                     line = get_next_line(script_file)
                     if not line:
                         logging.info('%s completed successfully' % script_path)
                         break
-                    if self.echo:
-                        print line
-                    result = OMPython.execute(line)
+                    result = execute(line)
                     print result
-                    error = OMPython.execute('''getErrorString()''').strip()[1:-1]
-                    if error:
-                        print error
-                        if self.terminal:
-                            OMPython.run()
-                        break
 
         if self.terminal:
             OMPython.run()
