@@ -1,0 +1,4 @@
+loadModel(Modelica);
+loadModel(Trim);
+simulate(Trim.Ex1);
+plot(a);
