@@ -5,8 +5,7 @@ package Datcom
 package StabilityFrame
 
     model ForceAndTorque
-       import Modelica.MultiBody.Forces.WorldForceAndTorque;
-       extends WorldForceAndTorque;
+       extends MultiBody.Forces.WorldForceAndTorque;
         Real CD;
         Real CL;
         Real CY;
