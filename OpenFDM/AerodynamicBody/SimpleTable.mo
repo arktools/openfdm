@@ -31,11 +31,11 @@ protected
     u1=alpha_deg, y=cD0, table = table_cD0_alpha);
 
 
-
+/*
   Modelica.Blocks.Tables.CombiTable2D cL0Table(
     u1=alpha_deg, u2=beta_deg, y=cL0,
     table = table_cL0_alpha);
-
+*/
 
 end SimpleTable;
 
