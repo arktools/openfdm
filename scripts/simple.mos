@@ -1,4 +1,4 @@
 loadModel(Modelica);
 loadModel(OpenFDM);
-simulate(OpenFDM.AerodynamicBody.Examples.Simple);
+simulate(OpenFDM.AerodynamicBody.Examples.SimpleEx);
 plotParametric(body.r_0[1],body.env.agl);
