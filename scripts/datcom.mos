@@ -1,4 +1,4 @@
-//    f16.mos: check f16 model
+//    datcom.mos: check datcom model
 //
 //    Copyright (C) 2012  James Goppert <james.goppert@gmail.com>
 //
@@ -20,5 +20,5 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(Test);
-simulate(Test.TestAerodynamicBodyDatcom);
+loadModel(OpenFDM);
+simulate(OpenFDM.AerodynamicBody.Examples.DatcomEx);
