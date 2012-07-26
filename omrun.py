@@ -30,9 +30,6 @@ root_path = os.path.abspath(os.path.join(inspect.getfile(inspect.currentframe())
 # set enviornment to include project root
 os.environ['OPENMODELICALIBRARY'] = os.getenv('OPENMODELICALIBRARY') + ':' + root_path
 
-class ModelicaException(Exception):
-    pass
-
 class OMInterface(object):
 
     def __init__(self,script,echo,quiet,terminal):
@@ -40,10 +37,7 @@ class OMInterface(object):
         self.echo = echo
         self.quiet = quiet
         self.terminal = terminal
-        try:
-            self.process()
-        except ModelicaException as error:
-            print error
+        self.process()
 
         # handle logging
         if self.quiet:
@@ -83,42 +77,19 @@ class OMInterface(object):
 
         import OMPython
 
-        re_error = re.compile('error',re.I)
-        re_stdlib_warning = re.compile('^.*Modelica.*Mechanics.*MultiBody.*parts.mo.*Warning.*',re.I)
-
-        def handleError(string):
-            if re_error.match(string):
+        def execute(command):
+            if self.echo:
+                print command
+            string = OMPython.execute(command)
+            error = OMPython.execute('''getErrorString()''').strip()[1:-1]
+            re_error = re.compile('error',re.I)
+            if re_error.match(error):
                 if self.terminal:
-                    print string
+                    print error
                     OMPython.run()
                 else:
-                    raise ModelicaException(string)
-
-        def execute(command):
-            data = OMPython.execute(command)
-            handleError(OMPython.execute('''getErrorString()'''))
-
-            if isinstance(data,bool):
-                if data == False:
-                    handleError("Error: %s , returned False" % command)
-            elif isinstance(data,dict):
-                simResult = data['SimulationResults']
-                hasError = False
-                for k, v in simResult.iteritems():
-                    if isinstance(v,str):
-                        if not re_stdlib_warning.match(v):
-                            if re_error.match(v):
-                                hasError = True
-                            print "%s : %s" % (k,v)
-                    else:
-                        print "%s : %s" % (k,v)
-                if hasError:
-                    raise ModelicaException("Error within simulation result")
-            elif isinstance(data,str):
-                data = data[-1:1]
-                handleError(data)
-
-            return data
+                    raise Exception(error)
+            return string
 
          # check paths
         logging.info('OPENMODELICALIBRARY: %s' % execute('''getEnvironmentVar("OPENMODELICALIBRARY")'''))
@@ -149,9 +120,8 @@ class OMInterface(object):
                     if not line:
                         logging.info('%s completed successfully' % script_path)
                         break
-                    #if self.echo:
-                    #    print line
                     result = execute(line)
+                    print result
 
         if self.terminal:
             OMPython.run()
