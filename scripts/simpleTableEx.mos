@@ -1,0 +1,10 @@
+loadModel(Modelica);
+getErrorString();
+
+loadModel(OpenFDM);
+getErrorString();
+
+simulate(OpenFDM.Aerodynamics.Examples.DatcomForceAndTorqueTableTest,stopTime=100);
+//getErrorString();
+
+plotParametric(body_s.airframe.r_0[1], body_s.aerodynamics.env.agl);
