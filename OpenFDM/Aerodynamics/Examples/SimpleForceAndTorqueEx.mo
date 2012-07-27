@@ -6,7 +6,10 @@ model SimpleStabilityFrameAeroObject
     r_0(start={0,0,-10000}),
     v_0(start={10,0,0}));
   Aero.StabilityFrame.SimpleForceAndTorque aerodynamics(
-    coefs(
+      // controls
+      aileron_deg = 0,
+      elevator_deg = 0,
+      rudder_deg = 0,
       // lift
       CL0 = 0.1,
       CLa = 0.1/20.0,
@@ -26,7 +29,9 @@ model SimpleStabilityFrameAeroObject
       Cnb = 0.1,
       Cnr = -0.1,
       Cndr = 0.1,
-      s=1, b=1, cBar=1));
+      //Stall angle
+      alphaStall_deg = 30.0,
+      coefs(s=1, b=1, cBar=1));
 equation
   connect(airframe.frame_a,aerodynamics.frame_b);
 end SimpleStabilityFrameAeroObject;

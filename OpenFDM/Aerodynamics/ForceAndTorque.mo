@@ -163,7 +163,18 @@ package StabilityFrame
   end ForceAndTorque;
 
   model SimpleForceAndTorque
+    import Modelica.SIunits.Conversions.*;
     extends ForceAndTorque;
+
+    // controls
+    Real aileron_deg;
+    Real elevator_deg;
+    Real rudder_deg;
+    Real alpha_deg;
+    Real beta_deg;
+
+    // stall
+    Real alphaStall_deg;
 
     // lift
     Real CL0;
@@ -188,27 +199,49 @@ package StabilityFrame
     Real Cnr "yaw damping, <0 for stability";
     Real Cndr "rudder effecto on yaw";
 
+  protected
+
+    function stallModel
+      input Real angle;
+      input Real stallAngle;
+      output Real effective;
+    algorithm
+      if (angle < stallAngle) then
+        effective := angle;
+      else // stall
+        effective := 0;
+      end if; 
+    end stallModel;
+
+    Real alpha_deg_effective;
+
   equation
-    CL =
+
+    alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
+    alpha_deg = to_deg(alpha);
+    beta_deg = to_deg(beta);
+
+    coefs.CL =
       CL0 +
-      CDa*alpha_deg_effective +
+      CLa*alpha_deg_effective +
       0;
-    CD = CD0 +
-      CDCL*CL^2 +
+    coefs.CD =
+      CD0 +
+      CDCL*coefs.CL^2 +
       0;
-    CY =
+    coefs.CY =
       CYb*beta_deg +
       0;
-    Cl =
+    coefs.Cl =
       Clp*p +
       Clda*aileron_deg +
       0;
-    Cm =
+    coefs.Cm =
       Cma*alpha_deg_effective +
       Cmq*q +
       Cmde*elevator_deg +
       0;
-    Cn = Cnb*beta_deg +
+    coefs.Cn = Cnb*beta_deg +
       Cnr*r +
       Cndr*rudder_deg +
       0;
