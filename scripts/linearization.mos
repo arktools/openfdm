@@ -1,4 +1,4 @@
-//    test.mos: tests linearization of kinematics
+//    linearization.mos: tests linearization of kinematics
 //
 //    Copyright (C) 2012  James Goppert <james.goppert@gmail.com>
 //
@@ -21,19 +21,20 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
 loadModel(OpenFDM);
+getErrorString();
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("echo \"model TestModel2 extends OpenFDM.Examples.TestModel; end TestModel2;\" > TestModel2.mo");
-loadFile("TestModel2.mo");
+system("echo \"model Linearization extends OpenFDM.Test.Linearization; end Linearization;\" > Linearization.mo");
+loadFile("Linearization.mo");
 
 // get linear model
-simulate(TestModel2,numberOfIntervals=1);
-system("./TestModel2 -l 0 > log.out"); readFile("log.out");
-loadFile("/tmp/linear_TestModel2.mo");
-list(linear_TestModel2);
+simulate(Linearization,numberOfIntervals=1);
+system("./Linearization -l 0 > log.out"); readFile("log.out");
+loadFile("/tmp/cstrode/linear_Linearization.mo");
+list(linear_Linearization);
 
 // simulate non-linear model
-simulate(TestModel2);
-plot({body.pN,body.pE});
-simulate(linear_TestModel2);
+simulate(Linearization);
+plot({x1,x2});
+simulate(linear_Linearization);
 plot({x[1],x[2]});

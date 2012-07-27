@@ -2,9 +2,16 @@ within OpenFDM.Aerodynamics.Examples;
 
 model SimpleStabilityFrameAeroObject
   import Aero=OpenFDM.Aerodynamics;
+  import Cv=Modelica.SIunits.Conversions;
   Airframe airframe(
     r_0(start={0,0,-10000}),
-    v_0(start={10,0,0}));
+    v_0(start={10,0,0}),
+    w_0_start={0,0,0},
+    w_0_fixed=true,
+    z_0_fixed=true,
+    angles_start=Cv.from_deg({0,1,1})
+    );
+
   Aero.StabilityFrame.SimpleForceAndTorque aerodynamics(
       // controls
       aileron_deg = 0,
@@ -32,6 +39,7 @@ model SimpleStabilityFrameAeroObject
       //Stall angle
       alphaStall_deg = 30.0,
       coefs(s=1, b=1, cBar=1));
+
 equation
   connect(airframe.frame_a,aerodynamics.frame_b);
 end SimpleStabilityFrameAeroObject;

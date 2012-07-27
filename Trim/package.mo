@@ -1,6 +1,8 @@
 package Trim
 
 model Ex1
+  import OpenFDM.Aerodynamics.Examples.*;
+  SimpleForceAndTorqueEx example1;
     Real a;
     Real b;
     Real c;
