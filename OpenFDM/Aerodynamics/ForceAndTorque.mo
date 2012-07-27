@@ -163,6 +163,7 @@ package StabilityFrame
   end ForceAndTorque;
 
   model SimpleForceAndTorque
+    import Modelica.SIunits.Conversions.*;
     extends ForceAndTorque;
 
     // controls
@@ -217,6 +218,8 @@ package StabilityFrame
   equation
 
     alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
+    alpha_deg = to_deg(alpha);
+    beta_deg = to_deg(beta);
 
     coefs.CL =
       CL0 +
