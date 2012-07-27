@@ -16,80 +16,37 @@ partial model ForceAndTorqueBase
   MB.Interfaces.Frame frame_wind;
   MB.Interfaces.Frame frame_stability;
 
-  // parameters
-  parameter Real vtTol = 0.001 "used to avoid singularities when approx. alphaDot etc.";
-
   // environment
-  Environment env;
+  Environment env(alpha=alpha,beta=beta,p=p,q=q,r=r,qBar=qBar);
 
-  // aerodynamic properties
-  SI.Velocity vt "true airspeed";
-  SI.Acceleration vtDot "Derivative of true airspeed";
-  SI.Angle alpha "angle of attack";
-  SI.AngularVelocity alphaDot "angle of attack derivative";
-  SI.Angle beta "side slip angle";
-  SI.Angle betaDot "side slip angle derivative";
-  SI.Pressure qBar "average dynamics pressure";
-  SI.AngularVelocity p "roll rate";
-  SI.AngularVelocity q "pitch rate";
-  SI.AngularVelocity r "yaw rate";
+  Utilities.VariableRotation rotateAlpha(axis=2,angle=-env.alpha,angleDot=-env.alphaDot);
+  Utilities.VariableRotation rotateBeta(axis=3,angle=env.beta,angleDot=env.betaDot);
 
-  SI.Velocity vRelative_NED[3];
-  SI.Velocity vRelative_b[3];
-  SI.Velocity aRelative_NED[3];
-  SI.Velocity aRelative_b[3];
-
-  SI.Velocity v_0[3];
-  SI.Acceleration a_0[3];
-
-  Utilities.VariableRotation rotateAlpha(axis=2,angle=-alpha,angleDot=-alphaDot);
-  Utilities.VariableRotation rotateBeta(axis=3,angle=beta,angleDot=betaDot);
+  Real alpha;
+  Real beta;
+  Real alpha_deg;
+  Real beta_deg;
+  Real p;
+  Real q;
+  Real r;
+  Real qBar;
 
 equation
 
   // connect environment
   connect(env.frame,frame_b);
 
+  // conversions
+  alpha_deg = to_deg(alpha);
+  beta_deg = to_deg(beta);
+
+  // stability frame rotation
   connect(frame_b,rotateAlpha.frame_a);
   connect(rotateAlpha.frame_b,frame_stability);
 
   // wind frame rotation
   connect(frame_stability,rotateBeta.frame_a);
   connect(rotateBeta.frame_b,frame_wind);
-
-  // TODO, adapt for lat, lon, alt
-  v_0 = der(frame_b.r_0);
-  a_0 = der(v_0);
-  vRelative_NED = v_0 - env.wind_NED;
-  aRelative_NED = a_0; // TODO: - der(env.wind_NED);
-  vRelative_b = resolve2(frame_b.R,vRelative_NED);
-  aRelative_b = resolve2(frame_b.R,aRelative_NED);
-  vt = Vectors.norm(vRelative_b);
-  {p,q,r} = angularVelocity2(frame_b.R);
-
-  alpha = atan2(vRelative_b[3],vRelative_b[1]);
-  qBar = 0.5*env.rho*vt^2;
-
-  // avoid singularity in side slip angle calc
-  if (vt > vtTol) then
-    beta = asin(vRelative_b[2]/vt);
-    betaDot = (aRelative_b[2]*vt - aRelative_b[2]*vtDot)/vt*sqrt(vRelative_b[1]^2 + vRelative_b[3]^2);
-    vtDot = (vRelative_b[1]*aRelative_b[1] + 
-      vRelative_b[2]*aRelative_b[2] +
-      vRelative_b[3]*aRelative_b[3])/vt;
-  else
-    beta = 0;
-    betaDot = 0;
-    vtDot = 0;
-  end if;
-
-  // if negligible airspeed, set wind angles to zero
-  // to avoid singularity
-  if ( (vRelative_b[1]^2 + vRelative_b[3]^2) > vtTol) then
-    alphaDot = (vRelative_b[1]*aRelative_b[3]-vRelative_b[3]*aRelative_b[1])/(vRelative_b[1]^2 + vRelative_b[3]^2); //stevens & lewis pg 78
-  else
-    alphaDot = 0;
-  end if;
 
 end ForceAndTorqueBase;
 
@@ -170,8 +127,6 @@ package StabilityFrame
     Real aileron_deg;
     Real elevator_deg;
     Real rudder_deg;
-    Real alpha_deg;
-    Real beta_deg;
 
     // stall
     Real alphaStall_deg;
@@ -218,8 +173,6 @@ package StabilityFrame
   equation
 
     alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
-    alpha_deg = to_deg(alpha);
-    beta_deg = to_deg(beta);
 
     coefs.CL =
       CL0 +
