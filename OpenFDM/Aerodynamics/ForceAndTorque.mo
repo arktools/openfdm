@@ -123,7 +123,7 @@ package BodyFrame
     extends Coefficients;
     extends CoefficientEquationsBase;
     Real f[3] = {CX*qBar*s,CY*qBar*s,CZ*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
@@ -150,7 +150,7 @@ package StabilityFrame
     extends Coefficients;
     extends CoefficientEquationsBase;
     Real f[3] = {-CD*qBar*s,-CY*qBar*s,-CL*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
@@ -161,6 +161,92 @@ package StabilityFrame
     force = coefs.f;
     torque = coefs.t;
   end ForceAndTorque;
+
+  model SimpleForceAndTorque
+    import Modelica.SIunits.Conversions.*;
+    extends ForceAndTorque;
+
+    // controls
+    Real aileron_deg;
+    Real elevator_deg;
+    Real rudder_deg;
+    Real alpha_deg;
+    Real beta_deg;
+
+    // stall
+    Real alphaStall_deg;
+
+    // lift
+    Real CL0;
+    Real CLa "CL alpha slope";
+
+    // drag 
+    Real CD0 "minimum drag";
+    Real CDCL "CL^2 term for drag polar";
+
+    // side force
+    Real CYb "side slipe effect on side force";
+
+    // roll moment
+    Real Clp "roll damping, <0 for stability";
+    Real Clda "aileron effect on roll";
+
+    // pitch moment
+    Real Cmq "pitch damping, <0 for stability";
+    Real Cma "alpha effect on pitch, <0 for stability";
+    Real Cmde "elevator effect on pitch";
+    Real Cnb "weather cocking stability >0 for stability";
+    Real Cnr "yaw damping, <0 for stability";
+    Real Cndr "rudder effecto on yaw";
+
+  protected
+
+    function stallModel
+      input Real angle;
+      input Real stallAngle;
+      output Real effective;
+    algorithm
+      if (angle < stallAngle) then
+        effective := angle;
+      else // stall
+        effective := 0;
+      end if; 
+    end stallModel;
+
+    Real alpha_deg_effective;
+
+  equation
+
+    alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
+    alpha_deg = to_deg(alpha);
+    beta_deg = to_deg(beta);
+
+    coefs.CL =
+      CL0 +
+      CLa*alpha_deg_effective +
+      0;
+    coefs.CD =
+      CD0 +
+      CDCL*coefs.CL^2 +
+      0;
+    coefs.CY =
+      CYb*beta_deg +
+      0;
+    coefs.Cl =
+      Clp*p +
+      Clda*aileron_deg +
+      0;
+    coefs.Cm =
+      Cma*alpha_deg_effective +
+      Cmq*q +
+      Cmde*elevator_deg +
+      0;
+    coefs.Cn = Cnb*beta_deg +
+      Cnr*r +
+      Cndr*rudder_deg +
+      0;
+  end SimpleForceAndTorque;
+
 
 end StabilityFrame;
 
@@ -178,7 +264,7 @@ package WindFrame
     extends CoefficientEquationsBase;
     //TODO fix these equations
     Real f[3] = {-CD*qBar*s,-CC*qBar*s,-CL*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
@@ -190,6 +276,7 @@ package WindFrame
     torque = coefs.t;
   end ForceAndTorque;
 
+  
 end WindFrame;
 
 // vim:ts=2:sw=2:expandtab:
