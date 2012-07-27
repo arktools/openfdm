@@ -8,25 +8,24 @@ model SimpleStabilityFrameAeroObject
   Aero.StabilityFrame.SimpleForceAndTorque aerodynamics(
     coefs(
       // lift
-      CL0 = .1,
-      CLa = .1/20.0,
+      CL0 = 0.1,
+      CLa = 0.1/20.0,
       // drag
-      CD0 = .01,
-      CDCL = .01,
+      CD0 = 0.01,
+      CDCL = 0.01,
       // side force
-      CYb = .01,
+      CYb = 0.01,
       // roll moment
-      Clp = -.1,
-      Clda = .1,
-      Clda = .1,
+      Clp = -0.1,
+      Clda = 0.1,
       // pitch moment
-      Cmq = -.1,
-      Cma = -.1,
-      Cmde = .1;
+      Cmq = -0.1,
+      Cma = -0.1,
+      Cmde = 0.1,
       // yaw moment
-      Cnb = .1;
-      Cnr = -.1;
-      Cndr = .1;
+      Cnb = 0.1,
+      Cnr = -0.1,
+      Cndr = 0.1,
       s=1, b=1, cBar=1));
 equation
   connect(airframe.frame_a,aerodynamics.frame_b);

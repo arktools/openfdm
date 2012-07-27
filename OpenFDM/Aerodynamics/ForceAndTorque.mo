@@ -162,34 +162,6 @@ package StabilityFrame
     torque = coefs.t;
   end ForceAndTorque;
 
-end StabilityFrame;
-
-package WindFrame
-
-  record Coefficients
-    extends MomentCoefficients;
-    Real CD;
-    Real CC;
-    Real CL;
-  end Coefficients;
-
-  model CoefficientEquations
-    extends Coefficients;
-    extends CoefficientEquationsBase;
-    //TODO fix these equations
-    Real f[3] = {-CD*qBar*s,-CC*qBar*s,-CL*qBar*s};
-    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
-  end CoefficientEquations;
-
-  model ForceAndTorque
-    extends ForceAndTorqueBase;
-    CoefficientEquations coefs(qBar=qBar);
-  equation
-    connect(frame_resolve,frame_wind);
-    force = coefs.f;
-    torque = coefs.t;
-  end ForceAndTorque;
-
   model SimpleForceAndTorque
     extends ForceAndTorque;
 
@@ -198,7 +170,7 @@ package WindFrame
     Real CLa "CL alpha slope";
 
     // drag 
-    Real CD0 "minimum drag;
+    Real CD0 "minimum drag";
     Real CDCL "CL^2 term for drag polar";
 
     // side force
@@ -211,9 +183,9 @@ package WindFrame
     // pitch moment
     Real Cmq "pitch damping, <0 for stability";
     Real Cma "alpha effect on pitch, <0 for stability";
-    Real Cmde "elevator effect on pitch";;
+    Real Cmde "elevator effect on pitch";
     Real Cnb "weather cocking stability >0 for stability";
-    Real Cnr "yaw damping, <0 for stability";;
+    Real Cnr "yaw damping, <0 for stability";
     Real Cndr "rudder effecto on yaw";
 
   equation
@@ -242,6 +214,36 @@ package WindFrame
       0;
   end SimpleForceAndTorque;
 
+
+end StabilityFrame;
+
+package WindFrame
+
+  record Coefficients
+    extends MomentCoefficients;
+    Real CD;
+    Real CC;
+    Real CL;
+  end Coefficients;
+
+  model CoefficientEquations
+    extends Coefficients;
+    extends CoefficientEquationsBase;
+    //TODO fix these equations
+    Real f[3] = {-CD*qBar*s,-CC*qBar*s,-CL*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
+  end CoefficientEquations;
+
+  model ForceAndTorque
+    extends ForceAndTorqueBase;
+    CoefficientEquations coefs(qBar=qBar);
+  equation
+    connect(frame_resolve,frame_wind);
+    force = coefs.f;
+    torque = coefs.t;
+  end ForceAndTorque;
+
+  
 end WindFrame;
 
 // vim:ts=2:sw=2:expandtab:
