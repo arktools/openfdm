@@ -1,7 +1,8 @@
 within OpenFDM.Navigation.Sensors;
 
 model Gyroscope
-    Real w_real(start=0);
+    //Measurement w(meas=0);
+    input Real w_real(start=0);
     output Real w_meas(start=0);
     Real[3] seed(start={27,10089,61});
     parameter Real bias=0;
@@ -15,6 +16,10 @@ algorithm
         nextSampleTime := pre(nextSampleTime) + samplePeriod;
         (noise,seed) := OpenFDM.Random.normalvariate(bias,sigma,seed);
         w_meas := w_real + noise;
-        w_real := w_real;
+//        w_real := w_real;
     end when;
 end Gyroscope;
+
+connector Measurement
+    Real meas;
+end Measurement;
