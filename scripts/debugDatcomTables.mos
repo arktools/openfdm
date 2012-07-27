@@ -1,0 +1,11 @@
+loadModel(Modelica);
+getErrorString();
+
+loadModel(OpenFDM);
+getErrorString();
+
+simulate(OpenFDM.Aerodynamics.DatcomTables.DatcomCoefficientTableConnect,stopTime=1);
+//getErrorString();
+
+//plot(tables.CL_Basic[1,1]);
+plot(CL_Basic);
