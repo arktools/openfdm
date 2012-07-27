@@ -4,9 +4,7 @@ getErrorString();
 loadModel(OpenFDM);
 getErrorString();
 
-simulate(OpenFDM.Aerodynamics.Examples.ForceAndTorqueEx);
-getErrorString();
+simulate(OpenFDM.Aerodynamics.Examples.ForceAndTorqueEx,stopTime=100);
+//getErrorString();
 
-plotParametric(body_w.airframe.r_0[1],body_w.aerodynamics.env.agl);
-plotParametric(body_b.airframe.r_0[1],body_b.aerodynamics.env.agl);
-plotParametric(body_s.airframe.r_0[1],body_s.aerodynamics.env.agl);
+plotParametric(body_b.airframe.r_0[1], body_b.aerodynamics.env.agl);

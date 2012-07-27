@@ -1,4 +1,0 @@
-loadModel(Modelica);
-getErrorString();
-loadModel(OpenFDM);
-getErrorString();
