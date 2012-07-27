@@ -190,6 +190,58 @@ package WindFrame
     torque = coefs.t;
   end ForceAndTorque;
 
+  model SimpleForceAndTorque
+    extends ForceAndTorque;
+
+    // lift
+    Real CL0;
+    Real CLa "CL alpha slope";
+
+    // drag 
+    Real CD0 "minimum drag;
+    Real CDCL "CL^2 term for drag polar";
+
+    // side force
+    Real CYb "side slipe effect on side force";
+
+    // roll moment
+    Real Clp "roll damping, <0 for stability";
+    Real Clda "aileron effect on roll";
+
+    // pitch moment
+    Real Cmq "pitch damping, <0 for stability";
+    Real Cma "alpha effect on pitch, <0 for stability";
+    Real Cmde "elevator effect on pitch";;
+    Real Cnb "weather cocking stability >0 for stability";
+    Real Cnr "yaw damping, <0 for stability";;
+    Real Cndr "rudder effecto on yaw";
+
+  equation
+    CL =
+      CL0 +
+      CDa*alpha_deg_effective +
+      0;
+    CD = CD0 +
+      CDCL*CL^2 +
+      0;
+    CY =
+      CYb*beta_deg +
+      0;
+    Cl =
+      Clp*p +
+      Clda*aileron_deg +
+      0;
+    Cm =
+      Cma*alpha_deg_effective +
+      Cmq*q +
+      Cmde*elevator_deg +
+      0;
+    Cn = Cnb*beta_deg +
+      Cnr*r +
+      Cndr*rudder_deg +
+      0;
+  end SimpleForceAndTorque;
+
 end WindFrame;
 
 // vim:ts=2:sw=2:expandtab:
