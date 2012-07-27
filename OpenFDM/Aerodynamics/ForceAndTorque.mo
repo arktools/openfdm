@@ -123,7 +123,7 @@ package BodyFrame
     extends Coefficients;
     extends CoefficientEquationsBase;
     Real f[3] = {CX*qBar*s,CY*qBar*s,CZ*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
@@ -150,7 +150,7 @@ package StabilityFrame
     extends Coefficients;
     extends CoefficientEquationsBase;
     Real f[3] = {-CD*qBar*s,-CY*qBar*s,-CL*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
@@ -178,7 +178,7 @@ package WindFrame
     extends CoefficientEquationsBase;
     //TODO fix these equations
     Real f[3] = {-CD*qBar*s,-CC*qBar*s,-CL*qBar*s};
-    Real t[3] = {Cl*qBar*s,Cm*qBar*s,Cn*qBar*s};
+    Real t[3] = {Cl*qBar*s*b,Cm*qBar*s*cBar,Cn*qBar*s*b};
   end CoefficientEquations;
 
   model ForceAndTorque
