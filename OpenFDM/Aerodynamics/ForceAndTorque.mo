@@ -220,11 +220,11 @@ package StabilityFrame
 
     coefs.CL =
       CL0 +
-      CDa*alpha_deg_effective +
+      CLa*alpha_deg_effective +
       0;
     coefs.CD =
       CD0 +
-      CDCL*CL^2 +
+      CDCL*coefs.CL^2 +
       0;
     coefs.CY =
       CYb*beta_deg +
