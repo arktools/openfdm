@@ -3,9 +3,9 @@ within OpenFDM.Random;
 function normalvariate "normally distributed random variable"
     input Real mu "mean value";
     input Real sigma "standard deviation";
-    input Real si[3] "input random seed";
+    input Seed si "input random seed";
     output Real x "gaussian random variate";
-    output Real so[3] "output random seed";
+    output Seed so "output random seed";
 protected
     constant Real NV_MAGICCONST=4*exp(-0.5)/sqrt(2.0);
     Real s1[3], s2[3];
