@@ -1,0 +1,6 @@
+*.log
+*.mod
+test
+fort.*
+.*.swp
+.nfs*
