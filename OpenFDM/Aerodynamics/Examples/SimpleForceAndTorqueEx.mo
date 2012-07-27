@@ -32,10 +32,10 @@ equation
   connect(airframe.frame_a,aerodynamics.frame_b);
 end SimpleStabilityFrameAeroObject;
 
-model ForceAndTorqueEx
+model SimpleForceAndTorqueEx
   import MB=Modelica.Mechanics.MultiBody;
   inner MB.World world(n={0,0,1});
   SimpleStabilityFrameAeroObject body_s;
-end ForceAndTorqueEx;
+end SimpleForceAndTorqueEx;
 
 // vim:ts=2:sw=2:expandtab:
