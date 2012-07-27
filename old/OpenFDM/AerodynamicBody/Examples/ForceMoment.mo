@@ -1,3 +1,0 @@
-
-model DimensionlessDerivatives
-end DimensionlessDerivatives;

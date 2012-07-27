@@ -1,2 +1,0 @@
-package Rand
-end Rand;
