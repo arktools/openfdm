@@ -34,13 +34,7 @@ protected
   Orientation R_sw "relative rotation object from stability into wind";
 
   Environment env;
-  MultiBody.Forces.WorldForceAndTorque forceTorque;
-  SI.Force lift;
-  SI.Force drag;
-  SI.Force sideForce;
-  SI.Torque rollMoment;
-  SI.Torque pitchMoment;
-  SI.Torque yawMoment;
+  Modelica.Mechanics.MultiBody.Forces.WorldForceAndTorque forceTorque;
 
   SI.Velocity vt "true airspeed";
   SI.Acceleration vtDot "Derivative of true airspeed";

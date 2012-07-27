@@ -2,11 +2,8 @@ within OpenFDM.AerodynamicBody;
 
 package Datcom
 
-package StabilityFrame
-
     model ForceAndTorque
-       import Modelica.MultiBody.Forces.WorldForceAndTorque;
-       extends WorldForceAndTorque;
+      extends Modelica.Mechanics.MultiBody.Forces.WorldForceAndTorque;
         Real CD;
         Real CL;
         Real CY;
@@ -19,32 +16,29 @@ package StabilityFrame
         Real l;
         Real m;
         Real n;
-        Real qBar, S, cBar, b;
+        Real qBar, s, cBar, b;
     equation
-        D = qBar * S * CD;
-        L = qBar * S * CL;
-        C = qBar * S * CY;
-        l = qBar * S * b * Cl;
-        m = qBar * S * cBar * Cm;
-        n = qBar * S * b * Cn;
+        D = qBar * s * CD;
+        L = qBar * s * CL;
+        C = qBar * s * CY;
+        l = qBar * s * b * Cl;
+        m = qBar * s * cBar * Cm;
+        n = qBar * s * b * Cn;
     end ForceAndTorque;
-
-end StabilityFrame;
-
 
 
 model DatcomCoefficientsForceAndTorque
-    extends StabilityFrame.ForceAndTorque;
+    extends ForceAndTorque;
     import Modelica.Blocks.Interfaces.RealOutput;
     type PerDeg = Real(unit="1/deg");
     Real CL_Basic "basic lift coefficient";
-    Real dCL_Flaps "change in lift coefficient due to flaps";
+    Real dCL_Flap "change in lift coefficient due to flaps";
     Real dCL_Elevator "change in lift coefficient due to elevator";
     Real dCL_PitchRate "change in lift coefficient due to pitch rate";
     Real dCL_AlphaDot "change in lift coefficient due to aoa rate";
      
     Real CD_Basic "basic drag coefficient";
-    Real dCD_Flaps "change in drag coefficient due to flaps";
+    Real dCD_Flap "change in drag coefficient due to flaps";
     Real dCD_Elevator "change in drag coefficient due to elevator";
 
     Real dCY_Beta "change in side force coefficient due to side slip angle";
@@ -56,7 +50,7 @@ model DatcomCoefficientsForceAndTorque
     Real dCl_YawRate "change in roll moment coefficient due to yaw rate";
     
     Real Cm_Basic;
-    Real dCm_Flaps "change in pitch moment coefficient due to flaps";
+    Real dCm_Flap "change in pitch moment coefficient due to flaps";
     Real dCm_Elevator "change in pitch moment coefficient due to elevator";
     Real dCm_PitchRate "change in pitch moment coefficient due to pitch rate";
     Real dCm_AlphaDot "change in pitch moment coefficient due to aoa rate";
@@ -66,18 +60,18 @@ model DatcomCoefficientsForceAndTorque
     Real dCn_RollRate "change in yaw moment coefficient due to roll rate";
     Real dCn_YawRate "change in yaw moment coefficient due to yaw rate";
 
-    Real dFlaps, dElevator, dAileron;
+    Real dFlap, dElevator, dAileron;
     Real p, q, r;
-    Real Vt;
+    Real Vt, cBar;
     Real alphaDot, alpha, beta;
 equation
     CL = CL_Basic +
-         dCL_Flaps * dFlaps +
+         dCL_Flap * dFlap +
          dCL_Elevator * dElevator +
          dCL_PitchRate * q * cBar/(2*Vt) +
          dCL_AlphaDot * alphaDot * cBar/(2*Vt);
     CD = CD_Basic +
-         dCD_Flaps * dFlaps +
+         dCD_Flap * dFlap +
          dCD_Elevator * dElevator;
     CY = dCY_Beta * beta +
          dCY_RollRate * p * b/(2*Vt);
@@ -86,7 +80,7 @@ equation
          dCl_RollRate * p * b/(2*Vt) +
          dCl_YawRate * r * b/(2*Vt);   
     Cm = Cm_Basic +
-         dCm_Flaps * dFlaps + 
+         dCm_Flap * dFlap + 
          dCm_Elevator * dElevator +
          dCm_PitchRate * q * cBar/(2*Vt) +
          dCm_AlphaDot * alphaDot * cBar/(2*Vt);
@@ -108,21 +102,21 @@ model DatcomConstantEx
         cBar=1,
         b=1,
         qBar = 1,
-        S = 1,
-        dFlaps = 0,
+        s = 1,
+        dFlap = 0,
         dAileron = 0,
         dElevator = 0,
 
         // lift force
         CL_Basic = 0,
-        dCL_Flaps = 0,
+        dCL_Flap = 0,
         dCL_Elevator = 0,
         dCL_PitchRate = 0,
         dCL_AlphaDot = 0,
 
         // drag force
         CD_Basic = 0,
-        dCD_Flaps = 0,
+        dCD_Flap = 0,
         dCD_Elevator = 0,
 
         // side force
@@ -137,7 +131,7 @@ model DatcomConstantEx
 
         // pitch moment
         Cm_Basic = 0,
-        dCm_Flaps = 0,
+        dCm_Flap = 0,
         dCm_Elevator = 0,
         dCm_PitchRate = 0,
         dCm_AlphaDot = 0,
@@ -152,13 +146,13 @@ end DatcomConstantEx;
 
 model DatcomCoefficientTableSet
     constant Real[:,:] CL_Basic;
-    constant Real[:,:] dCL_Flaps;
+    constant Real[:,:] dCL_Flap;
     constant Real[:,:] dCL_Elevator;
     constant Real[:,:] dCL_PitchRate;
     constant Real[:,:] dCL_AlphaDot;
 
     constant Real[:,:] CD_Basic;
-    constant Real[:,:] dCD_Flaps;
+    constant Real[:,:] dCD_Flap;
     constant Real[:,:] dCD_Elevator;
 
     constant Real[:,:] dCY_Beta;
@@ -170,7 +164,7 @@ model DatcomCoefficientTableSet
     constant Real[:,:] dCl_YawRate;
 
     constant Real[:,:] Cm_Basic;
-    constant Real[:,:] dCm_Flaps;
+    constant Real[:,:] dCm_Flap;
     constant Real[:,:] dCm_Elevator;
     constant Real[:,:] dCm_PitchRate;
     constant Real[:,:] dCm_AlphaDot;
@@ -196,12 +190,12 @@ model DatcomCoefficientTableSetForceAndTorque
   extends DatcomCoefficientsForceAndTorque;
 
   CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u1=alpha, y1=CL_Basic);
-  CombiTable1DSISO dCL_Flaps_table(table=tables.dCL_Flaps, u1=alpha, y1=dCL_Flaps);
+  CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u1=alpha, y1=dCL_Flap);
   CombiTable1DSISO dCL_Elevator_table(table=tables.dCL_Elevator, u1=alpha, y1=dCL_Elevator);
   CombiTable1DSISO dCL_PitchRate_table(table=tables.dCL_PitchRate, u1=alpha, y1=dCL_PitchRate);
   CombiTable1DSISO dCL_AlphaDot_table(table=tables.dCL_AlphaDot, u1=alpha, y1=dCL_AlphaDot);
   CombiTable1DSISO CD_Basic_table(table=tables.CD_Basic, u1=alpha, y1=CD_Basic);
-  CombiTable1DSISO dCD_Flaps_table(table=tables.dCD_Flaps, u1=alpha, y1=dCD_Flaps);
+  CombiTable1DSISO dCD_Flap_table(table=tables.dCD_Flap, u1=alpha, y1=dCD_Flap);
   CombiTable1DSISO dCD_Elevator_table(table=tables.dCD_Elevator, u1=alpha, y1=dCD_Elevator);
   CombiTable1DSISO dCY_Beta_table(table=tables.dCY_Beta, u1=alpha, y1=dCY_Beta);
   CombiTable1DSISO dCY_RollRate_table(table=tables.dCY_RollRate, u1=alpha, y1=dCY_RollRate);
@@ -210,7 +204,7 @@ model DatcomCoefficientTableSetForceAndTorque
   CombiTable1DSISO dCl_RollRate_table(table=tables.dCl_RollRate, u1=alpha, y1=dCl_RollRate);
   CombiTable1DSISO dCl_YawRate_table(table=tables.dCl_YawRate, u1=alpha, y1=dCl_YawRate);
   CombiTable1DSISO Cm_Basic_table(table=tables.Cm_Basic, u1=alpha, y1=Cm_Basic);
-  CombiTable1DSISO dCm_Flaps_table(table=tables.dCm_Flaps, u1=alpha, y1=dCm_Flaps);
+  CombiTable1DSISO dCm_Flap_table(table=tables.dCm_Flap, u1=alpha, y1=dCm_Flap);
   CombiTable1DSISO dCm_Elevator_table(table=tables.dCm_Elevator, u1=alpha, y1=dCm_Elevator);
   CombiTable1DSISO dCm_PitchRate_table(table=tables.dCm_PitchRate, u1=alpha, y1=dCm_PitchRate);
   CombiTable1DSISO dCm_AlphaDot_table(table=tables.dCm_AlphaDot, u1=alpha, y1=dCm_AlphaDot);
@@ -231,13 +225,13 @@ model DatcomTablesEx
 
     DatcomCoefficientTableSet tables(
       CL_Basic = ConstTable1D(0),
-      dCL_Flaps  = ConstTable1D(0),
+      dCL_Flap  = ConstTable1D(0),
       dCL_Elevator  = ConstTable1D(0),
       dCL_PitchRate  = ConstTable1D(0),
       dCL_AlphaDot  = ConstTable1D(0),
 
       CD_Basic  = ConstTable1D(0),
-      dCD_Flaps  = ConstTable1D(0),
+      dCD_Flap  = ConstTable1D(0),
       dCD_Elevator  = ConstTable1D(0),
 
       dCY_Beta  = ConstTable1D(0),
@@ -249,7 +243,7 @@ model DatcomTablesEx
       dCl_YawRate  = ConstTable1D(0),
 
       Cm_Basic = ConstTable1D(0),
-      dCm_Flaps  = ConstTable1D(0),
+      dCm_Flap  = ConstTable1D(0),
       dCm_Elevator  = ConstTable1D(0),
       dCm_PitchRate  = ConstTable1D(0),
       dCm_AlphaDot  = ConstTable1D(0),
@@ -271,8 +265,8 @@ model DatcomTablesEx
         cBar=1,
         b=1,
         qBar = 1,
-        S = 1,
-        dFlaps = 0,
+        s = 1,
+        dFlap = 0,
         dAileron = 0,
         dElevator = 0
     );
@@ -282,23 +276,26 @@ model DatcomAerodynamicBodyEx
 end DatcomAerodynamicBodyEx;
 
 model AerodynamicBodyDatcom
+
+  Real s, b, cBar;
+
     extends AerodynamicBody(
         forceTorque=datcomForceTorque
     );
     DatcomCoefficientsForceAndTorque datcomForceTorque(
-        resolveIn=stabilityFrame,
-        p=p, // deg?
-        q=q,
-        r=r,
+        s=s,
+        b=b,
+        cBar=cBar, 
+        frame_resolve=stabilityFrame,
+        p=aero_p, // deg?
+        q=aero_q,
+        r=aero_r,
         alpha = alpha,
         beta=beta,
         alphaDot=alphaDot,
         Vt=vt,
-        cBar=cBar,
-        b=b,
         qBar = qBar,
-        S = s,
-        dFlaps = flaps,
+        dFlap = flap,
         dAileron = aileron,
         dElevator = elevator
     );

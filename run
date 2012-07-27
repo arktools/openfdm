@@ -1,4 +1,12 @@
 #!/bin/bash
+
+if [[ $# != 1 ]]
+then
+    echo usage: $0 script
+    exit
+fi
+
+curDir=$PWD
 export OPENMODELICALIBRARY=$PWD:$OPENMODELICALIBRARY
 tmpDir=/tmp/$(whoami)
 mkdir -p $tmpDir
@@ -8,7 +16,5 @@ if [[ "$pids" != "" ]]
 then
     echo killing: $pids
     kill $pids
-else
-    echo no omc processes to kill
 fi
- OMShell-terminal
+omc +s $curDir/$1

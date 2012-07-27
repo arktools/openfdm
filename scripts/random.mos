@@ -24,4 +24,4 @@ loadModel(OpenFDM.Random);
 loadModel(OpenFDM.Navigation);
 loadModel(Rand);
 simulate(Rand.RandTest);
-plot(white.x);
+plot(scope.w_meas);
