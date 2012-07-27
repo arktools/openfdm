@@ -14,6 +14,7 @@ partial model AerodynamicBody "a rigid body from the multibody library with aero
   import Modelica.Math.Vectors;
   import Modelica.Mechanics.MultiBody;
   import Modelica.Mechanics.MultiBody.Frames.*;
+  import Modelica.Mechanics.MultiBody.Interfaces;
   import Modelica.Blocks.Interfaces.RealInput;
   import Modelica.SIunits.Conversions.*;
   import OpenFDM.SIunits.Conversions.*;
@@ -25,22 +26,22 @@ partial model AerodynamicBody "a rigid body from the multibody library with aero
   parameter Real vtTol=0.001 "Velocity above which aerodynamics are enabled";
   parameter SI.AngularVelocity w_max = 2 "maximum rotational rate before structural failure";
   parameter Real g_max = 3 "maximum acceleration in g's before structural failure";
-
+  
 protected
+
+  Interfaces.Frame stabilityFrame;
+  Interfaces.Frame windFrame;
+  Orientation R_sw "relative rotation object from stability into wind";
+
   Environment env;
-  MultiBody.Forces.WorldForceAndTorque forceTorque(
-    resolveInFrame=MultiBody.Types.ResolveInFrameB.frame_b);
-  SI.Force lift;
-  SI.Force drag;
-  SI.Force sideForce;
-  SI.Torque rollMoment;
-  SI.Torque pitchMoment;
-  SI.Torque yawMoment;
+  Modelica.Mechanics.MultiBody.Forces.WorldForceAndTorque forceTorque;
 
   SI.Velocity vt "true airspeed";
+  SI.Acceleration vtDot "Derivative of true airspeed";
   SI.Angle alpha "angle of attack";
   SI.AngularVelocity alphaDot "angle of attack derivative";
   SI.Angle beta "side slip angle";
+  SI.Angle betaDot "side slip angle derivative";
   SI.Pressure qBar "average dynamics pressure";
   SI.AngularVelocity aero_p "roll rate";
   SI.AngularVelocity aero_q "pitch rate";
@@ -68,6 +69,7 @@ protected
   Real wNorm;
   
 equation
+
   // conversion
   yaw_deg = to_deg(body.phi[1]);
   pitch_deg = to_deg(body.phi[2]);
@@ -101,8 +103,14 @@ equation
   // avoid singularity in side slip angle calc
   if (vt > vtTol) then
     beta = asin(vRelative_XYZ[2]/vt);
+    betaDot = (aRelative_XYZ[2]*vt - aRelative_XYZ[2]*vtDot)/vt*sqrt(vRelative_XYZ[1]^2 + vRelative_XYZ[3]^2);
+    vtDot = (vRelative_XYZ[1]*aRelative_XYZ[1] + 
+      vRelative_XYZ[2]*aRelative_XYZ[2] +
+      vRelative_XYZ[3]*aRelative_XYZ[3])/vt;
   else
     beta = 0;
+    betaDot = 0;
+    vtDot = 0;
   end if;
 
   // if negligible airspeed, set wind angles to zero
@@ -116,8 +124,13 @@ equation
   connect(env.frame,frame_b);
   connect(frame_b,forceTorque.frame_b);
   // right hand set (forward, right, down)
-  forceTorque.force = {-drag,sideForce,-lift};
-  forceTorque.torque = {rollMoment,pitchMoment,yawMoment};
-end AerodynamicBody;
+  //TODO: change to equal datcom forcetorque
 
+  stabilityFrame.R = axisRotation(2,-alpha, -alphaDot);
+  stabilityFrame.r_0 = frame_b.r_0;
+  R_sw = axisRotation(3,beta,betaDot);
+  windFrame.R = absoluteRotation(stabilityFrame.R, R_sw);
+  windFrame.r_0 = frame_b.r_0;
+
+end AerodynamicBody;
 // vim:ts=2:sw=2:expandtab:

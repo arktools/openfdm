@@ -10,7 +10,7 @@ model Environment "environment for multibody frame"
   SI.Position asl "altitude above sea level";
   SI.Position agl "altitude above ground level";
   SI.Position groundAsl "altitude of ground above sea level";
-  SI.Velocity wind_ECEF[3] "wind vector";
+  SI.Velocity wind_NED[3] "wind vector";
 equation
 
   assert(agl > 0, "altitude below ground level");
@@ -19,7 +19,7 @@ equation
 
   // TODO
   rho = 1.225;
-  wind_ECEF = {0,0,0};
+  wind_NED = {0,0,0};
   groundAsl = 0;
 
   // envronment exerts no force torques directly
@@ -28,3 +28,4 @@ equation
   frame.t = {0,0,0};
 end Environment;
 
+// vim:ts=2:sw=2:expandtab:
