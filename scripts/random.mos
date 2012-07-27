@@ -20,8 +20,9 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(OpenFDM.Random);
-loadModel(OpenFDM.Navigation);
-loadModel(Rand);
-simulate(Rand.RandTest);
-plot(scope.w_meas);
+loadModel(OpenFDM);
+loadModel(TestPackages);
+simulate(TestPackages.Rand.RandTest);
+plot(gyros.w_meas[1]);
+plot(gyros.w_meas[2]);
+plot(gyros.w_meas[3]);
