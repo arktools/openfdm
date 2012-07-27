@@ -7,6 +7,7 @@ model IMUSensorBank
     parameter Real samplePeriod=0.01;
 protected
     Sensor[3] gyro;
+    //Sensor[3] gyro(seed(start={{1,2,3},{4,5,6},{7.8.9}}));
 equation
     connect(w_real[:],gyro[:].real);
     connect(w_meas[:],gyro[:].meas);

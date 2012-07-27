@@ -1,9 +1,9 @@
 within OpenFDM.Random;
 
 function random "Pseudo random number generator" 
-    input Real[3] seed;
+    input Seed seed;
     output Real x;
-    output Real[3] outSeed;
+    output Seed outSeed;
 algorithm 
     outSeed[1] := rem((171*seed[1]), 30269);
     outSeed[2] := rem((172*seed[2]), 30307);
