@@ -1,14 +1,21 @@
 within OpenFDM.Navigation.Sensors;
 
 model IMUSensorBank
-    input Real[3] w_real(start=0);
-    discrete Real[3] w_meas(start=0);
-    //Real[3] seed(start={27,10089,61});
-    parameter Real samplePeriod=0.01;
+    input Real[3] w_real(each start=0);
+    discrete Real[3] w_meas(each start=0);
+    Seed seed1(start={1,2,3});
+    Seed seed2(start={4,5,6});
+    Seed seed3(start={7,8,9});
+    parameter Real samplePeriod=0.005;
 protected
-    Sensor[3] gyro;
-    //Sensor[3] gyro(seed(start={{1,2,3},{4,5,6},{7.8.9}}));
-equation
-    connect(w_real[:],gyro[:].real);
-    connect(w_meas[:],gyro[:].meas);
+    discrete Real nextSampleTime(start=0);
+    discrete Real[3] noise(each start=0);
+algorithm
+    when pre(nextSampleTime) <= time then
+        nextSampleTime := pre(nextSampleTime) + samplePeriod;
+        (noise[1],seed1) := OpenFDM.Random.normalvariate(0,1,seed1);
+        (noise[2],seed2) := OpenFDM.Random.normalvariate(0,1,seed2);
+        (noise[3],seed3) := OpenFDM.Random.normalvariate(0,1,seed3);
+        w_meas := w_real + noise;
+    end when;
 end IMUSensorBank;

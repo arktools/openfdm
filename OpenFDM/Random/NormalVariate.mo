@@ -8,7 +8,7 @@ function normalvariate "normally distributed random variable"
     output Seed so "output random seed";
 protected
     constant Real NV_MAGICCONST=4*exp(-0.5)/sqrt(2.0);
-    Real s1[3], s2[3];
+    Seed s1, s2;
     Real z, zz, u1, u2;
     Boolean breakL = false;
 algorithm

@@ -1,12 +1,15 @@
 within Rand;
 
 model RandTest
-    //OpenFDM.Random.RandomNumber white;
-    OpenFDM.Navigation.Sensors.IMUSensorBank gyros;
+    OpenFDM.Navigation.KalmanFilter kf;
+    OpenFDM.Navigation.Sensors.Sensor s(sigma=5);
 protected
-    Real x[3](start = {100,75,50});
+    Real x[4,1](start = {{100},{75},{50},{80}});
+    parameter Real[4,4] A = {{0,1,0,0},{0,0,1,0},{0,0,0,1},{-24,-50,-35,-10}};
 equation
-    der(x) = -7.5*x;
-    connect(gyros.w_real,x);
+    //x = x;
+    der(x) = A*x;
+    connect(x[1,1],s.real);
+    connect(s.meas,kf.y[1,1]);
 end RandTest;
 
