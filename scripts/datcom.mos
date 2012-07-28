@@ -22,4 +22,5 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 loadModel(Modelica);
 loadModel(OpenFDM);
 getErrorString();
-simulate(OpenFDM.Aerodynamics.Examples.DatcomEx,measureTime=true,stopTime=100);
+simulate(OpenFDM.Aerodynamics.Examples.DatcomEx,stopTime=40);
+plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);

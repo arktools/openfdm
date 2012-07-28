@@ -52,7 +52,7 @@ end DatcomAeroObject;
 model DatcomEx
   import MB=Modelica.Mechanics.MultiBody;
   inner MB.World world(n={0,0,1});
-  DatcomAeroObject body_s;
+  DatcomAeroObject body;
 end DatcomEx;
 
 // vim:ts=2:sw=2:expandtab:
