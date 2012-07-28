@@ -1,69 +1,81 @@
 within OpenFDM.Aerodynamics;
 
-package DatcomTables
+package Datcom
 
-  record DatcomCoefficients
+  record Tables
+    // lift
+    Real[:,:] CL_Basic "basic lift coefficient";
+    Real[:,:] dCL_Flap "change in lift coefficient due to flaps";
+    Real[:,:] dCL_Elevator "change in lift coefficient due to elevator";
+    Real[:,:] dCL_PitchRate "change in lift coefficient due to pitch rate";
+    Real[:,:] dCL_AlphaDot "change in lift coefficient due to aoa rate";
+    
+    // drag 
+    Real[:,:] CD_Basic "basic drag coefficient";
+    Real[:,:] dCD_Flap "change in drag coefficient due to flaps";
+    Real[:,:] dCD_Elevator "change in drag coefficient due to elevator";
+
+    // sideforce
+    Real[:,:] dCY_Beta "change in side force coefficient due to side slip angle";
+    Real[:,:] dCY_RollRate "change in side force coefficient due to roll rate";
+
+    // roll moment
+    Real[:,:] dCl_Aileron "change in roll moment coefficient due to aileron";
+    Real[:,:] dCl_Beta "change in roll moment coefficient due to side slip angle";
+    Real[:,:] dCl_RollRate "change in roll moment coefficient due to roll rate";
+    Real[:,:] dCl_YawRate "change in roll moment coefficient due to yaw rate";
+    
+    // pitch moment
+    Real[:,:] Cm_Basic;
+    Real[:,:] dCm_Flap "change in pitch moment coefficient due to flaps";
+    Real[:,:] dCm_Elevator "change in pitch moment coefficient due to elevator";
+    Real[:,:] dCm_PitchRate "change in pitch moment coefficient due to pitch rate";
+    Real[:,:] dCm_AlphaDot "change in pitch moment coefficient due to aoa rate";
+    
+    // yaw moment
+    Real[:,:] dCn_Aileron "change in yaw moment coefficient due to aileron";
+    Real[:,:] dCn_Beta "change in yaw moment coefficient due to side slip angle";
+    Real[:,:] dCn_RollRate "change in yaw moment coefficient due to roll rate";
+    Real[:,:] dCn_YawRate "change in yaw moment coefficient due to yaw rate";
+  end Tables;
+
+  record CoefficientsAndDerivatives
+    // lift
     Real CL_Basic "basic lift coefficient";
     Real dCL_Flap "change in lift coefficient due to flaps";
     Real dCL_Elevator "change in lift coefficient due to elevator";
     Real dCL_PitchRate "change in lift coefficient due to pitch rate";
     Real dCL_AlphaDot "change in lift coefficient due to aoa rate";
      
+    // drag
     Real CD_Basic "basic drag coefficient";
     Real dCD_Flap "change in drag coefficient due to flaps";
     Real dCD_Elevator "change in drag coefficient due to elevator";
 
+    // sideforce
     Real dCY_Beta "change in side force coefficient due to side slip angle";
     Real dCY_RollRate "change in side force coefficient due to roll rate";
 
+    // roll moment
     Real dCl_Aileron "change in roll moment coefficient due to aileron";
     Real dCl_Beta "change in roll moment coefficient due to side slip angle";
     Real dCl_RollRate "change in roll moment coefficient due to roll rate";
     Real dCl_YawRate "change in roll moment coefficient due to yaw rate";
     
-    Real Cm_Basic;
+    // pitch moment
+    Real Cm_Basic "basic pitch moment coefficient";
     Real dCm_Flap "change in pitch moment coefficient due to flaps";
     Real dCm_Elevator "change in pitch moment coefficient due to elevator";
     Real dCm_PitchRate "change in pitch moment coefficient due to pitch rate";
     Real dCm_AlphaDot "change in pitch moment coefficient due to aoa rate";
     
+    // yaw moment
     Real dCn_Aileron "change in yaw moment coefficient due to aileron";
     Real dCn_Beta "change in yaw moment coefficient due to side slip angle";
     Real dCn_RollRate "change in yaw moment coefficient due to roll rate";
     Real dCn_YawRate "change in yaw moment coefficient due to yaw rate";
 
-  end DatcomCoefficients;
-
-  model DatcomCoefficientTableSet "Where values for datcom tables are set"
-    parameter Real[:,:] CL_Basic;
-    parameter Real[:,:] dCL_Flap;
-    parameter Real[:,:] dCL_Elevator;
-    parameter Real[:,:] dCL_PitchRate;
-    parameter Real[:,:] dCL_AlphaDot;
-
-    parameter Real[:,:] CD_Basic;
-    parameter Real[:,:] dCD_Flap;
-    parameter Real[:,:] dCD_Elevator;
-
-    parameter Real[:,:] dCY_Beta;
-    parameter Real[:,:] dCY_RollRate;
-
-    parameter Real[:,:] dCl_Aileron;
-    parameter Real[:,:] dCl_Beta;
-    parameter Real[:,:] dCl_RollRate;
-    parameter Real[:,:] dCl_YawRate;
-
-    parameter Real[:,:] Cm_Basic;
-    parameter Real[:,:] dCm_Flap;
-    parameter Real[:,:] dCm_Elevator;
-    parameter Real[:,:] dCm_PitchRate;
-    parameter Real[:,:] dCm_AlphaDot;
-
-    parameter Real[:,:] dCn_Aileron;
-    parameter Real[:,:] dCn_Beta;
-    parameter Real[:,:] dCn_RollRate;
-    parameter Real[:,:] dCn_YawRate;
-  end DatcomCoefficientTableSet;
+  end CoefficientsAndDerivatives;
 
   block CombiTable1DSISO
     Real y1; 
@@ -74,13 +86,49 @@ package DatcomTables
     u = u1;
   end CombiTable1DSISO;
 
-  partial model DatcomCoefficientTableConnect
-    import Modelica.Blocks.Tables.*;
-    extends DatcomCoefficients;
-    parameter DatcomCoefficientTableSet tables;
-    //NullTable tables;
-    //ExampleDatcomTable tables;
+  partial model ForceAndTorqueBase
+    import Modelica.SIunits.Conversions.*;
+    extends StabilityFrame.ForceAndTorque;
+    extends CoefficientsAndDerivatives;
 
+    Real alpha_deg;
+    Real beta_deg;
+
+    // controls
+    Real dFlap, dElevator, dAileron;
+      
+  equation
+    alpha_deg = to_deg(alpha);
+    beta_deg = to_deg(beta);
+    coefs.CL = CL_Basic +
+         dCL_Flap * dFlap +
+         dCL_Elevator * dElevator +
+         dCL_PitchRate * q * coefs.cBar/(2*vt) +
+         dCL_AlphaDot * alphaDot * coefs.cBar/(2*vt);
+    coefs.CD = CD_Basic +
+         dCD_Flap * dFlap +
+         dCD_Elevator * dElevator;
+    coefs.CY = dCY_Beta * beta +
+         dCY_RollRate * p * coefs.b/(2*vt);
+    coefs.Cl = dCl_Aileron * dAileron +
+         dCl_Beta * beta +
+         dCl_RollRate * p * coefs.b/(2*vt) +
+         dCl_YawRate * r * coefs.b/(2*vt);   
+    coefs.Cm = Cm_Basic +
+         dCm_Flap * dFlap + 
+         dCm_Elevator * dElevator +
+         dCm_PitchRate * q * coefs.cBar/(2*vt) +
+         dCm_AlphaDot * alphaDot * coefs.cBar/(2*vt);
+    coefs.Cn = dCn_Aileron * dAileron +
+         dCn_Beta * beta +
+         dCn_RollRate * p * coefs.b/(2*vt) +
+         dCn_YawRate * r * coefs.b/(2*vt);  
+  end ForceAndTorqueBase;
+
+  model ForceAndTorque
+    import Modelica.Blocks.Tables.*;
+    extends ForceAndTorqueBase;
+    parameter Tables tables;
     CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u1=alpha, y1=CL_Basic);
     CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u1=alpha, y1=dCL_Flap);
     CombiTable1DSISO dCL_Elevator_table(table=tables.dCL_Elevator, u1=alpha, y1=dCL_Elevator);
@@ -104,82 +152,8 @@ package DatcomTables
     CombiTable1DSISO dCn_Beta_table(table=tables.dCn_Beta, u1=alpha, y1=dCn_Beta);
     CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u1=alpha, y1=dCn_RollRate);
     CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u1=alpha, y1=dCn_YawRate);
-  end DatcomCoefficientTableConnect;
+  end ForceAndTorque;
 
-
-  model ExampleDatcomTable
-  function ConstTable1D
-    input Real c;
-    output Real[2,2] table := {{0,c},{1,c}};
-  end ConstTable1D;
-  extends DatcomTables.DatcomCoefficientTableSet(
-    CL_Basic = ConstTable1D(1),
-    dCL_Flap  = ConstTable1D(0),
-    dCL_Elevator  = ConstTable1D(0),
-    dCL_PitchRate  = ConstTable1D(0),
-    dCL_AlphaDot  = ConstTable1D(0),
-
-    CD_Basic  = ConstTable1D(0),
-    dCD_Flap  = ConstTable1D(0),
-    dCD_Elevator  = ConstTable1D(0),
-
-    dCY_Beta  = ConstTable1D(0),
-    dCY_RollRate  = ConstTable1D(0),
-
-    dCl_Aileron  = ConstTable1D(0),
-    dCl_Beta  = ConstTable1D(0),
-    dCl_RollRate  = ConstTable1D(0),
-    dCl_YawRate  = ConstTable1D(0),
-
-    Cm_Basic = ConstTable1D(0),
-    dCm_Flap  = ConstTable1D(0),
-    dCm_Elevator  = ConstTable1D(0),
-    dCm_PitchRate  = ConstTable1D(0),
-    dCm_AlphaDot  = ConstTable1D(0),
-
-    dCn_Aileron  = ConstTable1D(0),
-    dCn_Beta  = ConstTable1D(0),
-    dCn_RollRate  = ConstTable1D(0),
-    dCn_YawRate  = ConstTable1D(0)
-  );
-end ExampleDatcomTable;
-
-model NullTable
-  constant Real[2,2] empty1D = {{0,0},{1,0}}; 
-    extends DatcomTables.DatcomCoefficientTableSet(
-    CL_Basic = empty1D,
-    dCL_Flap  = empty1D,
-    dCL_Elevator  = empty1D,
-    dCL_PitchRate  = empty1D,
-    dCL_AlphaDot  = empty1D,
-
-    CD_Basic  = empty1D,
-    dCD_Flap  = empty1D,
-    dCD_Elevator  = empty1D,
-
-    dCY_Beta  = empty1D,
-    dCY_RollRate  = empty1D,
-
-    dCl_Aileron  = empty1D,
-    dCl_Beta  = empty1D,
-    dCl_RollRate  = empty1D,
-    dCl_YawRate  = empty1D,
-
-    Cm_Basic = empty1D,
-    dCm_Flap  = empty1D,
-    dCm_Elevator  = empty1D,
-    dCm_PitchRate  = empty1D,
-    dCm_AlphaDot  = empty1D,
-
-    dCn_Aileron  = empty1D,
-    dCn_Beta  = empty1D,
-    dCn_RollRate  = empty1D,
-    dCn_YawRate  = empty1D
-  );
-end NullTable;
-
-
-
-end DatcomTables;
+end Datcom;
 
 // vim:ts=2:sw=2:expandtab:
