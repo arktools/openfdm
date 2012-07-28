@@ -23,6 +23,5 @@ loadModel(Modelica);
 loadModel(OpenFDM);
 loadModel(TestPackages);
 simulate(TestPackages.Rand.RandTest);
-plot(gyros.w_meas[1]);
-plot(gyros.w_meas[2]);
-plot(gyros.w_meas[3]);
+plot({x[1,1],kf.x_hat[1,1],x[2,1], kf.x_hat[2,1]});
+//plot({x[1,1],x[2,1],s.meas});
