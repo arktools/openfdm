@@ -6,18 +6,20 @@ model KalmanFilter
     parameter Integer r = 2;
     parameter Integer p = 1;
 
-    parameter Real[n,n] A ={{0,1,0,0},{0,0,1,0},{0,0,0,1},{-24,-50,-35,-10}};
+    parameter Real samplePeriod=0.1;
+
+    parameter Real[n,n] A = {{1.0000,0.0100,0.0000,0.0000},{-0.0000,1.0000,0.0100,0.0000},{-0.0012,-0.0024,0.9983,0.0095},{-0.2283,-0.4767,-0.3353,0.9032}};
+
+    //exp({{0,1,0,0},{0,0,1,0},{0,0,0,1},{-24,-50,-35,-10}};
     parameter Real[n,r] B ={{0,0},{0,0},{0,0},{0,0}};
     parameter Real[m,n] C ={{1,0,0,0}};
-    parameter Real[m,p] D ={{5}};
+    parameter Real[m,p] D =identity(1);
 
     discrete input Real[m,1] y;
-    discrete output Real[n,1] x_hat(start={{0},{0},{0},{0}});
-    discrete output Real[n,1] x_hatp(start={{0},{0},{0},{0}});
-    discrete output Real[n,n] Q(start=10*identity(n));
-    discrete output Real[n,n] Qp(start=10*identity(n));
-
-    parameter Real samplePeriod=0.01;
+    discrete output Real[n,1] x_hat(start={{110},{65},{45},{85}});
+    discrete output Real[n,1] x_hatp(start={{110},{65},{45},{85}});
+    discrete output Real[n,n] Q(start=100*identity(n));
+    discrete output Real[n,n] Qp(start=100*identity(n));
 
 protected
     discrete Real[n,m] K;

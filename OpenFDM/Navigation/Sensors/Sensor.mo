@@ -8,11 +8,9 @@ model Sensor
     parameter Real sigma=1;
     parameter Real samplePeriod=0.01;
 protected
-    discrete Real nextSampleTime(start=0);
     discrete Real noise(start=0);
 algorithm
-    when pre(nextSampleTime) <= time then
-        nextSampleTime := pre(nextSampleTime) + samplePeriod;
+    when sample(0,samplePeriod) then
         (noise,seed) := OpenFDM.Random.normalvariate(bias,sigma,seed);
         meas := real + noise;
     end when;
