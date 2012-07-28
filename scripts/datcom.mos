@@ -21,4 +21,6 @@ setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,consta
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
 loadModel(OpenFDM);
-simulate(OpenFDM.AerodynamicBody.Examples.DatcomEx);
+getErrorString();
+simulate(OpenFDM.Aerodynamics.Examples.DatcomEx,stopTime=40);
+plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);
