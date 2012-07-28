@@ -1,7 +1,12 @@
 within OpenFDM.Aerodynamics.Examples;
 
-package NullAircraft
-  constant Real[2,2] empty1D = {{0,0},{1,0}}; 
+model DatcomEx
+
+  import MB=Modelica.Mechanics.MultiBody;
+  import OpenFDM.Aerodynamics.Datcom;
+  import OpenFDM.Aerodynamics.Datcom.empty1D;
+  import OpenFDM.Aerodynamics.Datcom.empty2D;
+
   constant Datcom.Tables datcomTables(    
       CL_Basic = empty1D,
       dCL_Flap  = empty1D,
@@ -31,28 +36,25 @@ package NullAircraft
       dCn_Beta  = empty1D,
       dCn_RollRate  = empty1D,
       dCn_YawRate  = empty1D);
-end NullAircraft;
 
+  model Body 
+    Airframe airframe(
+      r_0(start={0,0,-10000}),
+      v_0(start={10,0,0}));
+    Datcom.ForceAndTorque aerodynamics(
+      tables=datcomTables,
+      rudder_deg = 0,
+      flap_deg = 0,
+      elevator_deg = 0,
+      aileron_deg = 0,
+      coefs(s=1, b=1, cBar=1));
+  equation
+    connect(airframe.frame_a,aerodynamics.frame_b);
+  end Body;
 
-model DatcomAeroObject
-  import Aero=OpenFDM.Aerodynamics;
-  Airframe airframe(
-    r_0(start={0,0,-10000}),
-    v_0(start={10,0,0}));
-  Aero.Datcom.ForceAndTorque aerodynamics(
-    tables=NullAircraft.datcomTables,
-    dFlap = 0,
-    dElevator = 0,
-    dAileron = 0,
-    coefs(s=1, b=1, cBar=1));
-equation
-  connect(airframe.frame_a,aerodynamics.frame_b);
-end DatcomAeroObject;
-
-model DatcomEx
-  import MB=Modelica.Mechanics.MultiBody;
   inner MB.World world(n={0,0,1});
-  DatcomAeroObject body;
+  Body body;
+
 end DatcomEx;
 
 // vim:ts=2:sw=2:expandtab:

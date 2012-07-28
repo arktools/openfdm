@@ -42,10 +42,18 @@ partial model ForceAndTorqueBase
   SI.Velocity v_0[3];
   SI.Acceleration a_0[3];
 
+  // conversion
+  Real alpha_deg;
+  Real beta_deg;
+
   Utilities.VariableRotation rotateAlpha(axis=2,angle=-alpha,angleDot=-alphaDot);
   Utilities.VariableRotation rotateBeta(axis=3,angle=beta,angleDot=betaDot);
 
 equation
+
+  // conversions
+  alpha_deg = to_deg(alpha);
+  beta_deg = to_deg(beta);
 
   // connect environment
   connect(env.frame,frame_b);
@@ -92,18 +100,6 @@ equation
   end if;
 
 end ForceAndTorqueBase;
-
-record MomentCoefficients
-  Real Cl;
-  Real Cm;
-  Real Cn;
-end MomentCoefficients;
-
-record WingPlanform
-  Real s;
-  Real b;
-  Real cBar;
-end WingPlanform;
 
 record CoefficientEquationsBase
   extends WingPlanform;
@@ -163,88 +159,29 @@ package StabilityFrame
   end ForceAndTorque;
 
   model SimpleForceAndTorque
+
     import Modelica.SIunits.Conversions.*;
     extends ForceAndTorque;
-
-    // controls
-    Real aileron_deg;
-    Real elevator_deg;
-    Real rudder_deg;
-    Real alpha_deg;
-    Real beta_deg;
-
-    // stall
-    Real alphaStall_deg;
-
-    // lift
-    Real CL0;
-    Real CLa "CL alpha slope";
-
-    // drag 
-    Real CD0 "minimum drag";
-    Real CDCL "CL^2 term for drag polar";
-
-    // side force
-    Real CYb "side slipe effect on side force";
-
-    // roll moment
-    Real Clp "roll damping, <0 for stability";
-    Real Clda "aileron effect on roll";
-
-    // pitch moment
-    Real Cmq "pitch damping, <0 for stability";
-    Real Cma "alpha effect on pitch, <0 for stability";
-    Real Cmde "elevator effect on pitch";
-    Real Cnb "weather cocking stability >0 for stability";
-    Real Cnr "yaw damping, <0 for stability";
-    Real Cndr "rudder effecto on yaw";
+    extends SimpleCoefficientAndDerivatives;
+    extends Controls;
 
   protected
-
-    function stallModel
-      input Real angle;
-      input Real stallAngle;
-      output Real effective;
-    algorithm
-      if (angle < stallAngle) then
-        effective := angle;
-      else // stall
-        effective := 0;
-      end if; 
-    end stallModel;
 
     Real alpha_deg_effective;
 
   equation
 
     alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
-    alpha_deg = to_deg(alpha);
-    beta_deg = to_deg(beta);
 
-    coefs.CL =
-      CL0 +
-      CLa*alpha_deg_effective +
-      0;
-    coefs.CD =
-      CD0 +
-      CDCL*coefs.CL^2 +
-      0;
-    coefs.CY =
-      CYb*beta_deg +
-      0;
-    coefs.Cl =
-      Clp*p +
-      Clda*aileron_deg +
-      0;
-    coefs.Cm =
-      Cma*alpha_deg_effective +
-      Cmq*q +
-      Cmde*elevator_deg +
-      0;
+    coefs.CL = CL0 + CLa*alpha_deg_effective;
+    coefs.CD = CD0 + CDCL*coefs.CL^2;
+    coefs.CY = CYb*beta_deg;
+    coefs.Cl = Clp*p + Clda*aileron_deg;
+    coefs.Cm = Cma*alpha_deg_effective +
+      Cmq*q + Cmde*elevator_deg;
     coefs.Cn = Cnb*beta_deg +
-      Cnr*r +
-      Cndr*rudder_deg +
-      0;
+      Cnr*r + Cndr*rudder_deg;
+
   end SimpleForceAndTorque;
 
 end StabilityFrame;
