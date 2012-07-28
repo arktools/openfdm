@@ -2,6 +2,12 @@ within OpenFDM.Aerodynamics;
 
 package Datcom
 
+  constant Real[2,2] empty1D = {{0,0},
+                                {1,0}}; 
+  constant Real[3,3] empty2D = {{0,0,1},
+                                {0,0,0},
+                                {1,0,0}};
+
   record Tables
     // lift
     Real[:,:] CL_Basic "basic lift coefficient";
@@ -38,6 +44,11 @@ package Datcom
     Real[:,:] dCn_RollRate "change in yaw moment coefficient due to roll rate";
     Real[:,:] dCn_YawRate "change in yaw moment coefficient due to yaw rate";
   end Tables;
+
+  record TablesCompact
+    type alphaColumns = enumeration(CL,CD); 
+    Real[:,:] AlphaTable "coefficients as a function of alpha";
+  end TablesCompact;
 
   record CoefficientsAndDerivatives
     // lift
@@ -86,41 +97,42 @@ package Datcom
     u = u1;
   end CombiTable1DSISO;
 
+  block CombiTable1DSIMO
+    Real y1; 
+    Real u1;
+    extends Modelica.Blocks.Tables.CombiTable1Ds;
+  equation
+    y[1] = y1; 
+    u = u1;
+  end CombiTable1DSIMO;
+
   partial model ForceAndTorqueBase
-    import Modelica.SIunits.Conversions.*;
     extends StabilityFrame.ForceAndTorque;
     extends CoefficientsAndDerivatives;
+    extends Controls;
 
-    Real alpha_deg;
-    Real beta_deg;
-
-    // controls
-    Real dFlap, dElevator, dAileron;
-      
   equation
-    alpha_deg = to_deg(alpha);
-    beta_deg = to_deg(beta);
     coefs.CL = CL_Basic +
-         dCL_Flap * dFlap +
-         dCL_Elevator * dElevator +
+         dCL_Flap * flap_deg +
+         dCL_Elevator * elevator_deg +
          dCL_PitchRate * q * coefs.cBar/(2*vt) +
          dCL_AlphaDot * alphaDot * coefs.cBar/(2*vt);
     coefs.CD = CD_Basic +
-         dCD_Flap * dFlap +
-         dCD_Elevator * dElevator;
+         dCD_Flap * flap_deg +
+         dCD_Elevator * elevator_deg;
     coefs.CY = dCY_Beta * beta +
          dCY_RollRate * p * coefs.b/(2*vt);
-    coefs.Cl = dCl_Aileron * dAileron +
+    coefs.Cl = dCl_Aileron * aileron_deg +
          dCl_Beta * beta +
          dCl_RollRate * p * coefs.b/(2*vt) +
          dCl_YawRate * r * coefs.b/(2*vt);   
     coefs.Cm = Cm_Basic +
-         dCm_Flap * dFlap + 
-         dCm_Elevator * dElevator +
+         dCm_Flap * flap_deg + 
+         dCm_Elevator * elevator_deg +
          dCm_PitchRate * q * coefs.cBar/(2*vt) +
          dCm_AlphaDot * alphaDot * coefs.cBar/(2*vt);
-    coefs.Cn = dCn_Aileron * dAileron +
-         dCn_Beta * beta +
+    coefs.Cn = dCn_Aileron * aileron_deg +
+        dCn_Beta * beta +
          dCn_RollRate * p * coefs.b/(2*vt) +
          dCn_YawRate * r * coefs.b/(2*vt);  
   end ForceAndTorqueBase;
@@ -153,6 +165,84 @@ package Datcom
     CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u1=alpha, y1=dCn_RollRate);
     CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u1=alpha, y1=dCn_YawRate);
   end ForceAndTorque;
+
+  model ForceAndTorqueCompact
+    import Modelica.Blocks.Tables.*;
+    extends ForceAndTorqueBase;
+    parameter TablesCompact tables;
+    CombiTable1DSIMO AlphaTable(table=tables.AlphaTable,y1=CL_Basic,u1=alpha);
+  equation 
+    // lift
+    dCL_Flap = 0;
+    dCL_Elevator = 0;
+    dCL_PitchRate = 0;
+    dCL_AlphaDot = 0;
+     
+    // drag
+    CD_Basic = 0;
+    dCD_Flap = 0;
+    dCD_Elevator = 0;
+
+    // sideforce
+    dCY_Beta = 0;
+    dCY_RollRate = 0;
+
+    // roll moment
+    dCl_Aileron = 0;
+    dCl_Beta = 0;
+    dCl_RollRate = 0;
+    dCl_YawRate = 0;
+    
+    // pitch moment
+    Cm_Basic = 0;
+    dCm_Flap = 0;
+    dCm_Elevator = 0;
+    dCm_PitchRate = 0;
+    dCm_AlphaDot = 0;
+    
+    // yaw moment
+    dCn_Aileron = 0;
+    dCn_Beta = 0;
+    dCn_RollRate = 0;
+    dCn_YawRate = 0;
+
+  end ForceAndTorqueCompact;
+
+  model ForceAndTorqueSimple
+    extends CoefficientAndDerivativesSimple;
+    // stall
+    Real alpha_deg_effective;
+
+    extends ForceAndTorqueBase(
+      CL_Basic = CL0 + CLa*alpha_deg_effective,
+      dCL_Flap = 0,
+      dCL_Elevator = 0,
+      dCL_PitchRate = 0,
+      dCL_AlphaDot = 0,
+      CD_Basic = CD0 + CDCL*CL_Basic^2,
+      dCD_Flap = 0,
+      dCD_Elevator = 0,
+      dCY_Beta = CYb,
+      dCY_RollRate = 0,
+      dCl_Aileron = Clda,
+      dCL_Beta = 0,
+      dCL_RollRate = Clp,
+      dCL_YawRate = 0,
+      Cm_Basic = Cma*alpha_deg_effective,
+      dCm_Flap = 0,
+      dCm_Elevator = Cmde,
+      dCm_PitchRate = Cmq,
+      dCm_AlphaDot = 0,
+      dCn_Aileron = 0,
+      dCn_Beta = Cnb,
+      dCn_RollRate = 0,
+      dCn_YawRate = Cnr,
+      coefs(s=1, b=1, cBar=1)
+    );
+
+  equation
+    alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
+  end ForceAndTorqueSimple;
 
 end Datcom;
 
