@@ -1,0 +1,40 @@
+//    linearization.mos: tests linearization of kinematics
+//
+//    Copyright (C) 2012  James Goppert <james.goppert@gmail.com>
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// options
+setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization"});
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Modelica);
+loadModel(OpenFDM);
+getErrorString();
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("echo \"model Linearization extends OpenFDM.Test.Linearization; end Linearization;\" > Linearization.mo");
+loadFile("Linearization.mo");
+
+// get linear model
+simulate(Linearization,numberOfIntervals=1);
+system("./Linearization -l 0 > log.out"); readFile("log.out");
+loadFile("linear_Linearization.mo");
+list(linear_Linearization);
+
+// simulate non-linear model
+simulate(Linearization);
+plot({x1,x2});
+simulate(linear_Linearization);
+plot({x[1],x[2]});
