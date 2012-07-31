@@ -16,7 +16,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // options
-setCommandLineOptions({"+d=linearization","+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization"});
+setCommandLineOptions({"+d=linearization,gendebugsymbols,checkSimplify,dumpindxdae","+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization"});
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);

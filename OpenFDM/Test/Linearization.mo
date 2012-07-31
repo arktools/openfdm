@@ -18,13 +18,16 @@
 within OpenFDM.Test;
 
 model Linearization
- Real x1(start=1);
- Real x2(start=2);
- parameter Real a=6,b=2,c=4;
- input Real u = 0;
- output Real y;
+ constant Real[2] x0 ={1,2};
+ constant Real[2] u0 ={1,2};
+ Real[2] x(start=x0);
+ input Real u[2] = u0;
+ output Real y[2];
+ constant Real A[2,2] = [1,2;2,0];
+ constant Real B[2,2] = [0,1;1,0];
+ constant Real C[2,2] = [1,2;2,1];
+ constant Real D[2,2] = [1,2;0,1];
 equation
- der(x1) = x1*(a-b*x1-x2);
- der(x2) = x2*(c-x1-x2) + u;
- y = x1 * u + x2 * u;
+ der(x) = A * x + B * u;
+ y = C*x + D * u;
 end Linearization;
