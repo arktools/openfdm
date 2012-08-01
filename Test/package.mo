@@ -14,11 +14,17 @@ model Kinematics6DofFlatEarth
   parameter Real f = 1/298.257223563 "(a-b)/a";
   parameter Real gimbalLockTol = 0.001;
   parameter Real epsilon = 0.001;
+
   Real e = sqrt(a^2-b^2)/a "eccentricity";
   Real e2 = e^2;
-  SI.Length b = a(1-f) "semi-minor axis"; 
+  SI.Length b = a*(1-f) "semi-minor axis"; 
   SI.Length M "meridian radius of curvature";
   SI.Length N "prime vertical radius of curvature";
+  SI.Velocity u "body x velocity";
+  SI.Velocity v "body y velocity";
+  SI.Velocity w "body z velocity";
+  SI.Force F_b[3] = {0,0,0} "force in body frame";
+  SI.Torque M_b[3] = {0,0,0} "moment in body frame";
   SI.AngularVelocity p "roll rate";
   SI.AngularVelocity q "pitch rate";
   SI.AngularVelocity r "yaw rate";
@@ -29,6 +35,16 @@ model Kinematics6DofFlatEarth
   SI.Position asl "altitude above sea level";
   SI.Angle lat "latitude";
   SI.Angle lng "longitude";
+
+// aerodynamic properties
+  /*SI.Velocity vt "true airspeed";*/
+  /*SI.Acceleration vtDot "Derivative of true airspeed";*/
+  /*SI.Angle alpha "angle of attack";*/
+  /*SI.AngularVelocity alphaDot "angle of attack derivative";*/
+  /*SI.Angle beta "side slip angle";*/
+  /*SI.Angle betaDot "side slip angle derivative";*/
+  /*SI.Pressure qBar "average dynamics pressure";*/
+
 protected
   Real cThe, cPsi, cPhi;
   Real sThe, sPsi, sPhi;
@@ -55,7 +71,7 @@ equation
   der(w) = q*u - p*v + gD*cPhi*cThe + F_b[3]/m;
 
   // kinematics
-  der(phi) = p + tThe*(q*sinPhi + r*cPhi);
+  der(phi) = p + tThe*(q*sPhi + r*cPhi);
   der(theta) = q*cPhi - r*sPhi;
   der(psi) = (q*sPhi + r*cPhi)/cThe;
 
@@ -74,48 +90,41 @@ equation
   der(lat) = v_n[1]/(M+asl);
   der(lng) = v_n[2]/(N+asl)/cPhi;
   der(asl) = -v_n[3];
-end Kinematics6DofFlatEarth;
 
-/*
-model KinematicsFlatEarth "planet assumed to be inertial frame and flat"
-  SI.Position r_n "position vector in navigaton frame";
-  SI.AngularVelocity w_b "angular velocity of body w.r.t earth in body frame";
-  Real C_nb[3,3] "rotation matrix from body to navigation frame";
-  Real C_bn[3,3] "rotation matrix from navigation to body frame";
-  Real H[3,3] "transforms body angular rates to euler angle rates";
-  Real gimbalLockTol = 0.001 "tolerance for gimbal lock to avoid singularities";
-  Real epsilon = 0.0001 "replace trig with epsilon during gimbal lock";
-  Real M_b[3] "moment in body frame";
-  Real F_b[3] "force in body frame";
-protected
-  Real cThe, cPsi, cPhi;
-  Real sThe, sPsi, sPhi;
-algorithm
-  if (abs(theta) - C.pi/2) >  gimbalLockTol then
-    cThe := cos(theta);
-  else
-    cThe := epsilon;
-  end if;
-  cPsi := cos(theta);
-  cPhi := cos(phi);  
-  sThe := sin(theta);
-  sPsi := sin(theta);
-  sPhi := sin(phi);  
-  tThe := tan(theta);
-equation
-  C_nb = {{                  cThe*cPsi,                   cThe*sPsi,     -sThe},
-          {-cPhi*sPsi + sPhi*sThe*cPsi,  cPhi*cPsi + sPhi*sThe*sPsi, sPhi*cThe},
-          { sPhi*sPsi + cPhi*sThe*cPsi, -sPhi*cPsi + cPhi*sThe*sPsi, cPhi*cThe}};
-  C_bn = transpose(C_nb);
-  H = {{1, tThe*sPhi, tThe*cPhi},
-       {0, cPhi     , -sPhi    },
-       {0, sPhi/cThe, cPhi/cThe}};
-  der(r_n) = C_nb*v_b;
-  der(phi_n) = H*w_b;
-  der(v_b) = (1/m)*F_b + C_bn*g_n - cross(w_b,v_b);
-  J*der(w_b) = M_b - cross(w_b,J*w_b);
-end KinematicsFlatEarth;
-*/
+  // aerodynamics
+  /*a_0 = der(v_0);*/
+  /*vR_n = v_0 - env.wind_NED;*/
+  /*aR_n = a_0; // TODO: - der(env.wind_NED);*/
+  /*vR_b = resolve2(frame_b.R,vR_n);*/
+  /*aR_b = resolve2(frame_b.R,aR_n);*/
+  /*vt = Vectors.norm(vR_b);*/
+  /*{p,q,r} = angularVelocity2(frame_b.R);*/
+
+  /*alpha = atan2(vR_b[3],vR_b[1]);*/
+  /*qBar = 0.5*env.rho*vt^2;*/
+
+  /*// avoid singularity in side slip angle calc*/
+  /*if (vt > vtTol) then*/
+    /*beta = asin(vR_b[2]/vt);*/
+    /*betaDot = (aR_b[2]*vt - aR_b[2]*vtDot)/vt*sqrt(vR_b[1]^2 + vR_b[3]^2);*/
+    /*vtDot = (vR_b[1]*aR_b[1] + */
+      /*vR_b[2]*aR_b[2] +*/
+      /*vR_b[3]*aR_b[3])/vt;*/
+  /*else*/
+    /*beta = 0;*/
+    /*betaDot = 0;*/
+    /*vtDot = 0;*/
+  /*end if;*/
+
+  /*// if negligible airspeed, set wind angles to zero*/
+  /*// to avoid singularity*/
+  /*if ( (vR_b[1]^2 + vR_b[3]^2) > vtTol) then*/
+    /*alphaDot = (vR_b[1]*aR_b[3]-vR_b[3]*aR_b[1])/(vR_b[1]^2 + vR_b[3]^2); //stevens & lewis pg 78*/
+  /*else*/
+    /*alphaDot = 0;*/
+  /*end if;*/
+
+end Kinematics6DofFlatEarth;
 
 end Test;
 
