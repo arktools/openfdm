@@ -3,6 +3,12 @@ package Test
 import SI=Modelica.SIunits;
 import C=Modelica.Constants;
 
+model Test1
+  Real a;
+equation
+  der(a) = 1;
+end Test1;
+
 model Kinematics6DofFlatEarth
   parameter SI.Mass m = 1 "mass";
   parameter Real Jx = 1;
@@ -23,8 +29,8 @@ model Kinematics6DofFlatEarth
   SI.Velocity u "body x velocity";
   SI.Velocity v "body y velocity";
   SI.Velocity w "body z velocity";
-  SI.Force F_b[3] = {0,0,0} "force in body frame";
-  SI.Torque M_b[3] = {0,0,0} "moment in body frame";
+  SI.Force F_b[3] "force in body frame";
+  SI.Torque M_b[3] "moment in body frame";
   SI.AngularVelocity p "roll rate";
   SI.AngularVelocity q "pitch rate";
   SI.AngularVelocity r "yaw rate";
@@ -51,11 +57,6 @@ protected
   Real tThe;
   Real gamma;
 algorithm
-  if (abs(theta) - C.pi/2) >  gimbalLockTol then
-    cThe := cos(theta);
-  else
-    cThe := epsilon;
-  end if;
   cPhi := cos(phi);  
   cThe := cos(theta);
   cPsi := cos(psi);
@@ -64,7 +65,12 @@ algorithm
   sPsi := sin(psi);
   tThe := tan(theta);
   gamma := Jx*Jz-Jxz^2;
+  if (abs(theta) - C.pi/2) <  gimbalLockTol then
+    cThe := epsilon;
+  end if;
 equation
+  F_b = {1,1,1};
+  M_b = {1,1,1};
   // force equations
   der(u) = r*v - q*w - gD*sThe + F_b[1]/m;
   der(v) = -r*u + p*w + gD*sPhi*cThe + F_b[2]/m;

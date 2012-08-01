@@ -1,0 +1,17 @@
+#!/bin/bash
+if [[ "$1" == "local" ]]
+then
+    export OPENMODELICAHOME="$HOME/svn/openmodelica-trunk/build"
+    export OPENMODELICALIBRARY="$OPENMODELICAHOME/lib/omlibrary"
+    export LD_LIBRARY_PATH="$OPENMODELICAHOME/lib"
+    export OMDEV=$OPENMODELICAHOME
+    PATH="${OPENMODELICAHOME}/bin:"$PATH
+elif [[ "$1" == "install" ]]
+then
+    export OPENMODELICAHOME="/usr"
+    export OPENMODELICALIBRARY="/usr/lib/omlibrary"
+    export OMDEV="/usr"
+    PATH="/usr/bin:"$PATH
+else
+    echo "usage: $0  [local | install]"
+fi
