@@ -13,5 +13,7 @@ then
     export OMDEV="/usr"
     PATH="/usr/bin:"$PATH
 else
-    echo "usage: $0  [local | install]"
+    echo "usage: . $0  [local | install]   *** Note, be sure to preceed with . to source"
 fi
+
+echo omc path: $(which omc)

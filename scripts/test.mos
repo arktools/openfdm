@@ -1,7 +1,12 @@
 // options
 setCommandLineOptions({
-"+d=linearization,gendebugsymbols",
-"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization"});
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
@@ -9,7 +14,9 @@ loadModel(Test);
 getErrorString();
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("echo \"model Test1 extends Test.Kinematics6DofFlatEarth; end Test1;\" > Test1.mo");
+system("rm Test1*");
+system("echo \"model Test1 extends Test.Aircraft6DofFlatEarth; end Test1;\" > Test1.mo");
+getErrorString();
 loadFile("Test1.mo");
 getErrorString();
 
