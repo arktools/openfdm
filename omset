@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ "$1" == "local" ]]
+if [[ "$1" == "svn" ]]
 then
     export OPENMODELICAHOME="$HOME/svn/openmodelica-trunk/build"
     export OPENMODELICALIBRARY="$OPENMODELICAHOME/lib/omlibrary"
@@ -13,7 +13,7 @@ then
     export OMDEV="/usr"
     PATH="/usr/bin:"$PATH
 else
-    echo "usage: . $0  [local | install]   *** Note, be sure to preceed with . to source"
+    echo "usage: . $0  [ svn | install]   *** Note, be sure to preceed with . to source"
 fi
 
 echo omc path: $(which omc)
