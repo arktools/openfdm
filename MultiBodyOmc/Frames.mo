@@ -134,7 +134,7 @@ with
     v1 := transpose(R.T)*v2;
     annotation(Inline=true);
     annotation (derivative(noDerivative=R) = Internal.resolve1_der,
-        __Dymola_InlineAfterIndexReduction=true,Inline=true);
+        __Dymola_InlineAfterIndexReduction=true);
   end resolve1;
 
   function resolve2 "Transform vector from frame 1 to frame 2"

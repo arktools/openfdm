@@ -11,11 +11,12 @@ setCommandLineOptions({
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
 loadModel(MultiBodyOmc);
+loadModel(OpenFDM);
 getErrorString();
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
 system("rm Test1*");
-system("echo \"model Test1 extends MultiBodyOmc.Test.OrientationTest; end Test1;\" > Test1.mo");
+system("echo \"model Test1 extends OpenFDM.Test.FreeBodyTest; end Test1;\" > Test1.mo");
 getErrorString();
 loadFile("Test1.mo");
 getErrorString();
