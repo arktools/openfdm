@@ -44,6 +44,9 @@ package Aircraft
     SI.Angle betaDot "side slip angle derivative";
     SI.Pressure qBar "average dynamics pressure";
     Real g_n[3];
+  equation
+    assert(sqrt(w_b*w_b) < 1, "spinning too fast");
+    assert(sqrt(a_b*a_b)/world.gD < 1, "reached maximum g load");
   end Base;
 
   model FlatEarth6DOF
