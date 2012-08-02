@@ -4,6 +4,12 @@ package Frames
 
   import SI=Modelica.SIunits;
 
+  record Orientation
+    "Orientation object defining rotation from a frame 1 into a frame 2"
+    Real T[3,3] "Trasformation matrix from world frame to local frame";
+    SI.AngularVelocity w[3] "Absolute angular velocity of local frame, resolved in local frame";
+  end Orientation;
+
   function T1
     input Real a;
     output Real T[3,3];

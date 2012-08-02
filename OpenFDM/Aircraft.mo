@@ -6,7 +6,7 @@ package Aircraft
   import NonSI=Modelica.SIunits.Conversions.NonSIunits;
 
   model Base
-    Connectors.Frame frame;
+    Interfaces.Frame frame;
     outer World.Base world;
     Real aileron_deg = 0;
     Real elevator_deg = 0;

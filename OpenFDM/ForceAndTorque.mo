@@ -5,7 +5,7 @@ package ForceAndTorque
   import SI=Modelica.SIunits;
 
   model Base
-    Connectors.Frame frame;
+    Interfaces.Frame frame;
     SI.Force force[3];
     SI.Torque torque[3];
   equation
