@@ -1,4 +1,4 @@
-within OpenFDM.Aerodynamics;
+ithin OpenFDM.Aerodynamics;
 
 partial model ForceAndTorqueBase
   "Aerodynamic force and torque acting at frame_b, this is a partial model

@@ -10,12 +10,12 @@ setCommandLineOptions({
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(Test);
+loadModel(OpenFDM);
 getErrorString();
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
 system("rm Test1*");
-system("echo \"model Test1 extends Test.Test1; end Test1;\" > Test1.mo");
+system("echo \"model Test1 extends OpenFDM.Test.FlatEarth6DOF; end Test1;\" > Test1.mo");
 getErrorString();
 loadFile("Test1.mo");
 getErrorString();
@@ -34,6 +34,6 @@ getErrorString();
 
 // simulate non-linear model
 simulate(Test1,stopTime=100);
-plot(aircraft.betaDot);
+plot(aircraft.alpha);
 //simulate(linear_Test1);
 //plot({x[1],x[2]});
