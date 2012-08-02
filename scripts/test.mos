@@ -33,7 +33,7 @@ list(linear_Test1);
 getErrorString();
 
 // simulate non-linear model
-simulate(Test1,stopTime=100);
+simulate(Test1,stopTime=5);
 plot(aircraft.alpha);
 //simulate(linear_Test1);
 //plot({x[1],x[2]});
