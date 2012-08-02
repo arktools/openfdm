@@ -6,7 +6,10 @@ package Test
     inner World.Earth world;
     import Aero=OpenFDM.Aerodynamics.StabilityFrame;
     Aircraft.FlatEarth6DOF aircraft(
-      v_n(start={10,0,0}));
+      phi(fixed=true, start=0),
+      theta(fixed=false, start=1),
+      psi(fixed=true, start=0),
+      v_n(fixed=true, start={10,0,0}));
     Aero.SimpleForceAndTorque aerodynamics(
       qBar=aircraft.qBar,
       alpha=aircraft.alpha,
@@ -45,8 +48,12 @@ package Test
       //Stall angle
       alphaStall_deg = 30.0,
       coefs(s=1, b=1, cBar=1));
+    Propulsion.ConstantThrust engine(thrust=1);
+  initial equation
+    der(aircraft.w_b) = {0,0,0};
   equation
     connect(aerodynamics.frame,aircraft.frame);
+    connect(engine.frame,aircraft.frame);
   end FlatEarth6DOF;
 
 end Test;

@@ -4,9 +4,13 @@ package Propulsion
 
   import SI=Modelica.SIunits;
 
-  model ElectricMotor
+  model ConstantThrust
+    parameter SI.Force thrust = 100 "thrust force";
     extends ForceAndTorque.Base;
-  end ElectricMotor;
+  equation
+    force = {thrust,0,0};
+    torque = {0,0,0};
+  end ConstantThrust;
 
 end Propulsion;
 
