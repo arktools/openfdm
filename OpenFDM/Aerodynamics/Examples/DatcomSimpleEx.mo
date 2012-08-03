@@ -8,9 +8,7 @@ model DatcomSimpleEx
 
   model Body
 
-    Airframe airframe(
-      r_0(start={0,0,-10000}),
-      v_0(start={10,0,0}));
+    AirframeInitGlide airframe;
 
     Datcom.ForceAndTorqueSimple aerodynamics( 
       // lift
@@ -33,7 +31,7 @@ model DatcomSimpleEx
       Cnr = -0.1,
       Cndr = 0.1,
       // stall
-      alpha_stall_deg = 20,
+      alphaStall_deg = 20,
       coefs(s=1, b=1, cBar=1)
     );
   equation

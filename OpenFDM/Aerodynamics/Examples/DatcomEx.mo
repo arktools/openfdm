@@ -39,18 +39,7 @@ model DatcomEx
 
   model Body 
     // find glide path of aircraft
-    Airframe airframe(
-      animation=false,
-      // solve for velocity and attitude
-      v_0(start={10,0,0}, fixed=false),
-      angles_start = {0,-0.1,0}, // guess
-      angles_fixed = false,
-      // given
-      r_0(start={0,0,-10000}, fixed=true),
-      w_0_fixed = true,
-      w_0_start = {0,0,0},
-      z_0_fixed = true,
-      z_0_start = {0,0,0});
+    AirframeInitGlide airframe;
     Datcom.ForceAndTorque aerodynamics(
       animation=false,
       tables=datcomTables,

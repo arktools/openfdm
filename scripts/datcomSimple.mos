@@ -1,0 +1,55 @@
+//    datcom.mos: check datcom model
+//
+//    Copyright (C) 2012  James Goppert <james.goppert@gmail.com>
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+// options
+setCommandLineOptions({
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Modelica);
+loadModel(MultiBodyOmc);
+loadModel(OpenFDM);
+getErrorString();
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("rm *DatcomSimpleEx*");
+loadString("
+model DatcomSimpleEx
+  extends OpenFDM.Aerodynamics.Examples.DatcomSimpleEx;
+end DatcomSimpleEx;
+");
+
+// get linear model
+simulate(DatcomSimpleEx,numberOfIntervals=1,method="euler");
+//getErrorString();
+system("./DatcomSimpleEx -l 0 > log.out"); readFile("log.out");
+loadFile("linear_DatcomSimpleEx.mo");
+getErrorString();
+list(linear_DatcomSimpleEx);
+getErrorString();
+
+// simulate non-linear model
+simulate(DatcomSimpleEx,stopTime=100,measureTime=true,method="euler");
+plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);
+//getErrorString();
