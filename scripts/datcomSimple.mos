@@ -41,7 +41,9 @@ end DatcomSimpleEx;
 ");
 
 // get linear model
-simulate(DatcomSimpleEx,numberOfIntervals=1,method="euler");
+simulate(DatcomSimpleEx,
+    numberOfIntervals=1,
+    method="rungekutta");
 //getErrorString();
 system("./DatcomSimpleEx -l 0 > log.out"); readFile("log.out");
 loadFile("linear_DatcomSimpleEx.mo");
@@ -50,6 +52,11 @@ list(linear_DatcomSimpleEx);
 getErrorString();
 
 // simulate non-linear model
-simulate(DatcomSimpleEx,stopTime=100,measureTime=true,method="euler");
+simulate(DatcomSimpleEx,
+    stopTime=100,
+    numberOfIntervals=10000,
+    //measureTime=true,
+    method="rungekutta");
 plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);
+//system("chromium-browser $PWD/DatcomSimpleEx_prof.html &");
 //getErrorString();

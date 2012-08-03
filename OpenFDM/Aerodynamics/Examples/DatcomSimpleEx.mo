@@ -11,6 +11,11 @@ model DatcomSimpleEx
     AirframeInitGlide airframe;
 
     Datcom.ForceAndTorqueSimple aerodynamics( 
+      // controls
+      aileron_deg = 0,
+      rudder_deg = 0,
+      elevator_deg = 0,
+      flap_deg = 0,
       // lift
       CL0 = 0.1,
       CLa = 0.1/20.0,
@@ -38,7 +43,7 @@ model DatcomSimpleEx
     connect(airframe.frame_a,aerodynamics.frame_b);
   end Body;
 
-  inner MB.World world(n={0,0,1});
+  inner WorldNED world;
   Body body;
 
 end DatcomSimpleEx;

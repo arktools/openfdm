@@ -37,10 +37,7 @@ model DatcomEx
       dCn_RollRate  = empty1D,
       dCn_YawRate  = empty1D);
 
-  inner MB.World world(
-    enableAnimation=false,
-    n={0,0,1}
-    );
+  inner WorldNED world;
 
   model Body 
     // find glide path of aircraft
