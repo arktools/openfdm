@@ -2,9 +2,9 @@ within OpenFDM.Utilities;
 
 model VariableRotation
   "Variable rotation of frame_b with respect to frame_a"
-  import Modelica.Mechanics.MultiBody.Frames.*;
-  import Modelica.Mechanics.MultiBody.Types;
-  import Modelica.Mechanics.MultiBody.*;
+  import MultiBodyOmc.Frames.*;
+  import MultiBodyOmc.Types;
+  import MultiBodyOmc.*;
   import SI = Modelica.SIunits;
   Interfaces.Frame_a frame_a
     "Coordinate system fixed to the component with one cut-force and cut-torque";

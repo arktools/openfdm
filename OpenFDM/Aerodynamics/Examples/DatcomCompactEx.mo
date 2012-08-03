@@ -2,7 +2,7 @@ within OpenFDM.Aerodynamics.Examples;
 
 model DatcomCompactEx
 
-  import MB=Modelica.Mechanics.MultiBody;
+  import MB=MultiBodyOmc;
   import OpenFDM.Aerodynamics.Datcom;
   import OpenFDM.Aerodynamics.Datcom.empty2D;
 

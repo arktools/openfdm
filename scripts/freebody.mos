@@ -9,8 +9,7 @@ setCommandLineOptions({
 });
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
-loadModel(Modelica);
-loadModel(MultiBodyOmc);
+loadModel(Modelica); loadModel(MultiBodyOmc);
 loadModel(OpenFDM);
 getErrorString();
 

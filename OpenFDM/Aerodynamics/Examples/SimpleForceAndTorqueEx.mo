@@ -37,7 +37,7 @@ equation
 end SimpleStabilityFrameAeroObject;
 
 model SimpleForceAndTorqueEx
-  import MB=Modelica.Mechanics.MultiBody;
+  import MB=MultiBodyOmc;
   inner MB.World world(n={0,0,1});
   SimpleStabilityFrameAeroObject body_s;
 end SimpleForceAndTorqueEx;

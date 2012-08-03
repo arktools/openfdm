@@ -2,7 +2,7 @@ within OpenFDM.Aerodynamics.Examples;
 
 model DatcomEx
 
-  import MB=Modelica.Mechanics.MultiBody;
+  import MB=MultiBodyOmc;
   import OpenFDM.Aerodynamics.Datcom;
   import OpenFDM.Aerodynamics.Datcom.empty1D;
   import OpenFDM.Aerodynamics.Datcom.empty2D;
@@ -38,10 +38,21 @@ model DatcomEx
       dCn_YawRate  = empty1D);
 
   model Body 
+    // find glide path of aircraft
     Airframe airframe(
-      r_0(start={0,0,-10000}),
-      v_0(start={10,0,0}));
+      animation=false,
+      // solve for velocity and attitude
+      v_0(start={10,0,0}, fixed=false),
+      angles_start = {0,-0.1,0}, // guess
+      angles_fixed = false,
+      // given
+      r_0(start={0,0,-10000}, fixed=true),
+      w_0_fixed = true,
+      w_0_start = {0,0,0},
+      z_0_fixed = true,
+      z_0_start = {0,0,0});
     Datcom.ForceAndTorque aerodynamics(
+      animation=false,
       tables=datcomTables,
       rudder_deg = 0,
       flap_deg = 0,
@@ -52,7 +63,10 @@ model DatcomEx
     connect(airframe.frame_a,aerodynamics.frame_b);
   end Body;
 
-  inner MB.World world(n={0,0,1});
+  inner MB.World world(
+    enableAnimation=false,
+    n={0,0,1}
+    );
   Body body;
 
 end DatcomEx;

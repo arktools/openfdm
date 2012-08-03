@@ -1,7 +1,7 @@
 within OpenFDM.Test;
 
 model Body
-  import Modelica.Mechanics.MultiBody.*; 
+  import MultiBodyOmc.*; 
   inner World world;
   Parts.Body body; 
 end Body;

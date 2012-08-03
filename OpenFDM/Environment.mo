@@ -3,9 +3,9 @@ within OpenFDM;
 model Environment "environment for multibody frame"
   import SI = Modelica.SIunits;
   import Modelica.Math.Vectors;
-  import Modelica.Mechanics.MultiBody;
-  import Modelica.Mechanics.MultiBody.Frames.*;
-  MultiBody.Interfaces.Frame frame;
+  import MultiBodyOmc;
+  import MultiBodyOmc.Frames.*;
+  MultiBodyOmc.Interfaces.Frame frame;
   SI.Density rho "air density";  
   SI.Position asl "altitude above sea level";
   SI.Position agl "altitude above ground level";

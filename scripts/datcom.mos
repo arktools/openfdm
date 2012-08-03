@@ -15,15 +15,41 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 // options
 setCommandLineOptions({
-"+d=linearization,gendebugsymbols,checkSimplify,dumpindxdae,optdaedump",
-"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization"});
-
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
+loadModel(MultiBodyOmc);
 loadModel(OpenFDM);
 getErrorString();
-simulate(OpenFDM.Aerodynamics.Examples.DatcomEx,stopTime=40);
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("rm *DatcomEx*");
+loadString("
+model DatcomEx
+  extends OpenFDM.Aerodynamics.Examples.DatcomEx;
+end DatcomEx;
+");
+
+// get linear model
+simulate(DatcomEx,numberOfIntervals=1,method="euler");
+//getErrorString();
+system("./DatcomEx -l 0 > log.out"); readFile("log.out");
+loadFile("linear_DatcomEx.mo");
+getErrorString();
+list(linear_DatcomEx);
+getErrorString();
+
+// simulate non-linear model
+simulate(DatcomEx,stopTime=100,measureTime=true,method="euler");
 plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);
+//getErrorString();

@@ -1,12 +1,12 @@
-ithin OpenFDM.Aerodynamics;
+within OpenFDM.Aerodynamics;
 
 partial model ForceAndTorqueBase
   "Aerodynamic force and torque acting at frame_b, this is a partial model
    that compiles useful data for aerodynamics, sets up frames"
 
   import SI = Modelica.SIunits;
-  import MB = Modelica.Mechanics.MultiBody;
-  import Modelica.Mechanics.MultiBody.Frames.*;
+  import MB = MultiBodyOmc;
+  import MultiBodyOmc.Frames.*;
   import Modelica.Math.Vectors;
   import Modelica.SIunits.Conversions.*;
   import Modelica.Blocks.Interfaces.RealInput;
@@ -72,7 +72,7 @@ equation
   aRelative_NED = a_0; // TODO: - der(env.wind_NED);
   vRelative_b = resolve2(frame_b.R,vRelative_NED);
   aRelative_b = resolve2(frame_b.R,aRelative_NED);
-  vt = Vectors.norm(vRelative_b);
+  vt = sqrt(vRelative_b*vRelative_b);
   {p,q,r} = angularVelocity2(frame_b.R);
 
   alpha = atan2(vRelative_b[3],vRelative_b[1]);
