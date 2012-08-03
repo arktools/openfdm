@@ -3,6 +3,7 @@ within OpenFDM;
 model Airframe "this is a body shape with a 3-2-1 angle sequence common for aircraft, and with quaternions disabled by default due to numerical problems with the openmodelica solver and quaterions"
   import MB=MultiBodyOmc;
   extends MB.Parts.Body(
+    useQuaternions=false,
     animation=false,
     sequence_angleStates = {3,2,1},
     sequence_start = sequence_angleStates);
@@ -19,7 +20,8 @@ model AirframeInitGlide
     w_0_fixed = true,
     w_0_start = {0,0,0},
     z_0_fixed = true,
-    z_0_start = {0,0,0});
+    z_0_start = {0,0,0}
+    );
 end AirframeInitGlide;
 
 // vim:ts=2:sw=2:expandtab:

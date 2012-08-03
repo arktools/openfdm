@@ -37,6 +37,11 @@ model DatcomEx
       dCn_RollRate  = empty1D,
       dCn_YawRate  = empty1D);
 
+  inner MB.World world(
+    enableAnimation=false,
+    n={0,0,1}
+    );
+
   model Body 
     // find glide path of aircraft
     AirframeInitGlide airframe;
@@ -52,10 +57,6 @@ model DatcomEx
     connect(airframe.frame_a,aerodynamics.frame_b);
   end Body;
 
-  inner MB.World world(
-    enableAnimation=false,
-    n={0,0,1}
-    );
   Body body;
 
 end DatcomEx;

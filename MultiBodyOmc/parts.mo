@@ -597,12 +597,10 @@ the animation may be switched off via parameter animation = <b>false</b>.
         Dialog(group=
             "Inertia tensor (resolved in center of mass, parallel to frame_a)"));
 
-    SI.Position r_0[3](start={0,0,0}, stateSelect=if enforceStates then
-                StateSelect.always else StateSelect.avoid)
+    SI.Position r_0[3](start={0,0,0}, each stateSelect=if enforceStates then StateSelect.always else StateSelect.avoid)
       "Position vector from origin of world frame to origin of frame_a"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
-    SI.Velocity v_0[3](start={0,0,0}, stateSelect=if enforceStates then StateSelect.always else
-                StateSelect.avoid)
+    SI.Velocity v_0[3](start={0,0,0}, each stateSelect=if enforceStates then StateSelect.always else StateSelect.avoid)
       "Absolute velocity of frame_a, resolved in world frame (= der(r_0))"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
     SI.Acceleration a_0[3](start={0,0,0})
@@ -681,7 +679,7 @@ the animation may be switched off via parameter animation = <b>false</b>.
 
     SI.AngularVelocity w_a[3](start=Frames.resolve2(R_start, w_0_start),
                               fixed=fill(w_0_fixed,3),
-                              stateSelect=if enforceStates then (if useQuaternions then
+                              each stateSelect=if enforceStates then (if useQuaternions then
                               StateSelect.always else StateSelect.never) else StateSelect.avoid)
       "Absolute angular velocity of frame_a resolved in frame_a";
     SI.AngularAcceleration z_a[3](start=Frames.resolve2(R_start, z_0_start),fixed=fill(z_0_fixed,3))
@@ -694,7 +692,7 @@ the animation may be switched off via parameter animation = <b>false</b>.
     // Declarations for quaternions (dummies, if quaternions are not used)
     parameter Frames.Quaternions.Orientation Q_start=Frames.to_Q(R_start)
       "Quaternion orientation object from world frame to frame_a at initial time";
-    Frames.Quaternions.Orientation Q(start=Q_start, stateSelect=if
+    Frames.Quaternions.Orientation Q(start=Q_start, each stateSelect=if
           enforceStates then (if useQuaternions then StateSelect.prefer else
           StateSelect.never) else StateSelect.avoid)
       "Quaternion orientation object from world frame to frame_a (dummy value, if quaternions are not used as states)";
@@ -705,11 +703,11 @@ the animation may be switched off via parameter animation = <b>false</b>.
          and sequence_start[3] == sequence_angleStates[3] then angles_start else
          Frames.axesRotationsAngles(R_start, sequence_angleStates)
       "Potential angle states at initial time";
-    SI.Angle phi[3](start=phi_start, stateSelect=if enforceStates then (if
+    SI.Angle phi[3](start=phi_start, each stateSelect=if enforceStates then (if
           useQuaternions then StateSelect.never else StateSelect.always) else
           StateSelect.avoid)
       "Dummy or 3 angles to rotate world frame into frame_a of body";
-    SI.AngularVelocity phi_d[3](stateSelect=if enforceStates then (if
+    SI.AngularVelocity phi_d[3](each stateSelect=if enforceStates then (if
           useQuaternions then StateSelect.never else StateSelect.always) else
           StateSelect.avoid) "= der(phi)";
     SI.AngularAcceleration phi_dd[3] "= der(phi_d)";
@@ -972,11 +970,11 @@ to the setting of parameters \"useQuaternions\" and
       annotation (Dialog(group=
             "Inertia tensor (resolved in center of mass, parallel to frame_a)"));
 
-    SI.Position r_0[3](start={0,0,0}, stateSelect=if enforceStates then
+    SI.Position r_0[3](start={0,0,0}, each stateSelect=if enforceStates then
                 StateSelect.always else StateSelect.avoid)
       "Position vector from origin of world frame to origin of frame_a"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
-    SI.Velocity v_0[3](start={0,0,0}, stateSelect=if enforceStates then StateSelect.always else
+    SI.Velocity v_0[3](start={0,0,0}, each stateSelect=if enforceStates then StateSelect.always else
                 StateSelect.avoid)
       "Absolute velocity of frame_a, resolved in world frame (= der(r_0))"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
@@ -1266,11 +1264,11 @@ states and of the \"Advanced\" menu parameters, see model
       "Reflection of ambient light (= 0: light is completely absorbed)"
       annotation (Dialog(enable=animation));
 
-    SI.Position r_0[3](start={0,0,0}, stateSelect=if enforceStates then
+    SI.Position r_0[3](start={0,0,0}, each stateSelect=if enforceStates then
                 StateSelect.always else StateSelect.avoid)
       "Position vector from origin of world frame to origin of frame_a"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
-    SI.Velocity v_0[3](start={0,0,0}, stateSelect=if enforceStates then StateSelect.always else
+    SI.Velocity v_0[3](start={0,0,0}, each stateSelect=if enforceStates then StateSelect.always else
                 StateSelect.avoid)
       "Absolute velocity of frame_a, resolved in world frame (= der(r_0))"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
@@ -1487,11 +1485,11 @@ states and of the \"Advanced\" menu parameters, see model
       "Reflection of ambient light (= 0: light is completely absorbed)"
       annotation (Dialog(enable=animation));
 
-    SI.Position r_0[3](start={0,0,0}, stateSelect=if enforceStates then
+    SI.Position r_0[3](start={0,0,0}, each stateSelect=if enforceStates then
                 StateSelect.always else StateSelect.avoid)
       "Position vector from origin of world frame to origin of frame_a"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
-    SI.Velocity v_0[3](start={0,0,0}, stateSelect=if enforceStates then StateSelect.always else
+    SI.Velocity v_0[3](start={0,0,0}, each stateSelect=if enforceStates then StateSelect.always else
                 StateSelect.avoid)
       "Absolute velocity of frame_a, resolved in world frame (= der(r_0))"
       annotation(Dialog(tab="Initialization", __Dymola_initialDialog=true));
@@ -1693,10 +1691,10 @@ states and of the \"Advanced\" menu parameters, see model
     parameter StateSelect stateSelect=StateSelect.avoid
       "Priority to use frame_a.r_0, v_0 (= der(frame_a.r_0)) as states" annotation(Dialog(tab="Advanced"));
 
-    SI.Position r_0[3](start={0,0,0}, stateSelect=stateSelect)
+    SI.Position r_0[3](start={0,0,0}, each stateSelect=stateSelect)
       "Position vector from origin of world frame to origin of frame_a, resolved in world frame"
       annotation(Dialog(group="Initialization", __Dymola_initialDialog=true));
-    SI.Velocity v_0[3](start={0,0,0}, stateSelect=stateSelect)
+    SI.Velocity v_0[3](start={0,0,0}, each stateSelect=stateSelect)
       "Absolute velocity of frame_a, resolved in world frame (= der(r_0))"
       annotation(Dialog(group="Initialization", __Dymola_initialDialog=true));
     SI.Acceleration a_0[3](start={0,0,0})

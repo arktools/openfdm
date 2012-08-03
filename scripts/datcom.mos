@@ -32,6 +32,7 @@ loadModel(MultiBodyOmc);
 loadModel(OpenFDM);
 getErrorString();
 
+
 // it is necessary to extract the model form all packages so the "." is not mis-read
 system("rm *DatcomEx*");
 loadString("
@@ -41,7 +42,7 @@ end DatcomEx;
 ");
 
 // get linear model
-simulate(DatcomEx,numberOfIntervals=1,method="euler");
+simulate(DatcomEx,numberOfIntervals=1);
 //getErrorString();
 system("./DatcomEx -l 0 > log.out"); readFile("log.out");
 loadFile("linear_DatcomEx.mo");
@@ -50,6 +51,6 @@ list(linear_DatcomEx);
 getErrorString();
 
 // simulate non-linear model
-simulate(DatcomEx,stopTime=100,measureTime=true,method="euler");
+simulate(DatcomEx,stopTime=100,measureTime=true);
 plotParametric(body.airframe.r_0[1],body.aerodynamics.env.agl);
 //getErrorString();
