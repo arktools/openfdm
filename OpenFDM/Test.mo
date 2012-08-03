@@ -70,12 +70,11 @@ package Test
       angles_fixed=true,
       w_0_fixed=true,
       angles_start={1,2,3},
-      animation=false,
-      useQuaternions=false);
+      animation=false);
   equation
     connect(body.frame_a,extFT.frame_b);
-    extFT.force = 0.1*ones(3);
-    extFT.torque =0.1*ones(3);
+    extFT.force = 0*ones(3);
+    extFT.torque =0*ones(3);
   end FreeBodyTest;
 
 end Test;

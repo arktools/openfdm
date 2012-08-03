@@ -22,7 +22,7 @@ loadFile("Test1.mo");
 getErrorString();
 
 // get linear model
-simulate(Test1,numberOfIntervals=1,method="rungekutta");
+simulate(Test1,numberOfIntervals=1);
 getErrorString();
 
 system("./Test1 -l 0 > log.out"); readFile("log.out");
@@ -34,4 +34,4 @@ list(linear_Test1);
 getErrorString();
 
 // simulate non-linear model
-simulate(Test1,stopTime=15,method="rungekutta");
+simulate(Test1,stopTime=100,measureTime=true);
