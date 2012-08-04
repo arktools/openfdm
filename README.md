@@ -23,8 +23,10 @@ nosetests -v
 OPENMODELICALIBRARY=$OPENMODELICALIBRARY:/path/to/openfdm omc +s scripts/datcom.mos
 ```
 
-* run: There is a convenience run script to prepend the path in the project directory.
+### Helper Scripts
 
-* omset: There is also a omset script that sets the modelica path for svn or installed versions.
+* run: Prepends openfdm path to OPENMODELICALIBRARY and runs a script.
 
-* term: Starts OMShell-terminal with the proper paths for OpenFDM
+* term: Starts OMShell-terminal with the proper paths for OpenFDM.
+
+* omset: Sets the modelica path for svn or installed versions.
