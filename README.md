@@ -8,19 +8,23 @@
 
 ## Development
 
-* Using eclipse MDT plugin: https://www.openmodelica.org/index.php/developer/tools/133
-* MDT/ OpenModelica Users Guide: https://www.openmodelica.org/images/docs/userdocs/OpenModelicaUsersGuide.pdf
+* Modified MultiBody library used to fix linearization issues with the OpenModelica Compiler.
 * A test suite is provided using python. It can be run using python nose:
-``` bash
+
+```bash
 nosetests -v
 ```
 
 ## Scripts
 
-* The scripts in the scripts directory can be run using the external tool configuratioin provided: see scripts/ScriptLinux.launch. It prompts for the script to run.
+* The scripts in the scripts directory can be run using omc. The project path must be appended to OPENMODELICALIBRARY. To run the script datcom.mos from the command line type:
 
-* The project path is appended to OPENMODELICALIBRARY. To run these scripts from the command line type 
-
-``` bash
-OPENMODELICALIBRARY=$OPENMODELICALIBRARY:/path/to/project omc
+```bash
+OPENMODELICALIBRARY=$OPENMODELICALIBRARY:/path/to/openfdm omc +s scripts/datcom.mos
 ```
+
+* run: There is a convenience run script to prepend the path in the project directory.
+
+* omset: There is also a omset script that sets the modelica path for svn or installed versions.
+
+* term: Starts OMShell-terminal with the proper paths for OpenFDM
