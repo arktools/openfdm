@@ -6,7 +6,7 @@ model Airframe "this is a body shape with a 3-2-1 angle sequence common for airc
   parameter Boolean a_0_fixed = false;
   parameter Boolean v_0_fixed = false;
   parameter Boolean r_0_fixed = false;
-  parameter SI.Position r_0_start[3] = {0,0,-10000};
+  parameter SI.Position r_0_start[3] = {0,0,-1000000};
   parameter SI.Velocity v_0_start[3] = {20,0,0};
   parameter SI.Acceleration a_0_start[3] = {0,0,0};
   extends MB.Parts.Body(

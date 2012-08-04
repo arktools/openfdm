@@ -19,7 +19,7 @@
 // options
 setCommandLineOptions({
 //"+showErrorMessages",
-"+preOptModules=inlineArrayEqn",
+"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
 "+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
 //"+a",
 //"+noSimplify",
@@ -42,15 +42,27 @@ end DatcomEx;
 ");
 
 // get linear model
-simulate(DatcomEx,numberOfIntervals=1);
+simulate(DatcomEx,
+    stopTime=0.001,
+    numberOfIntervals=1,
+    measureTime=false,
+    method="rungekutta");
 //getErrorString();
-system("./DatcomEx -l 0 > log.out"); readFile("log.out");
+system("./DatcomEx -l 0 > log.out");
+readFile("log.out");
 loadFile("linear_DatcomEx.mo");
-getErrorString();
+//getErrorString();
 list(linear_DatcomEx);
-getErrorString();
+//getErrorString();
 
 // simulate non-linear model
-simulate(DatcomEx,stopTime=100,measureTime=true);
-plotParametric(body.airframe.r_0[1],body.airframe.r_0[3]);
+simulate(DatcomEx,
+    stopTime=100,
+    measureTime=false,
+    numberOfIntervals=10000,
+    method="rungekutta");
+
+plotParametric(body.airframe.r_0[1],
+    body.aerodynamics.env.agl);
+//system("chromium-browser $PWD/DatcomEx_prof.html &");
 //getErrorString();

@@ -54,7 +54,7 @@ model DatcomEx
     connect(airframe.frame_a,aerodynamics.frame_b);
   end Body;
 
-  Body body;
+  Body body[8];
 
 end DatcomEx;
 

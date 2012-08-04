@@ -44,7 +44,7 @@ model DatcomSimpleEx
   end Body;
 
   inner WorldNED world;
-  Body body;
+  Body body[8];
 
 end DatcomSimpleEx;
 
