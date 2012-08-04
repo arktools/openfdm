@@ -1,4 +1,0 @@
-loadModel(Modelica);
-loadModel(OpenFDM);
-simulate(OpenFDM.AerodynamicBody.Examples.SimpleTable);
-plotParametric(body.r_0[1],body.env.agl);

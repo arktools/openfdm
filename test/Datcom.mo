@@ -1,9 +1,9 @@
-within OpenFDM.Aerodynamics.Examples;
+within test;
 
-model DatcomEx
+model Datcom
 
   import MB=MultiBodyOmc;
-  import OpenFDM.Aerodynamics.Datcom;
+  import OpenFDM.Aerodynamics.*;
   import OpenFDM.Aerodynamics.Datcom.empty1D;
   import OpenFDM.Aerodynamics.Datcom.empty2D;
 
@@ -37,11 +37,11 @@ model DatcomEx
       dCn_RollRate  = empty1D,
       dCn_YawRate  = empty1D);
 
-  inner WorldNED world;
+  inner OpenFDM.WorldNED world;
 
   model Body 
     // find glide path of aircraft
-    AirframeInitGlide airframe;
+    OpenFDM.AirframeInitGlide airframe;
     Datcom.ForceAndTorque aerodynamics(
       animation=false,
       tables=datcomTables,
@@ -54,8 +54,8 @@ model DatcomEx
     connect(airframe.frame_a,aerodynamics.frame_b);
   end Body;
 
-  Body body[8];
+  Body body;
 
-end DatcomEx;
+end Datcom;
 
 // vim:ts=2:sw=2:expandtab:

@@ -17,10 +17,10 @@ nosetests -v
 
 ## Scripts
 
-* The scripts in the scripts directory can be run using omc. The project path must be appended to OPENMODELICALIBRARY. To run the script datcom.mos from the command line type:
+* The scripts in the test directory can be run using omc. The project path must be appended to OPENMODELICALIBRARY. To run the script datcom.mos from the command line type:
 
 ```bash
-OPENMODELICALIBRARY=$OPENMODELICALIBRARY:/path/to/openfdm omc +s scripts/datcom.mos
+OPENMODELICALIBRARY=$OPENMODELICALIBRARY:/path/to/openfdm omc +s test/Datcom.mos
 ```
 
 ### Helper Scripts

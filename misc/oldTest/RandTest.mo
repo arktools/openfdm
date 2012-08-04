@@ -1,4 +1,4 @@
-within Rand;
+within OpenFDM.Test;
 
 model RandTest
     OpenFDM.Navigation.KalmanFilter kf;
@@ -12,4 +12,3 @@ equation
     connect(x[1,1],s.real);
     connect(s.meas,kf.y[1,1]);
 end RandTest;
-
