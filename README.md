@@ -9,9 +9,11 @@
 ## Development
 
 * Modified MultiBody library used to fix linearization issues with the OpenModelica Compiler.
-* A test suite is provided using python. It can be run using python nose:
+* A modified OMPython is included that adds more error handling and a class wrapper, see the python directory.
+* A test suite is provided using python. It can be run using python nose. It must be run within the python directory.
 
 ```bash
+cd python
 nosetests -v
 ```
 

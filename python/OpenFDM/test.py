@@ -5,28 +5,21 @@ import unittest
 
 from OMPython import OMShell, find_scripts, find_models
 
-# find root path or project
-class Test(unittest.TestCase):
+# find root path of project
+root_path = os.path.abspath(os.path.join(
+  inspect.getfile(inspect.currentframe()),
+  os.path.pardir,os.path.pardir,os.path.pardir))
 
-  def setUp(self):
+# start shell
+shell = OMShell(root_path)
 
-    # find root path of project
-    self.root_path = os.path.abspath(os.path.join(
-      inspect.getfile(inspect.currentframe()),
-      os.path.pardir,os.path.pardir,os.path.pardir))
+def test_scripts():
+  for script in find_scripts(os.path.join(root_path,'test')):
+    yield shell.run_script, script
 
-    # start shell
-    self.shell = OMShell(self.root_path)
 
-  def tearDown(self):
-    pass
-
-  def test_scripts(self):
-    for script in find_scripts(os.path.join(self.root_path,'test')):
-      self.shell.run_script(script);
-
-  #def test_models(self):
-    #for model in find_models(os.path.join(self.root_path,'test')):
-      #yield self.shell.run_model, model
+#def test_models(self):
+  #for model in find_models(os.path.join(self.root_path,'test')):
+    #yield self.shell.run_model, model
 
 # vim:ts=2:sw=2:expandtab:

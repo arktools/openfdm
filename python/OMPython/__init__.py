@@ -34,11 +34,13 @@
 """
 
 import sys
+import struct
 import os
 import time
 import inspect
 import re
 import tempfile
+import StringIO
 
 from subprocess import Popen, PIPE
 from datetime import datetime
@@ -55,13 +57,15 @@ import OMConfig
 
 class OMShell:
 
-  def __init__(self,root_path):
+  def __init__(self,root_path,echo=False):
 
     # set enviornment to include root path
     self.root_path = root_path
+    self.echo = echo
     os.environ['OPENMODELICALIBRARY'] = os.getenv('OPENMODELICALIBRARY') + ':' + root_path
 
     # regex's
+    self.re_simulate = re.compile('.*simulate\(.*',re.M)
     self.re_error = re.compile('.*error|fail.*',re.I|re.M)
     self.re_package = re.compile('within[\s]+([\w.]+)')
     self.re_model = re.compile('model[\s]+([\w.]+)')
@@ -120,11 +124,12 @@ class OMShell:
       ior_file = "openmodelica." + currentUser + ".objid." + random_string
     ior_file = os.path.join(temp, ior_file)
     omc_corba_uri= "file:///" + ior_file
-    print "file: ", ior_file
+    #print "file: ", ior_file
 
     # See if the omc server is running
     if os.path.isfile(ior_file):
-      print "OMC Server is up and running at " + omc_corba_uri + "\n"
+      pass
+      #print "OMC Server is up and running at " + omc_corba_uri + "\n"
     else:
       attempts = 0
       while True:
@@ -135,7 +140,7 @@ class OMShell:
             print "OMC Server is down. Please start it! Exiting...\n"
             sys.exit(2)
         else:
-          print "OMC Server is up and running at " + omc_corba_uri + "\n"
+          #print "OMC Server is up and running at " + omc_corba_uri + "\n"
           break
 
     #initialize the ORB with maximum size for the ORB set
@@ -171,9 +176,25 @@ class OMShell:
 
   def get_build_path(self):
     return self.build_path;
+
+  def execute(self,commands):
+    f = StringIO.StringIO(commands);
+    while True: # for all lines
+      # get next line
+      line = ''
+      while True:
+        data = f.read(1)
+        if not data:
+          return
+        if data == ';':
+          break
+        line += str(struct.unpack("c", data)[0])
+      self.raw_execute(line)  
     
   # Invoke the sendExpression method to send text commands to the server
-  def execute(self,command):
+  def raw_execute(self,command):
+    if self.echo:
+      print command
     curdir = os.path.abspath(os.path.curdir)
     os.chdir(self.build_path)
     if command == "quit()":
@@ -184,29 +205,30 @@ class OMShell:
     else:
       result = self.omc.sendExpression(command)
       error = self.omc.sendExpression('getErrorString()').strip()[1:-1]
-      answer = OMParser.check_for_values(result)
-      OMParser.result = {}
-
       try:
-        if type(answer) is bool:
-          if not (answer):
+        if self.re_simulate.match(command):
+          answer = OMParser.check_for_values(result)
+          OMParser.result = {}
+          if type(answer) is dict and answer != {}:
+            result = answer
+            messages = get(result,'SimulationResults.messages')
+            print "messages: ", messages
+            if self.re_error.match(messages):
+              raise Exception(messages)
+        elif type(result) is bool:
+          if not (result):
             raise Exception("command: %s returned false" % command)
-        elif type(answer) is dict:
-          messages = OMPython.get(answer,'Simulationanswers.messages')
-          print messages
-          if self.re_error.match(messages):
-            raise Exception(messages)
-        elif type(answer) is str:
-          if self.re_error.match(answer):
-            raise Exception(answer)
+        elif type(result) is str:
+          if self.re_error.match(result):
+            raise Exception(result)
 
         if self.re_error.match(error):
           raise Exception(error)
 
       finally:
-          os.chdir(curdir)
+        os.chdir(curdir)
       
-      return answer
+      return result
 
   # Test commmands
   def run(self):
@@ -225,7 +247,7 @@ class OMShell:
         print answer
 
   def run_script(self,scriptFile):
-    return self.execute('runScript("%s")' % scriptFile)
+    return self.raw_execute('runScript("%s")' % scriptFile);
 
   def run_model(self,modelFile):
     packageName = None
@@ -244,6 +266,7 @@ class OMShell:
     if not modelName:
       raise Exception('model name not found in ' + modelFile)
     return self.execute('simulate(%s.%s)' % (packageName,modelName))
+  
 
 def find_models(root_path):
   """find all models in a path"""
