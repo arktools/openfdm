@@ -1,0 +1,9 @@
+K 10
+svn:ignore
+V 80
+OMPython/omc_communication_idl.py
+OMPython/_GlobalIDL__POA
+OMPython/_GlobalIDL
+
+
+END
