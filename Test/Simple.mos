@@ -15,31 +15,31 @@ getErrorString();
 
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("rm -f linear_Rocket.mo Rocket.*");
+system("rm -f linear_Simple.mo Simple.*");
 loadString("
-model Rocket
-  extends Test.Rocket;
-end Rocket;
+model Simple
+  extends Test.Simple;
+end Simple;
 ");
 
 // get linear model
-simulate(Rocket,
+simulate(Simple,
     stopTime=0.001,
     numberOfIntervals=1,
     measureTime=false);
 //getErrorString();
-system("./Rocket -l 0 > log.out");
+system("./Simple -l 0 > log.out");
 readFile("log.out");
-loadFile("linear_Rocket.mo");
+loadFile("linear_Simple.mo");
 //getErrorString();
-list(linear_Rocket);
+list(linear_Simple);
 //getErrorString();
 
 // simulate non-linear model
-simulate(Rocket,
-    stopTime=10000,
+simulate(Simple,
+    stopTime=1,
     measureTime=false);
 
 plot({r_r[1],r_r[2],r_r[3],roll,pitch,heading});
-//system("chromium-browser $PWD/Rocket_prof.html &");
+//system("chromium-browser $PWD/Simple_prof.html &");
 //getErrorString();
