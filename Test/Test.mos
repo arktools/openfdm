@@ -1,0 +1,49 @@
+// options
+setCommandLineOptions({
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Modelica);
+loadModel(Test);
+getErrorString();
+
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("rm -f linear_Rocket.mo Rocket.*");
+loadString("
+model Rocket
+  extends Test.Rocket;
+end Rocket;
+");
+
+// get linear model
+simulate(Rocket,
+    stopTime=0.001,
+    numberOfIntervals=1,
+    measureTime=false,
+    method="rungekutta");
+//getErrorString();
+system("./Rocket -l 0 > log.out");
+readFile("log.out");
+loadFile("linear_Rocket.mo");
+//getErrorString();
+list(linear_Rocket);
+//getErrorString();
+
+// simulate non-linear model
+simulate(Rocket,
+    stopTime=100,
+    measureTime=false,
+    numberOfIntervals=10000,
+    method="rungekutta");
+
+plotParametric(body.airframe.r_0[1],
+    body.aerodynamics.env.agl);
+//system("chromium-browser $PWD/Rocket_prof.html &");
+//getErrorString();
