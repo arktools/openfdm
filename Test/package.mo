@@ -2,17 +2,35 @@ package Test
 
 import C=Modelica.Constants;
 
-function C_rb
-  input Real angle[3];
-  output Real T[3,3] = identity(3);
+function T1
+  input Real a;
+  output Real T[3,3];
+algorithm
+  T := {{  1,      0,      0},
+        {  0, cos(a), sin(a)},
+        {  0,-sin(a), cos(a)}};
 annotation(Inline=true);
-end C_rb;
+end T1;
 
-function C_br
-  input Real angle[3];
-  output Real T[3,3] = identity(3);
+function T2
+  input Real a;
+  output Real T[3,3];
+algorithm
+  T := {{ cos(a),  0,-sin(a)},
+        {  0,      1,      0},
+        { sin(a),  0, cos(a)}};
 annotation(Inline=true);
-end C_br;
+end T2;
+
+function T3
+  input Real a;
+  output Real T[3,3];
+algorithm
+  T := {{ cos(a), sin(a), 0},
+        {-sin(a), cos(a), 0},
+        {      0,      0, 1}};
+annotation(Inline=true);
+end T3;
 
 model World
 
@@ -34,7 +52,7 @@ model World
 
 end World;
 
-expandable connector RigidConnector
+expandable connector RigidConnector "A connector for rigid body components. Expandable to avoid potential/ flow balance warning. The rigid connection has more potential variable due to the rigid connection passing velocity, acceleration information that would be redundant to calculate"
   Real r_r[3];
   Real v_b[3];
   Real a_b[3];
@@ -45,13 +63,11 @@ expandable connector RigidConnector
   flow Real M_b[3];
 end RigidConnector;
 
-model RigidLink
-  input Real r_a[3]={1,1,1};
-  input Real angles[3]={1,1,1};
-  input Integer sequence[3] = {3,2,1};
+partial model RigidLink "Requires C_ba definition to be complete."
+  input Real r_a[3];
+  input Real angles[3];
   RigidConnector fA, fB;
-protected
-  Real C_ba[3,3] = identity(3); // TODO
+  Real C_ba[3,3];
 equation
   fA.r_r + transpose(fA.C_br)*r_a = fB.r_r;
   C_ba*fA.v_b = fB.v_b;
@@ -63,7 +79,13 @@ equation
   C_ba*fA.M_b + fB.M_b = zeros(3);
 end RigidLink;
 
-model ForceMoment
+model RigidLink_B321 "A body 3-2-1 rotation sequence rigid connector"
+  extends RigidLink;
+equation
+  C_ba = T1(angles[1])*T2(angles[2])*T3(angles[3]);
+end RigidLink_B321;
+
+model ForceMoment "A rigid body force and moment."
   Real F_b[3], M_b[3];
   RigidConnector fA;
 equation
@@ -71,124 +93,145 @@ equation
   fA.M_b + M_b = zeros(3);
 end ForceMoment;
 
-partial model LinearDynamics
+partial model TranslationalDynamics "Translational dynamics of a rigid body. Requires moment definition to be complete. Used as a base for point mass and rigid body."
   outer World world;
-  Real m;
   RigidConnector fA;
+  Real m "mass";
 protected
-  Real L_b[3];
+  Real L_b[3] "linear momentum";
 equation
   L_b = m*(fA.v_b + cross(fA.w_ib,fA.C_br*fA.r_r));
   fA.F_b + fA.C_br*world.g(fA.r_r) = 
     der(L_b) + cross(fA.w_ib,L_b);
-end LinearDynamics;
+end TranslationalDynamics;
 
-model PointMass
-  extends LinearDynamics;
+model PointMass "A point mass with translationa, but rotational dynamics."
+  extends TranslationalDynamics;
 equation
   fA.M_b = zeros(3);
 end PointMass;
 
-model RigidBody
-  extends LinearDynamics;
-  Real I_b[3,3];
-  Real H_b[3];
+model RigidBody "A body with rotational and translational dynamics. The body is assumed to be rigid."
+  extends TranslationalDynamics;
+  Real I_b[3,3] "inertial about the cm in the body frame";
+protected
+  Real H_b[3] "angular momentum";
 equation
   H_b = I_b*fA.w_ib;
   fA.M_b = der(H_b) + cross(fA.w_ib,H_b);
 end RigidBody;
 
-model ReferencePoint
-  RigidConnector fA;
-  Real w_ir[3] = {0,0,0} "ref frame ang rate wrt inertial";
-  Real euler[3];
+model RigidReferencePoint "The reference point of a rigid body. The acceleratoin and velocity are calculated here and passed through the rigid connector to the rest of the rigid body components. Convenience variables (e.g. roll/pitch/heading) are also defined as this is the point of interest for the rigid body."
+  RigidConnector fA "the rigid body connector";
+  Real w_ir[3] = {0,0,0} "ref frame ang rate wrt inertial expressed in the reference frame";
+  
+  // states
+  Real r_r[3](each stateSelect=StateSelect.always) "cartesian position resolved in the refernce frame";
+  Real v_b[3](each stateSelect=StateSelect.always) "velocity resolved in the body frame";
+  Real euler[3](each stateSelect=StateSelect.always)
+    "euler angles, body roll, horizon pitch, heading";
+  Real w_ib[3](each stateSelect=StateSelect.always) "angular velocity of body wrt inertial frame resolved in the body frame";
+
+  Real a_b[3](each stateSelect=StateSelect.never) "acceleration resolved in the body frame";
+  Real z_b[3](each stateSelect=StateSelect.never) "angular acceleration resolved in the body frame";
+  Real C_br[3,3](each stateSelect=StateSelect.never) "direction cosine matrix  from reference to body frame";
+
+  // alias's
+  Real roll = euler[1] "euler angle 1: body roll";
+  Real pitch = euler[2] "euler angle 2: horizon pitch";
+  Real heading = euler[3] "euler angle 3: heading";
+
 equation
-  fA.v_b = fA.C_br*der(fA.r_r);
-  fA.a_b = der(fA.v_b);
+  // connect frame
+  fA.r_r = r_r;
+  fA.v_b = v_b;
+  fA.a_b = a_b;
   fA.F_b = zeros(3);
-  fA.w_ib = w_ir + der(euler); // TODO*/
-  fA.C_br = identity(3); // TODO
-  fA.z_b = der(fA.w_ib);
+  fA.C_br = C_br;
+  fA.w_ib = w_ib; 
+  fA.z_b = z_b;
   fA.M_b = zeros(3);
+
+  // kinematics
+  v_b = C_br*der(r_r);
+  a_b = der(v_b);
+  fA.w_ib = w_ir + der(euler); // TODO*/
+  C_br = T1(euler[1])*T2(euler[2])*T3(euler[3]);
+  z_b = der(w_ib);
+
   // angle wrap
   for i in 1:size(euler,1) loop
     when (euler[i] > C.pi) then
       reinit(euler[i],pre(euler[i])-2*C.pi);
     end when;
   end for;
-end ReferencePoint;
+
+end RigidReferencePoint;
 
 model Simple
+  inner World world;
   ForceMoment fM1(F_b={1,1,1},M_b={1,1,1});
   ForceMoment fM2(F_b={1,1,1},M_b={1,1,1});
-  RigidBody b1(m=1,I=identity(3));
+  RigidBody b1(m=1,I_b=identity(3));
   PointMass b2(m=1);
-  RigidLink t(
-    sequence={3,2,1},
-    angles={0,0,0},
-      r_a={1,2,3});
-  ReferencePoint p; 
+  RigidLink_B321 t(r_a={1,2,3}, angles={1,1,1});
+  RigidReferencePoint p;
 equation
+  connect(p.fA,b1.fA);
   connect(fM1.fA,b1.fA);
   connect(fM2.fA,b2.fA);
   connect(b1.fA,t.fA);
-  connect(b2.fA,t.fB);
-  connect(p.fA,b1.fA);
+  connect(t.fB,b2.fA);
 end Simple;
 
-model RocketThrust
-  extends ForceMoment;
-  Real mDot;
-  Real Ve;
-equation
-  F_b = {0,0,-mDot*Ve};
-  M_b = {0,0,0}; 
-end RocketThrust;
-
 model RocketMotor
-  extends RigidBody;
-  Real Ve = 1000;
-  Real mFuel(start=1,fixed=true);
-  Real mInert=0.1;
-  Real mDot;
+  RigidConnector fA;
+  model Thrust
+    extends ForceMoment;
+    Real mDot;
+    Real Ve = 1000;
+  equation
+    F_b = {0,0,-mDot*Ve};
+    M_b = {0,0,0}; 
+  end Thrust;
+  model Structure
+    extends RigidBody;
+    Real mFuel(start=100,fixed=true);
+    Real mInert=0.1;
+    Real mDot;
+  equation
+    mDot = -der(mFuel);
+    if (mFuel > 0) then
+      der(mFuel) = -0.1;
+    else
+      der(mFuel) = 0;
+    end if;
+    I_b = m*identity(3);
+    m = mInert + mFuel;
+  end Structure;
+  Thrust thrust;
+  Structure structure;
 equation
-  mDot = -der(mFuel);
-  if (mFuel > 0) then
-    der(mFuel) = -0.1;
-  else
-    der(mFuel) = 0;
-  end if;
-  I_b = m*identity(3);
-  m = mInert + mFuel;
+  structure.mDot = thrust.mDot;
+  connect(structure.fA,fA);
+  connect(thrust.fA,structure.fA);
 end RocketMotor;
-
-model Structure
-  extends RigidBody;
-equation
-  I_b = identity(3);
-  m = 1;
-end Structure;
 
 model Rocket
   inner World world;
-  ReferencePoint p;
-  Structure structure;
+  extends RigidReferencePoint(
+    euler(start={0,1,0},fixed={true,false,true}),
+    r_r(start={0,0,0},fixed=true));
+  RigidBody structure(I_b=identity(3),m=0.1);
   RocketMotor motor;
-  RocketThrust thrust(
-    Ve=motor.Ve,
-    mDot=motor.mDot);
-  RigidLink t(
-    sequence={3,2,1},
-    angles={0,0,0},
-      r_a={1,2,3});
+  RigidLink_B321 t(angles={0,0,0},r_a={1,2,3});
   Real agl;
 equation
-  agl = world.agl(p.fA.r_r);
-  assert(p.fA.r_r[3] < 0, "hit ground");
-  connect(p.fA,structure.fA);
-  connect(t.fA,structure.fA);
-  connect(motor.fA,t.fB);
-  connect(motor.fA,thrust.fA);
+  agl = world.agl(r_r);
+  assert(r_r[3] <= 0, "hit ground");
+  connect(fA,structure.fA);
+  connect(structure.fA,t.fA);
+  connect(t.fB,motor.fA);
 end Rocket;
 
 end Test;
