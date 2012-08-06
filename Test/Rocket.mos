@@ -43,7 +43,6 @@ simulate(Rocket,
     numberOfIntervals=10000,
     method="rungekutta");
 
-plotParametric(body.airframe.r_0[1],
-    body.aerodynamics.env.agl);
+plotParametric(p.fA.r_r[1],agl);
 //system("chromium-browser $PWD/Rocket_prof.html &");
 //getErrorString();

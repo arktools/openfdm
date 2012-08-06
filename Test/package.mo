@@ -76,15 +76,11 @@ partial model LinearDynamics
   Real m;
   RigidConnector fA;
 protected
-  Real w_ibxr_b[3];
+  Real L_b[3];
 equation
-  w_ibxr_b = cross(fA.w_ib,fA.C_br*fA.r_r);
-  fA.F_b + m*transpose(fA.C_br)*world.g(fA.r_r) =
-    der(m)*(fA.v_b + w_ibxr_b) + // mdot term
-    m*(fA.a_b +  // body accel
-      cross(fA.z_b,fA.v_b) + // euler accel
-      2*cross(fA.w_ib,fA.v_b) + // coriolis accel
-      cross(fA.w_ib,w_ibxr_b)); // centrip accel
+  L_b = m*(fA.v_b + cross(fA.w_ib,fA.C_br*fA.r_r));
+  fA.F_b + fA.C_br*world.g(fA.r_r) = 
+    der(L_b) + cross(fA.w_ib,L_b);
 end LinearDynamics;
 
 model PointMass
@@ -96,10 +92,10 @@ end PointMass;
 model RigidBody
   extends LinearDynamics;
   Real I_b[3,3];
+  Real H_b[3];
 equation
-  fA.M_b = 
-    der(I_b*fA.w_ib) + 
-    cross(fA.w_ib,I_b*fA.w_ib);
+  H_b = I_b*fA.w_ib;
+  fA.M_b = der(H_b) + cross(fA.w_ib,H_b);
 end RigidBody;
 
 model ReferencePoint
