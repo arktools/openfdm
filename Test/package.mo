@@ -34,13 +34,13 @@ package Test
 
   model World
 
-    function g
-      input Real r_ecef[3];
-      output Real g[3];
+    function g_r
+      input Real r_r[3];
+      output Real g_r[3];
     algorithm
-      g := {0,0,9.8};
+      g_r := {0,0,9.8};
     annotation(Inline=true);
-    end g;
+    end g_r;
 
     function agl
       input Real r_ecef[3];
@@ -49,6 +49,22 @@ package Test
       agl := -r_ecef[3];
     annotation(Inline=true);
     end agl;
+
+    function rho
+      input Real r_r[3];
+      output Real rho;
+    algorithm
+      rho := 1.225;
+    annotation(Inline=true);
+    end rho;
+
+    function wind_r
+      input Real r_r[3];
+      output Real wind_r[3];
+    algorithm
+      wind_r := {0,0,0};
+    annotation(Inline=true);
+    end wind_r;
 
   end World;
 
@@ -101,7 +117,7 @@ package Test
     Real L_b[3] "linear momentum";
   equation
     L_b = m*(fA.v_b + cross(fA.w_ib,fA.C_br*fA.r_r));
-    fA.F_b + fA.C_br*world.g(fA.r_r) = 
+    fA.F_b + fA.C_br*world.g_r(fA.r_r) = 
       der(L_b) + cross(fA.w_ib,L_b);
   end TranslationalDynamics;
 
