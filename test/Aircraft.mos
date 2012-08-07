@@ -2,7 +2,7 @@
 setCommandLineOptions({
 //"+showErrorMessages",
 "+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
-"+postOptModules=inlineArrayEqn,constantLinearSystem,removeAircraftEquations,generateSymbolicLinearization",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
 //"+a",
 //"+noSimplify",
 "+d=linearization,gendebugsymbols"
