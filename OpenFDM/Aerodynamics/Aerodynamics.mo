@@ -19,6 +19,8 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
   parameter SI.Length cBar "average chord";
   parameter SI.Length b "span";
 
+  constant Real epsilon = 1e-2;
+
   SI.AngularVelocity p "body roll rate";
   SI.AngularVelocity q "body pitch rate";
   SI.AngularVelocity r "body yaw rate";
@@ -31,33 +33,22 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
   Real C_bw[3,3] "wind to body frame";
 
 equation
-  vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r);
+  vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r) + epsilon*ones(3);
   aR_b = der(vR_b);
   vt = sqrt(vR_b*vR_b);
   qBar = 0.5*world.rho(fA.r_r)*vt^2;
-  if (vR_b[1] > vtTol) then
-    alpha = atan2(vR_b[3],vR_b[1]);
-    // omc doesn't like der(beta), setting manually
-    alphaDot = (vR_b[1]*aR_b[3]-vR_b[3]*aR_b[1])/
-      (vR_b[1]^2 + vR_b[3]^2); //stevens & lewis pg 78
-  else
-    alpha = 0;
-    alphaDot = 0;
-  end if;
-  if (vt > vtTol) then
-    // omc doesn't like der(vt), setting manually
-    vtDot = (vR_b[1]*aR_b[1] + 
-          vR_b[2]*aR_b[2] +
-          vR_b[3]*aR_b[3])/vt;
-    beta = asin(vR_b[2]/vt);
-    // omc doesn't like der(beta), setting manually
-    betaDot = (aR_b[2]*vt - vR_b[2]*vtDot) /
-      vt*sqrt(vR_b[1]^2 + vR_b[3]^2);
-  else
-    vtDot = 0;
-    beta = 0;
-    betaDot = 0;
-  end if;
+  alpha = atan2(vR_b[3],vR_b[1]);
+  // omc doesn't like der(beta), setting manually
+  alphaDot = (vR_b[1]*aR_b[3]-vR_b[3]*aR_b[1])/
+    (vR_b[1]^2 + vR_b[3]^2); //stevens & lewis pg 78
+  vtDot = (vR_b[1]*aR_b[1] + 
+        vR_b[2]*aR_b[2] +
+        vR_b[3]*aR_b[3])/vt;
+  beta = asin(vR_b[2]/vt);
+  // omc doesn't like der(beta), setting manually
+  betaDot = (aR_b[2]*vt - vR_b[2]*vtDot) /
+    vt*sqrt(vR_b[1]^2 + vR_b[3]^2);
+
   // alias's and conversions
   alpha_deg = SI.Conversions.to_deg(alpha);
   beta_deg = SI.Conversions.to_deg(alpha);

@@ -11,20 +11,26 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   
   // states
   SI.Position r_r[3](each stateSelect=StateSelect.always) "cartesian position resolved in the refernce frame";
-  SI.Velocity v_b[3](each stateSelect=StateSelect.always) "velocity resolved in the body frame";
-  SI.Angle euler[3](each stateSelect=StateSelect.always)
+  SI.Velocity v_r[3](each stateSelect=StateSelect.always) "velocity resolved in the reference frame";
+  SI.Angle euler[3](each stateSelect=StateSelect.always,
+    each min=-C.pi, each max = C.pi)
     "euler angles, body roll, horizon pitch, heading";
   SI.AngularVelocity w_ib[3](each stateSelect=StateSelect.always) "angular velocity of body wrt inertial frame resolved in the body frame";
 
+  SI.Velocity v_b[3](each stateSelect=StateSelect.never) "velocity resolved in the body frame";
   SI.Acceleration a_b[3](each stateSelect=StateSelect.never) "acceleration resolved in the body frame";
   SI.AngularAcceleration z_b[3](each stateSelect=StateSelect.never) "angular acceleration resolved in the body frame";
   Real C_br[3,3](each stateSelect=StateSelect.never) "direction cosine matrix  from reference to body frame";
   SI.Position agl(stateSelect=StateSelect.never) "altitude above ground level";
+  SI.Angle gamma "flight path angle";
+  SI.Velocity vt "true velocity";
+  SI.Velocity vR_r[3] "relative air velocity in reference frame";
 
   // alias's
   SI.Angle roll = euler[1] "euler angle 1: body roll";
   SI.Angle pitch = euler[2] "euler angle 2: horizon pitch";
   SI.Angle heading = euler[3] "euler angle 3: heading";
+  constant Real epsilon = 1e-2;
 
 equation
   // connect frame
@@ -38,7 +44,8 @@ equation
   fA.M_b = zeros(3);
 
   // kinematics
-  v_b = C_br*der(r_r);
+  v_r = der(r_r);
+  v_b = C_br*v_r;
   a_b = der(v_b);
   fA.w_ib = w_ir + der(euler); // TODO*/
   C_br = T1(euler[1])*T2(euler[2])*T3(euler[3]);
@@ -50,6 +57,11 @@ equation
       reinit(euler[i],pre(euler[i])-2*C.pi);
     end when;
   end for;
+
+  // extra
+  vR_r = v_r - world.wind_r(r_r);
+  vt = sqrt(vR_r*vR_r); 
+  gamma = asin(v_r[3]/sqrt(v_r*v_r + epsilon));
 
   // assertion
   agl = world.agl(r_r);
