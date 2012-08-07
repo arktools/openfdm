@@ -35,7 +35,7 @@ equation
           vR_b[3]*aR_b[3])/vt;
     beta = asin(vR_b[2]/vt);
     // omc doesn't like der(beta), setting manually
-    betaDot = (aR_b[2]*vt - aR_b[2]*vtDot) /
+    betaDot = (aR_b[2]*vt - vR_b[2]*vtDot) /
       vt*sqrt(vR_b[1]^2 + vR_b[3]^2);
   else
     vtDot = 0;

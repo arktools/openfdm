@@ -42,7 +42,6 @@ simulate(Aircraft,
     numberOfIntervals=1000,
     measureTime=false);
 
-plot({p.r_r[1],p.r_r[2],p.r_r[3],
-    p.roll,p.pitch,p.heading});
+plotParametric(p.r_r[1],p.agl);
 //system("chromium-browser $PWD/Aircraft_prof.html &");
 //getErrorString();

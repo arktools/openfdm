@@ -8,17 +8,19 @@ model Aircraft
 
   Parts.RigidReferencePoint p(
     r_r(start={0,0,-1000},fixed=true),
-    euler(start={0,1,0},fixed=true));
+    euler(start={0,0,0},fixed=true));
 
   model Thrust
     extends Parts.ForceMoment;
   equation
-    F_b = {10,0,0};
+    F_b = {0,0,0};
     M_b = {0,0,0};
   end Thrust;
 
   model SimpleAerodynamics
-    extends Aerodynamics.AerodynamicForceMoment;
+    extends Aerodynamics.AerodynamicForceMoment(
+      vt(start=10,fixed=true)
+    );
   equation
     F_b = {0,0,0};
     M_b = {0,0,0};
