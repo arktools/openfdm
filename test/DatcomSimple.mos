@@ -25,6 +25,7 @@ end DatcomSimple;
 
 // get linear model
 simulate(DatcomSimple,
+    tolerance=1e-14,
     stopTime=0.001,
     numberOfIntervals=1,
     measureTime=false);
@@ -38,6 +39,7 @@ list(linear_DatcomSimple);
 
 // simulate non-linear model
 simulate(DatcomSimple,
+    tolerance=1e-14,
     stopTime=10,
     numberOfIntervals=10000,
     measureTime=false);
