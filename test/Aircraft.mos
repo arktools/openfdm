@@ -38,8 +38,8 @@ list(linear_Aircraft);
 
 // simulate non-linear model
 simulate(Aircraft,
-    stopTime=10,
-    numberOfIntervals=1000,
+    stopTime=1000,
+    numberOfIntervals=100000,
     measureTime=false);
 
 plotParametric(p.r_r[1],p.agl);
