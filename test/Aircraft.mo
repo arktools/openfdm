@@ -3,12 +3,18 @@ within test;
 model Aircraft
 
   import OpenFDM.*;
+  import C=Modelica.Constants;
 
   inner World.Earth world;
 
   Parts.RigidReferencePoint p(
-    r_r(start={0,0,-1000},fixed=true),
-    euler(start={0,0,0},fixed=true));
+    r_r(start={0,0,-1000},fixed={true,true,true}),
+    euler(start={0,0,0},fixed={true,false,true}),
+    w_ib(start={0,0,0},fixed={true,true,true}),
+    z_b(start={0,0,0},fixed={true,true,true}),
+    v_b(start={10,0,0},fixed={false,true,false}),
+    a_b(start={0,0,0},fixed={true,true,true})
+    );
 
   model Thrust
     extends Parts.ForceMoment;
@@ -19,11 +25,18 @@ model Aircraft
 
   model SimpleAerodynamics
     extends Aerodynamics.AerodynamicForceMoment(
-      vt(start=10,fixed=true)
+      s=1,cBar=1,b=1
     );
+    Real CL, CD, CS, Cl, Cm, Cn;
   equation
-    F_b = {0,0,0};
-    M_b = {0,0,0};
+    CL = (1.5/20)*alpha_deg;
+    CD = 0.001*CL^2 + 0.001;
+    CS = 0;
+    Cl = -0.1*p;
+    Cm = -0.1*q - 0.00001*(alpha_deg-5);
+    Cn = -0.1*r;
+    F_b = Parts.T2(alpha)*{-CD,-CS,-CL}*qBar*s; // TODO : CHECK
+    M_b = Parts.T2(alpha)*{Cl*b,Cm*cBar,Cn*b}*qBar*s; // TODO : FIX
   end SimpleAerodynamics;
   
   SimpleAerodynamics aero;

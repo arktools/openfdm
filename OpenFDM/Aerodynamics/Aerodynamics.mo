@@ -14,6 +14,18 @@ partial model AerodynamicForceMoment "partial force model that computes aerodyna
   SI.AngularVelocity alphaDot "derivative of angle of attack";
   SI.Angle beta "side slip angle";
   SI.AngularVelocity betaDot "derivative of side slip angle";
+
+  parameter SI.Area s "reference area";
+  parameter SI.Length cBar "average chord";
+  parameter SI.Length b "span";
+
+  SI.AngularVelocity p "body roll rate";
+  SI.AngularVelocity q "body pitch rate";
+  SI.AngularVelocity r "body yaw rate";
+
+  SI.Angle alpha_deg "angle of attack, deg";
+  SI.Angle beta_deg "side slip, deg";
+
 equation
   vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r);
   aR_b = der(vR_b);
@@ -42,6 +54,10 @@ equation
     beta = 0;
     betaDot = 0;
   end if;
+  // alias's and conversions
+  alpha_deg = SI.Conversions.to_deg(alpha);
+  beta_deg = SI.Conversions.to_deg(alpha);
+  {p,q,r} = fA.w_ib;
 end AerodynamicForceMoment;
 
 // vim:ts=2:sw=2:expandtab:
