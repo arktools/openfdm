@@ -42,6 +42,6 @@ simulate(Simple,
     measureTime=false);
 
 plot({p.r_r[1],p.r_r[2],p.r_r[3],
-    p.roll,p.pitch,p.heading});
+    p.phi,p.theta,p.psi});
 //system("chromium-browser $PWD/Simple_prof.html &");
 //getErrorString();
