@@ -37,9 +37,9 @@ list(linear_Rocket);
 
 // simulate non-linear model
 simulate(Rocket,
-    stopTime=10000,
+    stopTime=20,
     measureTime=false);
 
-plot({r_r[1],r_r[2],r_r[3],roll,pitch,heading});
+plotParametric(r_r[1],agl);
 //system("chromium-browser $PWD/Rocket_prof.html &");
 //getErrorString();
