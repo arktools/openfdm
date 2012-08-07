@@ -38,8 +38,8 @@ list(linear_DatcomSimple);
 
 // simulate non-linear model
 simulate(DatcomSimple,
-    stopTime=1,
-    numberOfIntervals=1000,
+    stopTime=10,
+    numberOfIntervals=10000,
     measureTime=false);
 
 plotParametric(p.r_r[1],p.agl);

@@ -19,7 +19,7 @@ model DatcomSimple
     //vt(start=6,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={6,0,0},fixed={false,true,true}),
+    v_r(start={10,0,0},fixed={false,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -28,15 +28,14 @@ model DatcomSimple
     w_ib(start={0,0,0},fixed={true,true,true}),
     z_b(start={0,0,0},fixed={true,true,true}),
     // no translational acceleration
-    a_b(start={0,0,0},fixed={true,true,false})
-    );
+    a_b(start={0,0,0},fixed={true,true,true}));
 
   model Thrust
     extends Parts.ForceMoment;
-    input Real throttle(start=0.3,min=0,max=1,fixed=true);
+    input Real throttle(start=0.3,min=0,max=1,fixed=false);
   equation
     der(throttle) = 0;
-    F_b = throttle*{0.1,0,0};
+    F_b = throttle*{2,0,0};
     M_b = {0,0,0};
   end Thrust;
 
