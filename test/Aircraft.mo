@@ -23,23 +23,19 @@ model Aircraft
     M_b = {0,0,0};
   end Thrust;
 
-  model SimpleAerodynamics
-    extends Aerodynamics.AerodynamicForceMoment(
-      s=1,cBar=1,b=1
-    );
-    Real CL, CD, CS, Cl, Cm, Cn;
+  model AerodynamicsSimple
+    extends Aerodynamics.StabilityFrame.ForceMoment(
+      s=1,cBar=1,b=1);
   equation
     CL = (1.5/20)*alpha_deg;
     CD = 0.001*CL^2 + 0.001;
-    CS = 0;
+    CY = 0;
     Cl = -0.1*p;
     Cm = -0.1*q - 0.00001*(alpha_deg-5);
     Cn = -0.1*r;
-    F_b = Parts.T2(alpha)*{-CD,-CS,-CL}*qBar*s; // TODO : CHECK
-    M_b = Parts.T2(alpha)*{Cl*b,Cm*cBar,Cn*b}*qBar*s; // TODO : FIX
-  end SimpleAerodynamics;
+  end AerodynamicsSimple;
   
-  SimpleAerodynamics aero;
+  AerodynamicsSimple aero;
 
   Thrust thrust;
   Parts.RigidBody structure(m=1,I_b=identity(3));

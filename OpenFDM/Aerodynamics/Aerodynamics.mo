@@ -1,6 +1,6 @@
 within OpenFDM.Aerodynamics; 
 
-partial model AerodynamicForceMoment "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
+partial model ForceMoment "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
   extends Parts.ForceMoment;
   import SI=Modelica.SIunits;
   outer World.WorldBase world;
@@ -25,6 +25,10 @@ partial model AerodynamicForceMoment "partial force model that computes aerodyna
 
   SI.Angle alpha_deg "angle of attack, deg";
   SI.Angle beta_deg "side slip, deg";
+
+  Real C_bs[3,3] "stability to body frame";
+
+  Real C_bw[3,3] "wind to body frame";
 
 equation
   vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r);
@@ -58,6 +62,39 @@ equation
   alpha_deg = SI.Conversions.to_deg(alpha);
   beta_deg = SI.Conversions.to_deg(alpha);
   {p,q,r} = fA.w_ib;
-end AerodynamicForceMoment;
+  // rotation matrices
+  C_bs = Parts.T2(alpha);
+  C_bw = Parts.T2(alpha)*Parts.T3(-beta);
+end ForceMoment;
+
+package StabilityFrame
+  model ForceMoment
+    extends Aerodynamics.ForceMoment;
+    Real CL, CD, CY, Cl, Cm, Cn;
+  equation
+    F_b = C_bs*{-CD,-CY,-CL}*qBar*s;
+    M_b = C_bs*{Cl*b,Cm*cBar,Cn*b}*qBar*s;
+  end ForceMoment;
+end StabilityFrame;
+
+package WindFrame
+  model ForceMoment
+    extends Aerodynamics.ForceMoment;
+    Real CL, CD, CC, Cl, Cm, Cn;
+  equation
+    F_b = C_bw*{-CD,-CC,-CL}*qBar*s;
+    M_b = C_bw*{Cl*b,Cm*cBar,Cn*b}*qBar*s;
+  end ForceMoment;
+end WindFrame;
+
+package BodyFrame
+  model ForceMoment
+    extends Aerodynamics.ForceMoment;
+    Real CX, XY, CZ, Cl, Cm, Cn;
+  equation
+    F_b = {CX,CY,CZ}*qBar*s;
+    M_b = {Cl*b,Cm*cBar,Cn*b}*qBar*s;
+  end ForceMoment;
+end BodyFrame;
 
 // vim:ts=2:sw=2:expandtab:
