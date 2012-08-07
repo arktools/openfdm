@@ -10,11 +10,13 @@ equation
   fA.r_r + transpose(fA.C_br)*r_a = fB.r_r;
   C_ba*fA.v_b = fB.v_b;
   C_ba*fA.a_b = fB.a_b;
-  C_ba*fA.F_b + fB.F_b = zeros(3);
+  zeros(3) = C_ba*fA.F_b + fB.F_b;
   C_ba*fA.C_br = fB.C_br;
   C_ba*fA.w_ib = fB.w_ib;
   C_ba*fA.z_b = fB.z_b;
-  C_ba*fA.M_b + fB.M_b = zeros(3);
+  zeros(3) = C_ba*fA.M_b + 
+    cross(C_ba*r_a,fB.F_b) +
+    fB.M_b;
 end RigidLink;
 
 model RigidLink_B321 "A body 3-2-1 rotation sequence rigid connector"
