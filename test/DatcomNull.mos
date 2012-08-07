@@ -1,0 +1,47 @@
+// options
+setCommandLineOptions({
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Modelica);
+loadModel(OpenFDM);
+loadModel(test);
+getErrorString();
+
+
+// it is necessary to extract the model form all packages so the "." is not mis-read
+system("rm -f linear_DatcomNull.mo DatcomNull.*");
+loadString("
+model DatcomNull
+  extends test.DatcomNull;
+end DatcomNull;
+");
+
+// get linear model
+simulate(DatcomNull,
+    stopTime=0.001,
+    numberOfIntervals=1,
+    measureTime=false);
+//getErrorString();
+system("./DatcomNull -l 0 > log.out");
+readFile("log.out");
+loadFile("linear_DatcomNull.mo");
+//getErrorString();
+list(linear_DatcomNull);
+//getErrorString();
+
+// simulate non-linear model
+simulate(DatcomNull,
+    stopTime=1000,
+    numberOfIntervals=100000,
+    measureTime=false);
+
+plotParametric(p.r_r[1],p.agl);
+//system("chromium-browser $PWD/DatcomNull_prof.html &");
+//getErrorString();

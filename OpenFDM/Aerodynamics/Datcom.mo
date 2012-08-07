@@ -2,6 +2,13 @@ within OpenFDM.Aerodynamics;
 
 package Datcom
 
+  record Controls
+    Real flap_deg "flap";
+    Real aileron_deg "aileron";
+    Real elevator_deg "elevator";
+    Real rudder_deg "rudder";
+  end Controls;
+
   constant Real[2,2] empty1D = {{0,0},
                                 {1,0}}; 
   constant Real[3,3] empty2D = {{0,0,1},
@@ -106,8 +113,8 @@ package Datcom
     u = u1;
   end CombiTable1DSIMO;
 
-  partial model ForceAndTorqueBase
-    extends StabilityFrame.ForceAndTorque;
+  partial model ForceMomentBase
+    extends StabilityFrame.ForceMoment;
     extends CoefficientsAndDerivatives;
     extends Controls;
 
@@ -135,11 +142,11 @@ package Datcom
         dCn_Beta * beta +
          dCn_RollRate * p * b/(2*vt) +
          dCn_YawRate * r * b/(2*vt);  
-  end ForceAndTorqueBase;
+  end ForceMomentBase;
 
-  model ForceAndTorque
+  model ForceMoment
     import Modelica.Blocks.Tables.*;
-    extends ForceAndTorqueBase;
+    extends ForceMomentBase;
     parameter Tables tables;
     CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u1=alpha, y1=CL_Basic);
     CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u1=alpha, y1=dCL_Flap);
@@ -164,11 +171,11 @@ package Datcom
     CombiTable1DSISO dCn_Beta_table(table=tables.dCn_Beta, u1=alpha, y1=dCn_Beta);
     CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u1=alpha, y1=dCn_RollRate);
     CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u1=alpha, y1=dCn_YawRate);
-  end ForceAndTorque;
+  end ForceMoment;
 
-  model ForceAndTorqueCompact
+  model ForceMomentCompact
     import Modelica.Blocks.Tables.*;
-    extends ForceAndTorqueBase;
+    extends ForceMomentBase;
     parameter TablesCompact tables;
     CombiTable1DSIMO AlphaTable(table=tables.AlphaTable,y1=CL_Basic,u1=alpha);
   equation 
@@ -206,14 +213,11 @@ package Datcom
     dCn_RollRate = 0;
     dCn_YawRate = 0;
 
-  end ForceAndTorqueCompact;
+  end ForceMomentCompact;
 
-  model ForceAndTorqueSimple
-    extends CoefficientAndDerivativesSimple;
-    // stall
-    Real alpha_deg_effective;
-
-    extends ForceAndTorqueBase(
+  model ForceMomentSimple
+    extends CoefficientsAndDerivativesSimple;
+    extends ForceMomentBase(
       CL_Basic = CL0 + CLa*alpha_deg_effective,
       dCL_Flap = 0,
       dCL_Elevator = 0,
@@ -237,14 +241,11 @@ package Datcom
       dCn_Beta = Cnb,
       dCn_RollRate = 0,
       dCn_YawRate = Cnr,
-      s=1,
-      b=1,
-      cBar=1
-    );
-
+      s=1, b=1, cBar=1);
+    Real alpha_deg_effective;
   equation
     alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
-  end ForceAndTorqueSimple;
+  end ForceMomentSimple;
 
 end Datcom;
 

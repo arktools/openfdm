@@ -1,5 +1,64 @@
 within OpenFDM.Aerodynamics; 
 
+record CoefficientsAndDerivativesSimple
+  // stall
+  Real alphaStall_deg "stall angle of attack";
+
+  // lift
+  Real CL0;
+  Real CLa "CL alpha slope";
+
+  // drag 
+  Real CD0 "minimum drag";
+  Real CDCL "CL^2 term for drag polar";
+
+  // side force
+  Real CYb "side slipe effect on side force";
+
+  // roll moment
+  Real Clp "roll damping, <0 for stability";
+  Real Clda "aileron effect on roll";
+
+  // pitch moment
+  Real Cmq "pitch damping, <0 for stability";
+  Real Cma "alpha effect on pitch, <0 for stability";
+  Real Cmde "elevator effect on pitch";
+  Real Cnb "weather cocking stability >0 for stability";
+  Real Cnr "yaw damping, <0 for stability";
+  Real Cndr "rudder effecto on yaw";
+end CoefficientsAndDerivativesSimple;
+
+record Controls
+  Real aileron_deg;
+  Real elevator_deg;
+  Real rudder_deg;
+  Real flap_deg;
+end Controls;
+
+function stallModel
+  input Real angle;
+  input Real stallAngle;
+  output Real effective;
+algorithm
+  if (angle < stallAngle) then
+    effective := angle;
+  else // stall
+    effective := 0;
+  end if; 
+end stallModel;
+
+record MomentCoefficients
+  Real Cl;
+  Real Cm;
+  Real Cn;
+end MomentCoefficients;
+
+record WingPlanform
+  Real s;
+  Real b;
+  Real cBar;
+end WingPlanform;
+
 partial model ForceMoment "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
   extends Parts.ForceMoment;
   import SI=Modelica.SIunits;
@@ -55,7 +114,7 @@ equation
   {p,q,r} = fA.w_ib;
   // rotation matrices
   C_bs = Parts.T2(alpha);
-  C_bw = Parts.T2(alpha)*Parts.T3(-beta);
+  C_bw = Parts.T2(alpha)*Parts.T3(beta);
 end ForceMoment;
 
 package StabilityFrame
@@ -66,6 +125,26 @@ package StabilityFrame
     F_b = C_bs*{-CD,-CY,-CL}*qBar*s;
     M_b = C_bs*{Cl*b,Cm*cBar,Cn*b}*qBar*s;
   end ForceMoment;
+
+
+  model ForceMomentSimple
+    extends ForceMoment;
+    extends CoefficientsAndDerivativesSimple;
+    extends Controls;
+  protected
+    Real alpha_deg_effective;
+  equation
+    alpha_deg_effective = stallModel(alpha_deg,alphaStall_deg);
+    CL = CL0 + CLa*alpha_deg_effective;
+    CD = CD0 + CDCL*coefs.CL^2;
+    CY = CYb*beta_deg;
+    Cl = Clp*p + Clda*aileron_deg;
+    Cm = Cma*alpha_deg_effective +
+      Cmq*q + Cmde*elevator_deg;
+    Cn = Cnb*beta_deg +
+      Cnr*r + Cndr*rudder_deg;
+  end ForceMomentSimple;
+
 end StabilityFrame;
 
 package WindFrame

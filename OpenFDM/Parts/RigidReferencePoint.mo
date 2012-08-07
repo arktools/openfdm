@@ -27,10 +27,10 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   SI.Velocity vR_r[3] "relative air velocity in reference frame";
 
   // alias's
-  SI.Angle roll = euler[1] "euler angle 1: body roll";
-  SI.Angle pitch = euler[2] "euler angle 2: horizon pitch";
-  SI.Angle heading = euler[3] "euler angle 3: heading";
-  constant Real epsilon = 1e-2;
+  SI.Angle phi = euler[1] "euler angle 1: body roll";
+  SI.Angle theta = euler[2] "euler angle 2: horizon pitch";
+  SI.Angle psi = euler[3] "euler angle 3: heading";
+  constant Real epsilon = 1e-14;
 
 equation
   // connect frame
@@ -47,8 +47,11 @@ equation
   v_r = der(r_r);
   v_b = C_br*v_r;
   a_b = der(v_b);
-  fA.w_ib = w_ir + der(euler); // TODO*/
-  C_br = T1(euler[1])*T2(euler[2])*T3(euler[3]);
+  fA.w_ib = w_ir + 
+    {{1,           tan(theta)*sin(phi),           tan(theta)*cos(phi)},
+     {0,                      cos(phi),                     -sin(phi)},
+     {0, sin(phi)/(cos(theta)+epsilon), cos(phi)/(cos(theta)+epsilon)}} * der(euler);
+  C_br = T1(phi)*T2(theta)*T3(psi);
   z_b = der(w_ib);
 
   // angle wrap
