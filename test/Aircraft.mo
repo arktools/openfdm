@@ -4,21 +4,21 @@ model Aircraft
 
   import OpenFDM.*;
 
-  inner World world;
+  inner World.Earth world;
 
-  RigidReferencePoint p(
+  Parts.RigidReferencePoint p(
     r_r(start={0,0,-1000},fixed=true),
     euler(start={0,1,0},fixed=true));
 
   model Thrust
-    extends ForceMoment;
+    extends Parts.ForceMoment;
   equation
     F_b = {10,0,0};
     M_b = {0,0,0};
   end Thrust;
 
   model SimpleAerodynamics
-    extends Aerodynamics;
+    extends Aerodynamics.AerodynamicForceMoment;
   equation
     F_b = {0,0,0};
     M_b = {0,0,0};
@@ -27,9 +27,9 @@ model Aircraft
   SimpleAerodynamics aero;
 
   Thrust thrust;
-  RigidBody structure(m=1,I_b=identity(3));
-  RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
-  RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});
+  Parts.RigidBody structure(m=1,I_b=identity(3));
+  Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
+  Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});
 
 equation
 

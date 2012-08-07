@@ -1,9 +1,9 @@
-within OpenFDM;
+within OpenFDM.Propulsion;
 
 model SolidRocketMotor
 
   import SI=Modelica.SIunits;
-  RigidConnector fA;
+  Interfaces.RigidConnector fA;
 
   parameter SI.Mass mInert = 0.1 "inert mass";
   parameter SI.Velocity Ve = 1000 "exit velocity";
@@ -11,7 +11,7 @@ model SolidRocketMotor
   parameter SI.MassFlowRate mDot = 0.1 "mass flow rate";
 
   model Thrust
-    extends ForceMoment;
+    extends Parts.ForceMoment;
     SI.MassFlowRate mDot;
     SI.Velocity Ve;
   equation
@@ -20,7 +20,7 @@ model SolidRocketMotor
   end Thrust;
 
   model Structure
-    extends RigidBody;
+    extends Parts.RigidBody;
     SI.Mass mInert;
     SI.Mass mFuel;
     SI.MassFlowRate mDot;

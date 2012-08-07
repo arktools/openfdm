@@ -1,9 +1,9 @@
-within OpenFDM; 
+within OpenFDM.Aerodynamics; 
 
-partial model Aerodynamics "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
-  extends ForceMoment;
+partial model AerodynamicForceMoment "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
+  extends Parts.ForceMoment;
   import SI=Modelica.SIunits;
-  outer World world;
+  outer World.WorldBase world;
   parameter SI.Velocity vtTol = 0.01 "when to ignore aerodynamics";
   SI.Velocity vR_b[3] "relative air velocity resolved in body frame";
   SI.Acceleration aR_b[3] "relative air acceleration resolved in body frame";
@@ -42,6 +42,6 @@ equation
     beta = 0;
     betaDot = 0;
   end if;
-end Aerodynamics;
+end AerodynamicForceMoment;
 
 // vim:ts=2:sw=2:expandtab:
