@@ -10,17 +10,17 @@ model Rocket
     RigidConnector fA;
     model Thrust
       extends ForceMoment;
-      Real mDot;
-      Real Ve = 1000;
+      SI.MassFlowRate mDot;
+      SI.Velocity Ve = 1000;
     equation
       F_b = {0,0,-mDot*Ve};
       M_b = {0,0,0}; 
     end Thrust;
     model Structure
       extends RigidBody;
-      Real mFuel(start=100,fixed=true);
-      Real mInert=0.1;
-      Real mDot;
+      SI.Mass mFuel(start=100,fixed=true);
+      SI.Mass mInert=0.1;
+      SI.MassFlowRate mDot;
     equation
       mDot = -der(mFuel);
       if (mFuel > 0) then
@@ -40,7 +40,7 @@ model Rocket
   end RocketMotor;
   RocketMotor motor;
   RigidLink_B321 t(angles={0,0,0},r_a={1,2,3});
-  Real agl;
+  SI.Position agl;
 equation
   agl = world.agl(r_r);
   assert(r_r[3] <= 0, "hit ground");

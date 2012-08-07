@@ -2,17 +2,18 @@ within Test;
 
 partial model Aerodynamics "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
   extends ForceMoment;
+  import SI=Modelica.SIunits;
   outer World world;
-  parameter Real vtTol = 0.01 "when to ignore aerodynamics";
-  Real vR_b[3] "relative air velocity resolved in body frame";
-  Real aR_b[3] "relative air acceleration resolved in body frame";
-  Real vt "true air velocity";
-  Real vtDot "true air velocity derivative";
-  Real qBar "dynamics pressure";
-  Real alpha "angle of attack";
-  Real alphaDot "derivative of angle of attack";
-  Real beta "side slip angle";
-  Real betaDot "derivative of side slip angle";
+  parameter SI.Velocity vtTol = 0.01 "when to ignore aerodynamics";
+  SI.Velocity vR_b[3] "relative air velocity resolved in body frame";
+  SI.Acceleration aR_b[3] "relative air acceleration resolved in body frame";
+  SI.Velocity vt "true air velocity";
+  SI.Acceleration vtDot "true air velocity derivative";
+  SI.Pressure qBar "dynamics pressure";
+  SI.Angle alpha "angle of attack";
+  SI.AngularVelocity alphaDot "derivative of angle of attack";
+  SI.Angle beta "side slip angle";
+  SI.AngularVelocity betaDot "derivative of side slip angle";
 equation
   vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r);
   aR_b = der(vR_b);
