@@ -10,7 +10,8 @@ setCommandLineOptions({
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(Test);
+loadModel(OpenFDM);
+loadModel(test);
 getErrorString();
 
 
@@ -18,7 +19,7 @@ getErrorString();
 system("rm -f linear_Simple.mo Simple.*");
 loadString("
 model Simple
-  extends Test.Simple;
+  extends test.Simple;
 end Simple;
 ");
 
@@ -40,6 +41,7 @@ simulate(Simple,
     stopTime=1,
     measureTime=false);
 
-plot({r_r[1],r_r[2],r_r[3],roll,pitch,heading});
+plot({p.r_r[1],p.r_r[2],p.r_r[3],
+    p.roll,p.pitch,p.heading});
 //system("chromium-browser $PWD/Simple_prof.html &");
 //getErrorString();

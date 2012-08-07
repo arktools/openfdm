@@ -1,4 +1,4 @@
-within Test;
+within OpenFDM;
 
 model SolidRocketMotor
 

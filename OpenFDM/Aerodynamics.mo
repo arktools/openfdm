@@ -1,4 +1,4 @@
-within Test; 
+within OpenFDM; 
 
 partial model Aerodynamics "partial force model that computes aerodynamic relavent properties, still required to define F_b, M_B"
   extends ForceMoment;

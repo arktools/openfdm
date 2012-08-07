@@ -1,11 +1,13 @@
-within Test;
+within test;
 
 model Aircraft
 
+  import OpenFDM.*;
+
   inner World world;
 
-  extends RigidReferencePoint(
-    r_r(start={0,0,0},fixed=false),
+  RigidReferencePoint p(
+    r_r(start={0,0,-1000},fixed=true),
     euler(start={0,1,0},fixed=true));
 
   model Thrust
@@ -31,12 +33,12 @@ model Aircraft
 
 equation
 
-  connect(fA,structure.fA);
+  connect(p.fA,structure.fA);
 
-  connect(fA,t_motor.fA);
+  connect(p.fA,t_motor.fA);
   connect(t_motor.fB,thrust.fA);
 
-  connect(fA,t_aero_rp.fA);
+  connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);
 
 end Aircraft;

@@ -2,7 +2,7 @@
 setCommandLineOptions({
 //"+showErrorMessages",
 "+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
-"+postOptModules=inlineArrayEqn,constantLinearSystem,removeAircraftEquations,generateSymbolicLinearization",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeRocketEquations,generateSymbolicLinearization",
 //"+a",
 //"+noSimplify",
 "+d=linearization,gendebugsymbols"
@@ -10,36 +10,38 @@ setCommandLineOptions({
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(Test);
+loadModel(OpenFDM);
+loadModel(test);
 getErrorString();
 
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("rm -f linear_Aircraft.mo Aircraft.*");
+system("rm -f linear_Rocket.mo Rocket.*");
 loadString("
-model Aircraft
-  extends Test.Aircraft;
-end Aircraft;
+model Rocket
+  extends test.Rocket;
+end Rocket;
 ");
 
 // get linear model
-simulate(Aircraft,
+simulate(Rocket,
     stopTime=0.001,
     numberOfIntervals=1,
     measureTime=false);
 //getErrorString();
-system("./Aircraft -l 0 > log.out");
+system("./Rocket -l 0 > log.out");
 readFile("log.out");
-loadFile("linear_Aircraft.mo");
+loadFile("linear_Rocket.mo");
 //getErrorString();
-list(linear_Aircraft);
+list(linear_Rocket);
 //getErrorString();
 
 // simulate non-linear model
-simulate(Aircraft,
-    stopTime=1,
+simulate(Rocket,
+    stopTime=20,
+    numberOfIntervals=2000,
     measureTime=false);
 
-plot({r_r[1],r_r[2],r_r[3],roll,pitch,heading});
-//system("chromium-browser $PWD/Aircraft_prof.html &");
+plotParametric(p.r_r[1],p.agl);
+//system("chromium-browser $PWD/Rocket_prof.html &");
 //getErrorString();
