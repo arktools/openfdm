@@ -4,7 +4,7 @@ model Rocket
   inner World world;
   extends RigidReferencePoint(
     euler(start={0,1,0},fixed={true,false,true}),
-    r_r(start={0,0,0},fixed=true));
+    r_r(start={0,0,-1},fixed=true));
   RigidBody structure(I_b=identity(3),m=0.1);
   model RocketMotor
     RigidConnector fA;
@@ -18,16 +18,16 @@ model Rocket
     end Thrust;
     model Structure
       extends RigidBody;
-      SI.Mass mFuel(start=100,fixed=true);
+      SI.Mass mFuel(start=0.1,fixed=true);
       SI.Mass mInert=0.1;
-      SI.MassFlowRate mDot;
+      SI.MassFlowRate mDot(start=0.1);
     equation
-      mDot = -der(mFuel);
-      if (mFuel > 0) then
-        der(mFuel) = -0.1;
-      else
-        der(mFuel) = 0;
-      end if;
+      der(mDot) = 0;
+      der(mFuel) = -mDot;
+      when (mFuel <= 0) then
+        reinit(mFuel,0);
+        reinit(mDot,0);
+      end when;
       I_b = m*identity(3);
       m = mInert + mFuel;
     end Structure;
@@ -39,7 +39,7 @@ model Rocket
     connect(thrust.fA,structure.fA);
   end RocketMotor;
   RocketMotor motor;
-  RigidLink_B321 t(angles={0,0,0},r_a={1,2,3});
+  RigidLink_B321 t(angles={0,0,0},r_a={0,0,0});
   SI.Position agl;
 equation
   agl = world.agl(r_r);
