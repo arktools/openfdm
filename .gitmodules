@@ -1,3 +1,0 @@
-[submodule "python/DyMat"]
-	path = python/DyMat
-	url = git://github.com/jraedler/DyMat.git
