@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import multiprocessing,logging
 from setuptools import setup
 
 def read(fname):
