@@ -124,12 +124,12 @@ class OMShell:
       ior_file = "openmodelica." + currentUser + ".objid." + random_string
     ior_file = os.path.join(temp, ior_file)
     omc_corba_uri= "file:///" + ior_file
-    #print "file: ", ior_file
+    print "file: ", ior_file
 
     # See if the omc server is running
     if os.path.isfile(ior_file):
       pass
-      #print "OMC Server is up and running at " + omc_corba_uri + "\n"
+      print "OMC Server is up and running at " + omc_corba_uri + "\n"
     else:
       attempts = 0
       while True:
@@ -140,7 +140,7 @@ class OMShell:
             print "OMC Server is down. Please start it! Exiting...\n"
             sys.exit(2)
         else:
-          #print "OMC Server is up and running at " + omc_corba_uri + "\n"
+          print "OMC Server is up and running at " + omc_corba_uri + "\n"
           break
 
     #initialize the ORB with maximum size for the ORB set
@@ -177,8 +177,9 @@ class OMShell:
   def get_build_path(self):
     return self.build_path;
 
-  def execute(self,commands):
+  def executeMultiLine(self,commands):
     f = StringIO.StringIO(commands);
+    result = None
     while True: # for all lines
       # get next line
       line = ''
@@ -189,10 +190,10 @@ class OMShell:
         if data == ';':
           break
         line += str(struct.unpack("c", data)[0])
-      self.raw_execute(line)  
+      yield self.execute(line)  
     
   # Invoke the sendExpression method to send text commands to the server
-  def raw_execute(self,command):
+  def execute(self,command):
     if self.echo:
       print command
     curdir = os.path.abspath(os.path.curdir)
@@ -227,7 +228,7 @@ class OMShell:
 
       finally:
         os.chdir(curdir)
-      
+
       return result
 
   # Test commmands
@@ -247,7 +248,7 @@ class OMShell:
         print answer
 
   def run_script(self,scriptFile):
-    return self.raw_execute('runScript("%s")' % scriptFile);
+    return self.execute('runScript("%s")' % scriptFile);
 
   def run_model(self,modelFile):
     packageName = None
