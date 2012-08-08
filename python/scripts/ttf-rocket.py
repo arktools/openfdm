@@ -9,6 +9,7 @@ from OMPython import OMShell, get
 from DyMat import DyMatFile
 import multiprocessing
 import time
+import math
 
 # plotting
 from mpl_toolkits.mplot3d import Axes3D
@@ -16,13 +17,28 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import EngFormatter
 import numpy as np
 
-if not os.path.isdir('fig'):
-  os.mkdir('fig')
+# input data setup
+n = 4
+motorXVals = np.linspace(-1,1,n)
+motorAngleVals = np.linspace(0,1,n)
+timeTillFailure = np.zeros((n,n))
+val_dict = {
+  'motorX': 0,
+  'motorAngle': 0,
+}
 
+# modelica setup
 options_dict = {
   'cpus' : multiprocessing.cpu_count()
 }
 
+# plot setup
+formatter_m = EngFormatter(unit='m', places=1)
+formatter_deg = EngFormatter(unit='deg', places=1)
+if not os.path.isdir('fig'):
+  os.mkdir('fig')
+
+# initialize modelica
 shell = OMShell(root, echo=True)
 for item in shell.executeMultiLine(
 """
@@ -34,23 +50,14 @@ for item in shell.executeMultiLine(
 """.format(**options_dict)):
     print " ", item
 
-n = 4
-motorXVals = np.linspace(-1,1,n)
-motorYawVals = np.linspace(0,1,n)
-timeTillFailure = np.zeros((n,n))
-
-val_dict = {
-  'motorX': 0,
-  'motorYaw': 0,
-}
-
+# main loop
 for motorXIndex in xrange(len(motorXVals)):
 
   val_dict['motorX'] = motorXVals[motorXIndex]
 
-  for motorYawIndex in xrange(len(motorYawVals)):
+  for motorAngleIndex in xrange(len(motorAngleVals)):
 
-    val_dict['motorYaw'] = motorYawVals[motorYawIndex]
+    val_dict['motorAngle'] = motorAngleVals[motorAngleIndex]
 
     print shell.execute("""loadString("
       model Rocket
@@ -67,7 +74,7 @@ for motorXIndex in xrange(len(motorXVals)):
           Ve=1000,
           mDot=1.0);
         Parts.RigidLink_B321 t(
-          angles={{ {motorYaw}, {motorYaw}, {motorYaw} }},
+          angles={{ {motorAngle}, {motorAngle}, {motorAngle} }},
           r_a={{ {motorX}, {motorX}, {motorX} }});
       equation
         connect(p.fA,structure.fA);
@@ -81,38 +88,36 @@ for motorXIndex in xrange(len(motorXVals)):
     resultFile = os.path.splitext(resultFile)[0]
 
     matFile = DyMatFile(resultFile)
-    timeTillFailure[motorXIndex][motorYawIndex] = matFile.abscissa('p.r_r[1]', valuesOnly=True)[-1]
+    timeTillFailure[motorXIndex][motorAngleIndex] = matFile.abscissa('p.r_r[1]', valuesOnly=True)[-1]
     x = matFile.data('p.r_r[1]')
     y = matFile.data('p.r_r[2]')
     agl = matFile.data('p.agl')
 
-    formatter = EngFormatter(unit='m', places=1)
-
     fig1 = plt.figure()
     a1 = fig1.add_subplot(111)
-    a1.set_title('x: {motorX}, yaw: {motorYaw}'.format(**val_dict))
+    a1.set_title('x: {motorX}, angle: {motorAngle}'.format(**val_dict))
     a1.set_xlabel('x')
     a1.set_ylabel('agl')
-    a1.xaxis.set_major_formatter(formatter)
-    a1.yaxis.set_major_formatter(formatter)
+    a1.xaxis.set_major_formatter(formatter_m)
+    a1.yaxis.set_major_formatter(formatter_m)
     a1.plot(x, agl)
     a1.grid()
-    plt.savefig('fig/rocket-2d-{motorYaw}-{motorX}.pdf'.format(**val_dict))
+    plt.savefig('fig/rocket-2d-{motorAngle}-{motorX}.pdf'.format(**val_dict))
     plt.close(fig1)
 
 
     fig2 = plt.figure()
     a2 = fig2.add_subplot(111, projection='3d')
-    a2.set_title('x: {motorX}, yaw: {motorYaw}'.format(**val_dict))
+    a2.set_title('x: {motorX}, angle: {motorAngle}'.format(**val_dict))
     a2.set_xlabel('x')
     a2.set_ylabel('y')
     a2.set_zlabel('agl')
-    a2.xaxis.set_major_formatter(formatter)
-    a2.yaxis.set_major_formatter(formatter)
-    a2.zaxis.set_major_formatter(formatter)
+    a2.xaxis.set_major_formatter(formatter_m)
+    a2.yaxis.set_major_formatter(formatter_m)
+    a2.zaxis.set_major_formatter(formatter_m)
     a2.plot(x, y, agl)
     a2.grid()
-    plt.savefig('fig/rocket-3d-{motorYaw}-{motorX}.pdf'.format(**val_dict))
+    plt.savefig('fig/rocket-3d-{motorAngle}-{motorX}.pdf'.format(**val_dict))
     plt.close(fig2)
 
 
@@ -120,14 +125,13 @@ fig3 = plt.figure()
 a3 = fig3.add_subplot(111)
 a3.set_title('time till failure')
 a3.set_xlabel('motor x')
-a3.set_ylabel('motor yaw')
-a3.xaxis.set_major_formatter(formatter)
-a3.yaxis.set_major_formatter(formatter)
-np.meshgrid(motorXVals,motorYawVals)
-plt.contourf(motorXVals,motorYawVals,timeTillFailure)
+a3.set_ylabel('motor angle')
+a3.xaxis.set_major_formatter(formatter_m)
+a3.yaxis.set_major_formatter(formatter_deg)
+plt.contourf(motorXVals,motorAngleVals*180/math.pi,timeTillFailure)
 print "timeTillFailure:", timeTillFailure
 a3.grid()
-plt.savefig('fig/time-till-failure-{motorYaw}-{motorX}.pdf'.format(**val_dict))
+plt.savefig('fig/time-till-failure-{motorAngle}-{motorX}.pdf'.format(**val_dict))
 
 plt.show()
 plt.close(fig3)
