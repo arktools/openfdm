@@ -9,5 +9,3 @@ for dep in ['OMPython','DyMat']:
     path = os.path.join(dep_root,dep)
     if path not in sys.path:
         sys.path.insert(0, path)
-
-import test
