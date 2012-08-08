@@ -6,14 +6,14 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   import C=Modelica.Constants;
 
   outer World.WorldBase world "the world";
+  parameter Boolean wrapEuler = true;
   Interfaces.RigidConnector fA "the rigid body connector";
   SI.AngularVelocity w_ir[3] = {0,0,0} "ref frame ang rate wrt inertial expressed in the reference frame";
   
   // states
   SI.Position r_r[3](each stateSelect=StateSelect.always) "cartesian position resolved in the refernce frame";
   SI.Velocity v_r[3](each stateSelect=StateSelect.always) "velocity resolved in the reference frame";
-  SI.Angle euler[3](each stateSelect=StateSelect.always,
-    each min=-C.pi, each max = C.pi)
+  SI.Angle euler[3](each stateSelect=StateSelect.always)
     "euler angles, body roll, horizon pitch, heading";
   SI.AngularVelocity w_ib[3](each stateSelect=StateSelect.always) "angular velocity of body wrt inertial frame resolved in the body frame";
 
@@ -55,11 +55,16 @@ equation
   z_b = der(w_ib);
 
   // angle wrap
-  for i in 1:size(euler,1) loop
-    when (euler[i] > C.pi) then
-      reinit(euler[i],pre(euler[i])-2*C.pi);
-    end when;
-  end for;
+  if wrapEuler then
+    for i in 1:size(euler,1) loop
+      when (euler[i] > C.pi) then
+        reinit(euler[i],pre(euler[i])-2*C.pi);
+      end when;
+      when (euler[i] < -C.pi) then
+        reinit(euler[i],pre(euler[i])+2*C.pi);
+      end when;
+    end for;
+  end if;
 
   // extra
   vR_r = v_r - world.wind_r(r_r);
