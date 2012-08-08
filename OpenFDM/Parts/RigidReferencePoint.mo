@@ -47,7 +47,7 @@ equation
   v_r = der(r_r);
   v_b = C_br*v_r;
   a_b = der(v_b);
-  fA.w_ib = w_ir + 
+  w_ib = w_ir + 
     {{1,           tan(theta)*sin(phi),           tan(theta)*cos(phi)},
      {0,                      cos(phi),                     -sin(phi)},
      {0, sin(phi)/(cos(theta)+epsilon), cos(phi)/(cos(theta)+epsilon)}} * der(euler);

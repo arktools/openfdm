@@ -2,10 +2,10 @@ within OpenFDM.Parts;
 
 partial model RigidLink "Requires C_ba definition to be complete."
   import SI=Modelica.SIunits;
-  input SI.Position r_a[3];
-  input SI.Angle angles[3];
+  input SI.Position r_a[3] "position vector from fA to fB, resolved in fA";
+  input SI.Angle angles[3] "rotation angles from fA into fB";
   Interfaces.RigidConnector fA, fB;
-  Real C_ba[3,3];
+  Real C_ba[3,3] "rotation matrix from fA into fB";
 equation
   fA.r_r + transpose(fA.C_br)*r_a = fB.r_r;
   C_ba*fA.v_b = fB.v_b;
