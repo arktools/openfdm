@@ -3,7 +3,7 @@
 import os
 import sys
 import inspect
-import path_append
+from openfdm_path import root
 import OpenFDM
 from OMPython import OMShell, get
 from DyMat import DyMatFile
@@ -14,11 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import EngFormatter
 import numpy as np
 
-root_path = os.path.abspath(os.path.join(
-  inspect.getfile(inspect.currentframe()),
-  os.path.pardir, os.path.pardir))
-
-shell = OMShell(root_path, echo=True)
+shell = OMShell(root, echo=True)
 for item in shell.executeMultiLine(
 """
   loadModel(Modelica);

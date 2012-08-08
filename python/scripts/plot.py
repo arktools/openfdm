@@ -2,7 +2,7 @@
 # an example of plotting within python for openfdm
 import sys
 import os
-import path_append
+from openfdm_path import root
 from DyMat import DyMatFile
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
