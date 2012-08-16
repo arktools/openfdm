@@ -10,8 +10,8 @@ setCommandLineOptions({
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
+loadModel(Aerosonde);
 loadModel(OpenFDM);
-loadModel(Aerosonde)
 loadModel(test);
 getErrorString();
 
@@ -46,5 +46,3 @@ simulate(AerosondeModel,
 plotParametric(p.r_r[1],p.agl);
 //system("chromium-browser $PWD/AerosondeModel_prof.html &");
 //getErrorString();
-
-// vim:ts=2:sw=2:expandtab

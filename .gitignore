@@ -1,2 +1,8 @@
 *.swp
 *.pyc
+*_parsetab.py
+*.lfi
+*.csv
+*.xml
+*.dat
+*.ac
