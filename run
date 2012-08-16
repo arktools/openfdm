@@ -7,7 +7,7 @@ then
 fi
 
 curDir=$PWD
-export OPENMODELICALIBRARY=$PWD:$OPENMODELICALIBRARY
+export OPENMODELICALIBRARY=$PWD:$PWD/aircraft:$OPENMODELICALIBRARY
 tmpDir=/tmp/$(whoami)
 mkdir -p $tmpDir
 cd $tmpDir
