@@ -39,6 +39,7 @@ list(linear_DatcomNull);
 // simulate non-linear model
 simulate(DatcomNull,
     stopTime=1000,
+    tolerance=1,
     numberOfIntervals=100000,
     measureTime=true);
 
