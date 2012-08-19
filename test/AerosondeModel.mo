@@ -8,7 +8,7 @@ model AerosondeModel
   import OpenFDM.Aerodynamics.Datcom.empty1D;
   import OpenFDM.Aerodynamics.Datcom.empty2D;
 
-  constant Datcom.Tables datcomTablesNull(    
+  constant Datcom.Tables datcomTables(    
       //CL_Basic = empty1D,
       CL_Basic =   {
         { -16,    -1.533},     
@@ -208,7 +208,7 @@ model AerosondeModel
   end Thrust;
 
   Datcom.ForceMoment aero(
-    tables=datcomTablesNull,
+    tables=datcomTables,
     rudder_deg = 0,
     flap_deg = 0,
     elevator_deg = 0,

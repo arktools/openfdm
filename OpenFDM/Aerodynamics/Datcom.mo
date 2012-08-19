@@ -104,7 +104,7 @@ package Datcom
       uMin=table[1,1]);
     Modelica.Blocks.Tables.CombiTable1Ds combi(columns={2}, table=table);
   equation
-    y = 0;
+    y = combi.y[1];
     sat.u = u;
     combi.u = sat.y;
   end CombiTable1DSISO;
