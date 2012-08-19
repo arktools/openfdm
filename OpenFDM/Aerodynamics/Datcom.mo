@@ -146,31 +146,32 @@ package Datcom
     extends StabilityFrame.ForceMoment;
     extends CoefficientsAndDerivatives;
     extends Controls;
+    constant Real rad2deg = 180.0/3.14159;
 
   equation
     CL = CL_Basic +
          dCL_Flap * flap_deg +
          dCL_Elevator * elevator_deg +
-         dCL_PitchRate * q * cBar/(2*vt) +
-         dCL_AlphaDot * alphaDot * cBar/(2*vt);
+         dCL_PitchRate * rad2deg * q * cBar/(2*vt) +
+         dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt);
     CD = CD_Basic +
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg;
     CY = dCY_Beta * beta_deg +
-         dCY_RollRate * p * b/(2*vt);
+         dCY_RollRate * rad2deg * p * b/(2*vt);
     Cl = dCl_Aileron * aileron_deg +
          dCl_Beta * beta_deg +
-         dCl_RollRate * p * b/(2*vt) +
-         dCl_YawRate * r * b/(2*vt);   
-    Cm = Cm_Basic +
+         dCl_RollRate * rad2deg * p * b/(2*vt) +
+         dCl_YawRate * rad2deg * r * b/(2*vt);   
+    Cm = -Cm_Basic +
          dCm_Flap * flap_deg + 
          dCm_Elevator * elevator_deg +
-         dCm_PitchRate * q * cBar/(2*vt) +
-         dCm_AlphaDot * alphaDot * cBar/(2*vt);
+         dCm_PitchRate * rad2deg * q * cBar/(2*vt) +
+         dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt);
     Cn = dCn_Aileron * aileron_deg +
         dCn_Beta * beta_deg +
-         dCn_RollRate * p * b/(2*vt) +
-         dCn_YawRate * r * b/(2*vt);  
+         dCn_RollRate * rad2deg * p * b/(2*vt) +
+         dCn_YawRate * rad2deg * r * b/(2*vt);  
   end ForceMomentBase;
 
   model ForceMoment

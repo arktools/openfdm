@@ -140,32 +140,33 @@ model AerosondeModel
       dCl_RollRate  = empty1D,
       dCl_YawRate  = empty1D,
 
-      //Cm_Basic = empty1D,
-      Cm_Basic =   {    
-        { -16,     0.434},    
-        {  -8,     0.277},    
-        {  -6,    0.1997},    
-        {  -4,    0.1202},    
-        {  -2,    0.0403},    
-        {   0,   -0.0397},    
-        {   2,   -0.1216},    
-        {   4,   -0.2076},    
-        {   8,   -0.3993},    
-        {   9,   -0.4548},    
-        {  10,   -0.5165},    
-        {  12,   -0.6391},    
-        {  14,   -0.7634},    
-        {  16,   -0.0153},    
-        {  18,   -0.0095},    
-        {  19,    0.0126},    
-        {  20,    0.1351},    
-        {  21,    0.1985},    
-        {  22,     0.155},    
+      /*Cm_Basic = empty1D,*/
+      Cm_Basic =   {   
+        { -16,     0.434},   
+        {  -8,     0.277},   
+        {  -6,    0.1997},   
+        {  -4,    0.1202},   
+        {  -2,    0.0403},   
+        {   0,   -0.0397},   
+        {   2,   -0.1216},   
+        {   4,   -0.2076},   
+        {   8,   -0.3993},   
+        {   9,   -0.4548},   
+        {  10,   -0.5165},   
+        {  12,   -0.6391},   
+        {  14,   -0.7634},   
+        {  16,   -0.0153},   
+        {  18,   -0.0095},   
+        {  19,    0.0126},   
+        {  20,    0.1351},   
+        {  21,    0.1985},   
+        {  22,     0.155},   
         {  24,    0.0624}},
 
       dCm_Flap  = empty1D,
       dCm_Elevator  = empty1D,
-      dCm_PitchRate  = empty1D,
+      dCm_PitchRate  =   {      
+        { -16,   -0.7118}},
       dCm_AlphaDot  = empty1D,
 
       dCn_Aileron  = empty1D,
@@ -186,7 +187,7 @@ model AerosondeModel
     //vt(start=6,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={20,0,0},fixed={true,true,true}),
+    v_r(start={12,0,0},fixed={true,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -200,10 +201,14 @@ model AerosondeModel
 
   model Thrust
     extends Parts.ForceMoment;
-    input Real throttle(start=0.3,min=0,max=1,fixed=false);
+    Modelica.Blocks.Nonlinear.Limiter sat(
+      uMax=1,
+      uMin=0);
+    input Real throttle(start=0.3,fixed=false);
   equation
     der(throttle) = 0;
-    F_b = throttle*{0.1,0,0};
+    sat.u = throttle;
+    F_b = sat.y*{10,0,0};
     M_b = {0,0,0};
   end Thrust;
 
