@@ -183,29 +183,27 @@ model AerosondeModel
         {  40,   0.05196},     
         {  56,  0.057601}},
 
-      dCl_Beta  = empty1D,
-      // TODO
-      /*dCl_Beta  =   {    */
-        /*{ -16, -0.002301},    */
-        /*{  -8, -0.001955},    */
-        /*{  -6, -0.001871},    */
-        /*{  -4, -0.001787},    */
-        /*{  -2, -0.001703},    */
-        /*{   0, -0.001616},    */
-        /*{   2, -0.001527},    */
-        /*{   4, -0.001437},    */
-        /*{   8, -0.001255},    */
-        /*{   9, -0.001213},    */
-        /*{  10, -0.001173},    */
-        /*{  12, -0.001097},    */
-        /*{  14,  -0.00103},    */
-        /*{  16, -0.000971},    */
-        /*{  18,-0.0009398},    */
-        /*{  19,-0.0009883},    */
-        /*{  20, -0.001047},    */
-        /*{  21, -0.001095},    */
-        /*{  22, -0.001121},    */
-        /*{  24, -0.001181}},*/
+      dCl_Beta  =   {   
+        { -16, -0.002301},   
+        {  -8, -0.001955},   
+        {  -6, -0.001871},   
+        {  -4, -0.001787},   
+        {  -2, -0.001703},   
+        {   0, -0.001616},   
+        {   2, -0.001527},   
+        {   4, -0.001437},   
+        {   8, -0.001255},   
+        {   9, -0.001213},   
+        {  10, -0.001173},   
+        {  12, -0.001097},   
+        {  14,  -0.00103},   
+        {  16, -0.000971},   
+        {  18,-0.0009398},   
+        {  19,-0.0009883},   
+        {  20, -0.001047},   
+        {  21, -0.001095},   
+        {  22, -0.001121},   
+        {  24, -0.001181}},
 
       dCl_RollRate  =   {      
         { -16, -0.006514},      
@@ -251,30 +249,29 @@ model AerosondeModel
         {  22, 0.0002949},      
         {  24, -0.001001}},
 
-
-      Cm_Basic = empty1D,
-      // TODO
-      /*Cm_Basic = {{-16,1e-10},{16,-1e-10}},*/
-      /*Cm_Basic =   {   */
-        /*{ -16,     0.434},   */
-        /*{  -8,     0.277},   */
-        /*{  -6,    0.1997},   */
-        /*{  -4,    0.1202},   */
-        /*{  -2,    0.0403},   */
-        /*{   0,   -0.0397},   */
-        /*{   2,   -0.1216},   */
-        /*{   4,   -0.2076},   */
-        /*{   8,   -0.3993},   */
-        /*{   9,   -0.4548},   */
-        /*{  10,   -0.5165},   */
-        /*{  12,   -0.6391},   */
-        /*{  14,   -0.7634},   */
-        /*{  16,   -0.0153},   */
-        /*{  18,   -0.0095},   */
-        /*{  19,    0.0126},   */
-        /*{  20,    0.1351},   */
-        /*{  21,    0.1985},   */
-        /*{  22,     0.155},   */
+      Cm_Basic =   {
+        { -16,      0.16},
+        {  16,     -0.16}},
+      /*Cm_Basic =   {*/
+        /*{ -16,     0.434},*/
+        /*{  -8,     0.277},*/
+        /*{  -6,    0.1997},*/
+        /*{  -4,    0.1202},*/
+        /*{  -2,    0.0403},*/
+        /*{   0,   -0.0397},*/
+        /*{   2,   -0.1216},*/
+        /*{   4,   -0.2076},*/
+        /*{   8,   -0.3993},*/
+        /*{   9,   -0.4548},*/
+        /*{  10,   -0.5165},*/
+        /*{  12,   -0.6391},*/
+        /*{  14,   -0.7634},*/
+        /*{  16,   -0.0153},*/
+        /*{  18,   -0.0095},*/
+        /*{  19,    0.0126},*/
+        /*{  20,    0.1351},*/
+        /*{  21,    0.1985},*/
+        /*{  22,     0.155},*/
         /*{  24,    0.0624}},*/
 
       dCm_Flap  =   {      
@@ -404,7 +401,7 @@ model AerosondeModel
     //vt(start=6,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={16,0,0},fixed={true,true,true}),
+    v_r(start={20,0,0},fixed={true,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -421,23 +418,38 @@ model AerosondeModel
     Modelica.Blocks.Nonlinear.Limiter sat(
       uMax=1,
       uMin=0);
-    input Real throttle(start=0.3,fixed=false);
+    input Real throttle;
   equation
-    der(throttle) = 0;
     sat.u = throttle;
     F_b = sat.y*{10,0,0};
     M_b = {0,0,0};
   end Thrust;
 
+  model Pilot
+    Real throttle(start=0.3, fixed=false);
+    Real elevator_deg(start=0, fixed=false);
+    Real rudder_deg(start=0, fixed=true);
+    Real aileron_deg(start=0, fixed=true);
+    Real flap_deg(start=0, fixed=true);
+  equation
+    der(throttle) = 0;
+    der(elevator_deg) = 0;
+    der(rudder_deg) = 0;
+    der(aileron_deg) = 0;
+    der(flap_deg) = 0;
+  end Pilot;
+
+  Pilot pilot;
+
   Datcom.ForceMoment aero(
     tables=datcomTables,
-    rudder_deg = 0,
-    flap_deg = 0,
-    elevator_deg = 0,
-    aileron_deg = 0,
+    rudder_deg = pilot.rudder_deg,
+    flap_deg = pilot.flap_deg,
+    elevator_deg = pilot.elevator_deg,
+    aileron_deg = pilot.aileron_deg,
     s=0.1, b=1, cBar=0.1);
 
-  Thrust thrust;
+  Thrust thrust(throttle=pilot.throttle);
   Parts.RigidBody structure(m=1,I_b=1*identity(3));
   Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
   Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});

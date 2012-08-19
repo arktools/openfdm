@@ -170,11 +170,11 @@ package Datcom
     CY = dCY_Beta * beta_deg +
          dCY_RollRate * rad2deg * p * b/(2*vt);
     Cl = dCl_Aileron * aileron_deg +
-         dCl_Beta * beta_deg +
+         (-dCl_Beta) * beta_deg +
          dCl_RollRate * rad2deg * p * b/(2*vt) +
          dCl_YawRate * rad2deg * r * b/(2*vt);   
     Cm = Cm_Basic +
-         dCm_Flap * flap_deg + 
+         dCm_Flap * flap_deg +
          dCm_Elevator * elevator_deg +
          dCm_PitchRate * rad2deg * q * cBar/(2*vt) +
          dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt);
