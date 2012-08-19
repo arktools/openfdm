@@ -125,7 +125,7 @@ model AerosondeModel
         /*{  24,  2.66e-05,    0.0138,    0.0285,    0.0433,    0.0584,    0.0736,    0.0866,    0.0967,     0.104}},*/
 
 
-      dCD_Elevator  = empty1D,
+      dCD_Elevator  = empty2D,
 
       dCY_Beta  = empty1D,
       dCY_RollRate  = empty1D,
@@ -165,7 +165,7 @@ model AerosondeModel
         { -16,   -0.7118}},
       dCm_AlphaDot  = empty1D,
 
-      dCn_Aileron  = empty1D,
+      dCn_Aileron  = empty2D,
       dCn_Beta  = empty1D,
       /*dCn_Beta  =   {*/
         /*{-16, 0.0008503}},*/
