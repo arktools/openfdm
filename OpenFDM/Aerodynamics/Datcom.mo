@@ -96,25 +96,50 @@ package Datcom
   end CoefficientsAndDerivatives;
 
   block CombiTable1DSISO
-    Real y1; 
-    Real u1;
-    extends Modelica.Blocks.Tables.CombiTable1Ds(columns={2});
+    output Real y; 
+    input Real u;
+    constant Real table[:,:]; 
+    Modelica.Blocks.Nonlinear.Limiter sat(
+      uMax=table[size(table,1),1],
+      uMin=table[1,1]);
+    Modelica.Blocks.Tables.CombiTable1Ds combi(columns={2}, table=table);
   equation
-    y[1] = y1; 
-    u = u1;
+    y = 0;
+    sat.u = u;
+    combi.u = sat.y;
   end CombiTable1DSISO;
 
   block CombiTable1DSIMO
-    Real y1; 
-    Real u1;
-    extends Modelica.Blocks.Tables.CombiTable1Ds;
+    output Real y[:]; 
+    input Real u;
+    constant Real table[:,:]; 
+    Modelica.Blocks.Nonlinear.Limiter sat(
+      uMax=table[size(table,1),1],
+      uMin=table[1,1]);
+    Modelica.Blocks.Tables.CombiTable1Ds combi(table=table);
   equation
-    y[1] = y1; 
-    u = u1;
+    y = combi.y;
+    sat.u = u;
+    combi.u = sat.y;
   end CombiTable1DSIMO;
 
   block CombiTable2DMISO
-    extends Modelica.Blocks.Tables.CombiTable2D;
+    output Real y;
+    input Real u1, u2;
+    constant Real table[:,:]; 
+    Modelica.Blocks.Nonlinear.Limiter sat1(
+      uMax=table[size(table,1),1],
+      uMin=table[2,1]);
+    Modelica.Blocks.Nonlinear.Limiter sat2(
+      uMax=table[1,size(table,2)],
+      uMin=table[1,2]);
+    Modelica.Blocks.Tables.CombiTable2D combi(table=table);
+  equation
+    y = combi.y;
+    sat1.u = u1;
+    sat2.u = u2;
+    combi.u1 = sat1.y;
+    combi.u2 = sat2.y;
   end CombiTable2DMISO;
 
   partial model ForceMomentBase
@@ -152,29 +177,29 @@ package Datcom
     import Modelica.Blocks.Tables.*;
     extends ForceMomentBase;
     constant Tables tables;
-    CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u1=alpha_deg, y1=CL_Basic);
-    CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u1=flap_deg, y1=dCL_Flap);
-    CombiTable1DSISO dCL_Elevator_table(table=tables.dCL_Elevator, u1=elevator_deg, y1=dCL_Elevator);
-    CombiTable1DSISO dCL_PitchRate_table(table=tables.dCL_PitchRate, u1=alpha_deg, y1=dCL_PitchRate);
-    CombiTable1DSISO dCL_AlphaDot_table(table=tables.dCL_AlphaDot, u1=alpha_deg, y1=dCL_AlphaDot);
-    CombiTable1DSISO CD_Basic_table(table=tables.CD_Basic, u1=alpha_deg, y1=CD_Basic);
+    CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u=alpha_deg, y=CL_Basic);
+    CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u=flap_deg, y=dCL_Flap);
+    CombiTable1DSISO dCL_Elevator_table(table=tables.dCL_Elevator, u=elevator_deg, y=dCL_Elevator);
+    CombiTable1DSISO dCL_PitchRate_table(table=tables.dCL_PitchRate, u=alpha_deg, y=dCL_PitchRate);
+    CombiTable1DSISO dCL_AlphaDot_table(table=tables.dCL_AlphaDot, u=alpha_deg, y=dCL_AlphaDot);
+    CombiTable1DSISO CD_Basic_table(table=tables.CD_Basic, u=alpha_deg, y=CD_Basic);
     CombiTable2DMISO dCD_Flap_table(table=tables.dCD_Flap, u1=alpha_deg, u2=flap_deg, y=dCD_Flap);
     CombiTable2DMISO dCD_Elevator_table(table=tables.dCD_Elevator, u1=alpha_deg, u2=elevator_deg, y=dCD_Elevator);
-    CombiTable1DSISO dCY_Beta_table(table=tables.dCY_Beta, u1=alpha_deg, y1=dCY_Beta);
-    CombiTable1DSISO dCY_RollRate_table(table=tables.dCY_RollRate, u1=alpha_deg, y1=dCY_RollRate);
-    CombiTable1DSISO dCl_Aileron_table(table=tables.dCl_Aileron, u1=aileron_deg, y1=dCl_Aileron);
-    CombiTable1DSISO dCl_Beta_table(table=tables.dCl_Beta, u1=alpha_deg, y1=dCl_Beta);
-    CombiTable1DSISO dCl_RollRate_table(table=tables.dCl_RollRate, u1=alpha_deg, y1=dCl_RollRate);
-    CombiTable1DSISO dCl_YawRate_table(table=tables.dCl_YawRate, u1=alpha_deg, y1=dCl_YawRate);
-    CombiTable1DSISO Cm_Basic_table(table=tables.Cm_Basic, u1=alpha_deg, y1=Cm_Basic);
-    CombiTable1DSISO dCm_Flap_table(table=tables.dCm_Flap, u1=alpha_deg, y1=dCm_Flap);
-    CombiTable1DSISO dCm_Elevator_table(table=tables.dCm_Elevator, u1=alpha_deg, y1=dCm_Elevator);
-    CombiTable1DSISO dCm_PitchRate_table(table=tables.dCm_PitchRate, u1=alpha_deg, y1=dCm_PitchRate);
-    CombiTable1DSISO dCm_AlphaDot_table(table=tables.dCm_AlphaDot, u1=alpha_deg, y1=dCm_AlphaDot);
+    CombiTable1DSISO dCY_Beta_table(table=tables.dCY_Beta, u=alpha_deg, y=dCY_Beta);
+    CombiTable1DSISO dCY_RollRate_table(table=tables.dCY_RollRate, u=alpha_deg, y=dCY_RollRate);
+    CombiTable1DSISO dCl_Aileron_table(table=tables.dCl_Aileron, u=aileron_deg, y=dCl_Aileron);
+    CombiTable1DSISO dCl_Beta_table(table=tables.dCl_Beta, u=alpha_deg, y=dCl_Beta);
+    CombiTable1DSISO dCl_RollRate_table(table=tables.dCl_RollRate, u=alpha_deg, y=dCl_RollRate);
+    CombiTable1DSISO dCl_YawRate_table(table=tables.dCl_YawRate, u=alpha_deg, y=dCl_YawRate);
+    CombiTable1DSISO Cm_Basic_table(table=tables.Cm_Basic, u=alpha_deg, y=Cm_Basic);
+    CombiTable1DSISO dCm_Flap_table(table=tables.dCm_Flap, u=alpha_deg, y=dCm_Flap);
+    CombiTable1DSISO dCm_Elevator_table(table=tables.dCm_Elevator, u=alpha_deg, y=dCm_Elevator);
+    CombiTable1DSISO dCm_PitchRate_table(table=tables.dCm_PitchRate, u=alpha_deg, y=dCm_PitchRate);
+    CombiTable1DSISO dCm_AlphaDot_table(table=tables.dCm_AlphaDot, u=alpha_deg, y=dCm_AlphaDot);
     CombiTable2DMISO dCn_Aileron_table(table=tables.dCn_Aileron, u1=alpha_deg, u2=aileron_deg, y=dCn_Aileron);
-    CombiTable1DSISO dCn_Beta_table(table=tables.dCn_Beta, u1=alpha_deg, y1=dCn_Beta);
-    CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u1=alpha_deg, y1=dCn_RollRate);
-    CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u1=alpha_deg, y1=dCn_YawRate);
+    CombiTable1DSISO dCn_Beta_table(table=tables.dCn_Beta, u=alpha_deg, y=dCn_Beta);
+    CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u=alpha_deg, y=dCn_RollRate);
+    CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u=alpha_deg, y=dCn_YawRate);
   end ForceMoment;
 
   model ForceMomentCompact
