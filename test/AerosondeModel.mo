@@ -249,6 +249,7 @@ model AerosondeModel
         {  22, 0.0002949},      
         {  24, -0.001001}},
 
+      // MODIFIED from DATCOM, pitching moment was too large
       Cm_Basic =   {
         { -16,      0.16},
         {  16,     -0.16}},
