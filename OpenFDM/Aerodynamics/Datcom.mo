@@ -127,19 +127,29 @@ package Datcom
     output Real y;
     input Real u1, u2;
     constant Real table[:,:]; 
+    constant Integer nRows = size(table,1);
+    constant Integer nCols = size(table,2);
     Modelica.Blocks.Nonlinear.Limiter sat1(
-      uMax=table[size(table,1),1],
+      uMax=table[nRows,1],
       uMin=table[2,1]);
     Modelica.Blocks.Nonlinear.Limiter sat2(
-      uMax=table[1,size(table,2)],
+      uMax=table[1,nCols],
       uMin=table[1,2]);
-    Modelica.Blocks.Tables.CombiTable2D combi(table=table);
+    Modelica.Blocks.Tables.CombiTable2D combi(
+      table=if nCols > nRows then table else transpose(table));
   equation
     y = combi.y;
     sat1.u = u1;
     sat2.u = u2;
-    combi.u1 = sat1.y;
-    combi.u2 = sat2.y;
+    // 2d combitables like to have more columns than rows
+    // so, we flip the table and inputs if necessary
+    if nCols > nRows then
+      combi.u1 = sat1.y;
+      combi.u2 = sat2.y;
+    else
+      combi.u1 = sat2.y;
+      combi.u2 = sat1.y;
+    end if;
   end CombiTable2DMISO;
 
   partial model ForceMomentBase

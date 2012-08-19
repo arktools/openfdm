@@ -110,7 +110,7 @@ equation
 
   // alias's and conversions
   alpha_deg = SI.Conversions.to_deg(alpha);
-  beta_deg = SI.Conversions.to_deg(alpha);
+  beta_deg = SI.Conversions.to_deg(beta);
   {p,q,r} = fA.w_ib;
   // rotation matrices
   C_bs = Parts.T2(alpha);
