@@ -426,7 +426,7 @@ model AerosondeModel
     M_b = {0,0,0};
   end Thrust;
 
-  model Pilot
+  model Pilot "a constant input autopilot"
     Real throttle(start=0.3, fixed=false);
     Real elevator_deg(start=0, fixed=false);
     Real rudder_deg(start=0, fixed=true);
