@@ -131,10 +131,10 @@ package Datcom
     CD = CD_Basic +
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg;
-    CY = dCY_Beta * beta +
+    CY = dCY_Beta * beta_deg +
          dCY_RollRate * p * b/(2*vt);
     Cl = dCl_Aileron * aileron_deg +
-         dCl_Beta * beta +
+         dCl_Beta * beta_deg +
          dCl_RollRate * p * b/(2*vt) +
          dCl_YawRate * r * b/(2*vt);   
     Cm = Cm_Basic +
@@ -143,7 +143,7 @@ package Datcom
          dCm_PitchRate * q * cBar/(2*vt) +
          dCm_AlphaDot * alphaDot * cBar/(2*vt);
     Cn = dCn_Aileron * aileron_deg +
-        dCn_Beta * beta +
+        dCn_Beta * beta_deg +
          dCn_RollRate * p * b/(2*vt) +
          dCn_YawRate * r * b/(2*vt);  
   end ForceMomentBase;
@@ -151,7 +151,7 @@ package Datcom
   model ForceMoment
     import Modelica.Blocks.Tables.*;
     extends ForceMomentBase;
-    parameter Tables tables;
+    constant Tables tables;
     CombiTable1DSISO CL_Basic_table(table=tables.CL_Basic, u1=alpha_deg, y1=CL_Basic);
     CombiTable1DSISO dCL_Flap_table(table=tables.dCL_Flap, u1=flap_deg, y1=dCL_Flap);
     CombiTable1DSISO dCL_Elevator_table(table=tables.dCL_Elevator, u1=elevator_deg, y1=dCL_Elevator);
@@ -180,7 +180,7 @@ package Datcom
   model ForceMomentCompact
     import Modelica.Blocks.Tables.*;
     extends ForceMomentBase;
-    parameter TablesCompact tables;
+    constant TablesCompact tables;
     CombiTable1DSIMO AlphaTable(table=tables.AlphaTable,y1=CL_Basic,u1=alpha);
   equation 
     // lift
