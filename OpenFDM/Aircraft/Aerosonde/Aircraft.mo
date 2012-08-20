@@ -1,10 +1,9 @@
-within test;
+within OpenFDM.Aircraft.Aerosonde;
 
-model AerosondeModel
+model Aircraft
 
   import C=Modelica.Constants;
   import OpenFDM.*;
-  import OpenFDM.Aerodynamics.*;
   import OpenFDM.Aerodynamics.Datcom.empty1D;
   import OpenFDM.Aerodynamics.Datcom.empty2D;
   import OpenFDM.Aircraft.Aerosonde;
@@ -30,35 +29,9 @@ model AerosondeModel
     a_b(start={0,0,0},fixed={true,true,true}));
 
 
-  model Thrust
-    extends Parts.ForceMoment;
-    Modelica.Blocks.Nonlinear.Limiter sat(
-      uMax=1,
-      uMin=0);
-    input Real throttle;
-  equation
-    sat.u = throttle;
-    F_b = sat.y*{10,0,0};
-    M_b = {0,0,0};
-  end Thrust;
+  OpenFDM.Control.AutoPilotConst pilot;
 
-  model Pilot "a constant input autopilot"
-    Real throttle(start=0.3, fixed=false);
-    Real elevator_deg(start=0, fixed=false);
-    Real rudder_deg(start=0, fixed=true);
-    Real aileron_deg(start=0, fixed=true);
-    Real flap_deg(start=0, fixed=true);
-  equation
-    der(throttle) = 0;
-    der(elevator_deg) = 0;
-    der(rudder_deg) = 0;
-    der(aileron_deg) = 0;
-    der(flap_deg) = 0;
-  end Pilot;
-
-  Pilot pilot;
-
-  Datcom.ForceMoment aero(
+  Aerodynamics.Datcom.ForceMoment aero(
     tables=Aerosonde.Datcom.tables,
     rudder_deg = pilot.rudder_deg,
     flap_deg = pilot.flap_deg,
@@ -66,7 +39,8 @@ model AerosondeModel
     aileron_deg = pilot.aileron_deg,
     s=0.1, b=1, cBar=0.1);
 
-  Thrust thrust(throttle=pilot.throttle);
+  OpenFDM.Propulsion.Thruster thruster(
+    throttle=pilot.throttle);
   Parts.RigidBody structure(m=1,I_b=1*identity(3));
   Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
   Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});
@@ -83,11 +57,11 @@ equation
   connect(p.fA,structure.fA);
 
   connect(p.fA,t_motor.fA);
-  connect(t_motor.fB,thrust.fA);
+  connect(t_motor.fB,thruster.fA);
 
   connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);
 
-end AerosondeModel;
+end Aircraft;
 
 // vim:ts=2:sw=2:expandtab:

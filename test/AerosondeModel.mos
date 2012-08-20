@@ -20,7 +20,7 @@ getErrorString();
 system("rm -f linear_AerosondeModel.mo AerosondeModel.*");
 loadString("
 model AerosondeModel
-  extends test.AerosondeModel;
+  extends OpenFDM.Aircraft.Aerosonde.Aircraft;
 end AerosondeModel;
 ");
 
