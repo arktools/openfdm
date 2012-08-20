@@ -106,8 +106,8 @@ package Datcom
       uMin=table[1,1]);
     Modelica.Blocks.Tables.CombiTable1Ds combi(
       columns={2},
-      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+      /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
+      smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=table);
   equation
     y = combi.y[1];
@@ -123,8 +123,8 @@ package Datcom
       uMax=table[size(table,1),1],
       uMin=table[1,1]);
     Modelica.Blocks.Tables.CombiTable1Ds combi(
-      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+      /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
+      smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=table);
   equation
     y = combi.y;
@@ -145,8 +145,8 @@ package Datcom
       uMax=table[1,nCols],
       uMin=table[1,2]);
     Modelica.Blocks.Tables.CombiTable2D combi(
-      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+      /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
+      smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=if nCols > nRows then table else transpose(table));
   equation
     y = combi.y;
@@ -173,31 +173,31 @@ package Datcom
     CL = CL_Basic +
          dCL_Flap * flap_deg +
          dCL_Elevator * elevator_deg +
-         //dCL_PitchRate * rad2deg * q * cBar/(2*vt) +
-         //dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
+         dCL_PitchRate * rad2deg * q * cBar/(2*vt) +
+         dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     CD = CD_Basic +
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg +
          0;
-    CY = dCY_Beta * beta_deg +
-         dCY_RollRate * rad2deg * p + //* b/(2*vt) +
+    CY = //dCY_Beta * beta_deg +
+         //dCY_RollRate * rad2deg * p * b/(2*vt) +
          0;
     Cl = dCl_Aileron * aileron_deg +
          //(-dCl_Beta) * beta_deg +
-         dCl_RollRate * rad2deg * p + //* b/(2*vt) +
-         dCl_YawRate * rad2deg * r + //* b/(2*vt) +  
+         dCl_RollRate * rad2deg * p * b/(2*vt) +
+         dCl_YawRate * rad2deg * r * b/(2*vt) +  
          0;
     Cm = Cm_Basic +
          dCm_Flap * flap_deg +
          dCm_Elevator * elevator_deg +
-         dCm_PitchRate * rad2deg * q + //* cBar/(2*vt) +
+         dCm_PitchRate * rad2deg * q * cBar/(2*vt) +
          //dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     Cn = dCn_Aileron * aileron_deg +
-         dCn_Beta * beta_deg +
-         dCn_RollRate * rad2deg * p + //* b/(2*vt) +
-         dCn_YawRate * rad2deg * r + //* b/(2*vt) +
+         //dCn_Beta * beta_deg +
+         dCn_RollRate * rad2deg * p * b/(2*vt) +
+         dCn_YawRate * rad2deg * r * b/(2*vt) +
          0;
   end ForceMomentBase;
 
