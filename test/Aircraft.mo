@@ -12,10 +12,10 @@ model Aircraft
   // to obtain zero flight path angle at desired vt
   Parts.RigidReferencePoint p(
     // true airspeed
-    //vt(start=6,fixed=false),
+    //vt(start=20,fixed=true),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={6,0,0},fixed={false,true,true}),
+    v_r(start={20,0,0},fixed={true,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -27,30 +27,60 @@ model Aircraft
     a_b(start={0,0,0},fixed={true,true,true})
     );
 
-  model Thrust
-    extends Parts.ForceMoment;
-    input Real throttle(start=0.3,min=0,max=1,fixed=true);
-  equation
-    der(throttle) = 0;
-    F_b = throttle*{0.1,0,0};
-    M_b = {0,0,0};
-  end Thrust;
 
   model AerodynamicsSimple
+    input Real elevator_deg;
+    input Real rudder_deg;
+    input Real aileron_deg;
+    input Real flap_deg;
     extends Aerodynamics.StabilityFrame.ForceMoment(
-      s=1,cBar=1,b=1);
+      s=1,cBar=0.1,b=1);
   equation
-    CL = (1.5/20)*alpha_deg;
-    CD = 0.001*CL^2 + 0.001;
-    CY = 0;
-    Cl = -0.1*p;
-    Cm = -0.1*q - 0.00001*(alpha_deg-5);
-    Cn = -0.1*r;
+    CL =
+      (1.5/20)*alpha_deg + 
+      0.00001*flap_deg +
+      0.0001*elevator_deg +
+      0.0001*q*cBar/(2*vt) +
+      0.0001*alphaDot*alphaDot*cBar/(2*vt) +
+      0;
+    CD =
+      0.001*CL^2 + 0.001 +
+      0.00001*flap_deg +
+      0.00001*elevator_deg + 
+      0;
+    CY =
+      /*0.0001*beta_deg +*/
+      0.0001*p*b/(2*vt) +
+      0; 
+    Cl =
+      0.00001*aileron_deg +
+      (-0.1)*p*b/(2*vt) +
+      0.0001*r*b/(2*vt) +
+      0;
+    Cm =
+      (-0.00001)*(alpha_deg-5) +
+      0.00001*flap_deg +
+      (-0.1)*q +
+      0.0001*elevator_deg +
+      0;
+    Cn =
+      0.00001*aileron_deg +
+      0.00001*p*b/(2*vt) +
+      (-0.1)*r*b/(2*vt) +
+      0;
   end AerodynamicsSimple;
   
-  AerodynamicsSimple aero;
 
-  Thrust thrust;
+  OpenFDM.Control.AutoPilotConst pilot;
+
+  AerodynamicsSimple aero(
+    elevator_deg=pilot.elevator_deg,
+    rudder_deg=pilot.rudder_deg,
+    aileron_deg=pilot.aileron_deg,
+    flap_deg=pilot.flap_deg);
+
+  OpenFDM.Propulsion.Thruster thrust(throttle=pilot.throttle);
+
   Parts.RigidBody structure(m=1,I_b=identity(3));
   Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
   Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});

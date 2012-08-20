@@ -3,8 +3,8 @@ within OpenFDM.Control;
 model AutoPilotConst "a constant input autopilot"
   Real throttle(start=0.3, fixed=false);
   Real elevator_deg(start=0, fixed=false);
-  Real rudder_deg(start=0, fixed=true);
-  Real aileron_deg(start=0, fixed=true);
+  Real rudder_deg(start=0, fixed=false);
+  Real aileron_deg(start=0, fixed=false);
   Real flap_deg(start=0, fixed=true);
 equation
   der(throttle) = 0;
