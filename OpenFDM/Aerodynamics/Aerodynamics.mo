@@ -92,21 +92,15 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
   Real C_bw[3,3] "wind to body frame";
 
 equation
+  vt = sqrt(vR_b*vR_b);
   vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r) + epsilon*ones(3);
   aR_b = der(vR_b);
-  vt = sqrt(vR_b*vR_b);
   qBar = 0.5*world.rho(fA.r_r)*vt^2;
   alpha = atan2(vR_b[3],vR_b[1]);
-  // omc doesn't like der(beta), setting manually
-  alphaDot = (vR_b[1]*aR_b[3]-vR_b[3]*aR_b[1])/
-    (vR_b[1]^2 + vR_b[3]^2); //stevens & lewis pg 78
-  vtDot = (vR_b[1]*aR_b[1] + 
-        vR_b[2]*aR_b[2] +
-        vR_b[3]*aR_b[3])/vt;
+  alphaDot = der(alpha);
+  vtDot = der(vt);
   beta = asin(vR_b[2]/vt);
-  // omc doesn't like der(beta), setting manually
-  betaDot = (aR_b[2]*vt - vR_b[2]*vtDot) /
-    vt*sqrt(vR_b[1]^2 + vR_b[3]^2);
+  betaDot = der(beta);
 
   // alias's and conversions
   alpha_deg = SI.Conversions.to_deg(alpha);

@@ -99,14 +99,20 @@ package Datcom
     output Real y; 
     input Real u;
     constant Real table[:,:]; 
+    constant Real uMin = table[1,1]; 
+    constant Real uMax = table[size(table,1),1]; 
     Modelica.Blocks.Nonlinear.Limiter sat(
       uMax=table[size(table,1),1],
       uMin=table[1,1]);
-    Modelica.Blocks.Tables.CombiTable1Ds combi(columns={2}, table=table);
+    Modelica.Blocks.Tables.CombiTable1Ds combi(
+      columns={2},
+      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+      table=table);
   equation
     y = combi.y[1];
-    sat.u = u;
-    combi.u = sat.y;
+    connect(u,sat.u);
+    connect(sat.y,combi.u);
   end CombiTable1DSISO;
 
   block CombiTable1DSIMO
@@ -116,11 +122,14 @@ package Datcom
     Modelica.Blocks.Nonlinear.Limiter sat(
       uMax=table[size(table,1),1],
       uMin=table[1,1]);
-    Modelica.Blocks.Tables.CombiTable1Ds combi(table=table);
+    Modelica.Blocks.Tables.CombiTable1Ds combi(
+      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+      table=table);
   equation
     y = combi.y;
-    sat.u = u;
-    combi.u = sat.y;
+    connect(u,sat.u);
+    connect(sat.y,combi.u);
   end CombiTable1DSIMO;
 
   block CombiTable2DMISO
@@ -136,19 +145,21 @@ package Datcom
       uMax=table[1,nCols],
       uMin=table[1,2]);
     Modelica.Blocks.Tables.CombiTable2D combi(
+      smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+      //smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=if nCols > nRows then table else transpose(table));
   equation
     y = combi.y;
-    sat1.u = u1;
-    sat2.u = u2;
+    connect(u1,sat1.u);
+    connect(u2,sat2.u);
     // 2d combitables like to have more columns than rows
     // so, we flip the table and inputs if necessary
     if nCols > nRows then
-      combi.u1 = sat1.y;
-      combi.u2 = sat2.y;
+      connect(sat1.y,combi.u1);
+      connect(sat2.y,combi.u2);
     else
-      combi.u1 = sat2.y;
-      combi.u2 = sat1.y;
+      connect(sat1.y,combi.u2);
+      connect(sat2.y,combi.u1);
     end if;
   end CombiTable2DMISO;
 
@@ -162,26 +173,32 @@ package Datcom
     CL = CL_Basic +
          dCL_Flap * flap_deg +
          dCL_Elevator * elevator_deg +
-         dCL_PitchRate * rad2deg * q * cBar/(2*vt) +
-         dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt);
+         //dCL_PitchRate * rad2deg * q * cBar/(2*vt) +
+         //dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
+         0;
     CD = CD_Basic +
          dCD_Flap * flap_deg +
-         dCD_Elevator * elevator_deg;
+         dCD_Elevator * elevator_deg +
+         0;
     CY = dCY_Beta * beta_deg +
-         dCY_RollRate * rad2deg * p * b/(2*vt);
+         dCY_RollRate * rad2deg * p + //* b/(2*vt) +
+         0;
     Cl = dCl_Aileron * aileron_deg +
-         (-dCl_Beta) * beta_deg +
-         dCl_RollRate * rad2deg * p * b/(2*vt) +
-         dCl_YawRate * rad2deg * r * b/(2*vt);   
+         //(-dCl_Beta) * beta_deg +
+         dCl_RollRate * rad2deg * p + //* b/(2*vt) +
+         dCl_YawRate * rad2deg * r + //* b/(2*vt) +  
+         0;
     Cm = Cm_Basic +
          dCm_Flap * flap_deg +
          dCm_Elevator * elevator_deg +
-         dCm_PitchRate * rad2deg * q * cBar/(2*vt) +
-         dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt);
+         dCm_PitchRate * rad2deg * q + //* cBar/(2*vt) +
+         //dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
+         0;
     Cn = dCn_Aileron * aileron_deg +
-        dCn_Beta * beta_deg +
-         dCn_RollRate * rad2deg * p * b/(2*vt) +
-         dCn_YawRate * rad2deg * r * b/(2*vt);  
+         dCn_Beta * beta_deg +
+         dCn_RollRate * rad2deg * p + //* b/(2*vt) +
+         dCn_YawRate * rad2deg * r + //* b/(2*vt) +
+         0;
   end ForceMomentBase;
 
   model ForceMoment

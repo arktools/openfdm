@@ -10,7 +10,6 @@ setCommandLineOptions({
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
 loadModel(Modelica);
-loadModel(Aerosonde);
 loadModel(OpenFDM);
 loadModel(test);
 getErrorString();

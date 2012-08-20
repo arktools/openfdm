@@ -50,9 +50,9 @@ equation
   assert(p.w_ib[1] < 1, "rolling too fast");
   assert(p.w_ib[2] < 1, "pitching too fast");
   assert(p.w_ib[3] < 1, "yawing too fast");
-  assert(p.v_b[1] < 100, "Vx too fast");
-  assert(p.v_b[2] < 100, "Vy too fast");
-  assert(p.v_b[3] < 100, "Vx too fast");
+  assert(p.v_b[1] < 30, "Vx too fast");
+  assert(p.v_b[2] < 30, "Vy too fast");
+  assert(p.v_b[3] < 30, "Vx too fast");
 
   connect(p.fA,structure.fA);
 
