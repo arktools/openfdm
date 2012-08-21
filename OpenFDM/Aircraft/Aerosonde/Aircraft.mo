@@ -14,7 +14,7 @@ model Aircraft
   // to obtain zero flight path angle at desired vt
   Parts.RigidReferencePoint p(
     // true airspeed
-    //vt(start=6,fixed=false),
+    //vt(start=20,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
     v_r(start={20,0,0},fixed={true,true,true}),
