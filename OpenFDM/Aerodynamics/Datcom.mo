@@ -184,7 +184,7 @@ package Datcom
          dCY_RollRate * rad2deg * p * b/(2*vt) +
          0;
     Cl = dCl_Aileron * aileron_deg +
-         (dCl_Beta) * beta_deg/10000 + // TODO
+         (-dCl_Beta) * beta_deg/10000 +
          dCl_RollRate * rad2deg * p * b/(2*vt) +
          dCl_YawRate * rad2deg * r * b/(2*vt) +  
          0;
@@ -195,7 +195,7 @@ package Datcom
          dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     Cn = dCn_Aileron * aileron_deg +
-         (-dCn_Beta) * beta_deg/10000 + // TODO
+         (-dCn_Beta) * beta_deg/10000 +
          dCn_RollRate * rad2deg * p * b/(2*vt) +
          dCn_YawRate * rad2deg * r * b/(2*vt) +
          0;

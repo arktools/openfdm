@@ -17,7 +17,7 @@ model Aircraft
     //vt(start=20,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={20,0,0},fixed={true,true,true}),
+    v_r(start={40,0,0},fixed={true,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -37,22 +37,34 @@ model Aircraft
     flap_deg = pilot.flap_deg,
     elevator_deg = pilot.elevator_deg,
     aileron_deg = pilot.aileron_deg,
-    s=0.1, b=1, cBar=0.1);
+    s=1.04322,
+    b=3.377,
+    cBar=0.4602);
 
   OpenFDM.Propulsion.Thruster thruster(
+    maxThrust=100,
     throttle=pilot.throttle);
-  Parts.RigidBody structure(m=1,I_b=1*identity(3));
-  Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
-  Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});
+
+  Parts.RigidBody structure(
+    m=22.18,
+    I_b={{101.686,0,0},{0,43.071,0},{0,0,85.463}});
+
+  Parts.RigidLink_B321 t_aero_rp(
+    r_a={0,0,0},
+    angles={0,0,0});
+
+  Parts.RigidLink_B321 t_motor(
+    r_a={-0.5639,0,0/*-0.09144*/},
+    angles={0,0,0});
 
 equation
 
   assert(p.w_ib[1] < 1, "rolling too fast");
   assert(p.w_ib[2] < 1, "pitching too fast");
   assert(p.w_ib[3] < 1, "yawing too fast");
-  assert(p.v_b[1] < 30, "Vx too fast");
-  assert(p.v_b[2] < 30, "Vy too fast");
-  assert(p.v_b[3] < 30, "Vx too fast");
+  assert(p.v_b[1] < 100, "Vx too fast");
+  assert(p.v_b[2] < 100, "Vy too fast");
+  assert(p.v_b[3] < 100, "Vz too fast");
 
   connect(p.fA,structure.fA);
 
