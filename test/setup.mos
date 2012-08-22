@@ -1,0 +1,18 @@
+// options
+setCommandLineOptions({
+//"+showErrorMessages",
+"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
+"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+a",
+//"+noSimplify",
+"+d=linearization,gendebugsymbols"
+});
+getErrorString();
+
+// this line required the project path to be appended to OPENMODELICALIBRARY
+loadModel(Modelica);
+getErrorString();
+loadModel(OpenFDM);
+getErrorString();
+loadModel(test);
+getErrorString();

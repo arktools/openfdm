@@ -49,7 +49,7 @@ model Aircraft
       0.00001*elevator_deg + 
       0;
     CY =
-      /*0.0001*beta_deg +*/
+      0.01*beta_deg +
       0.0001*p*b/(2*vt) +
       0; 
     Cl =

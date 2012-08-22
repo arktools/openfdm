@@ -180,11 +180,11 @@ package Datcom
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg +
          0;
-    CY = //dCY_Beta * beta_deg +
-         //dCY_RollRate * rad2deg * p * b/(2*vt) +
+    CY = (-dCY_Beta) * beta_deg +
+         dCY_RollRate * rad2deg * p * b/(2*vt) +
          0;
     Cl = dCl_Aileron * aileron_deg +
-         //(-dCl_Beta) * beta_deg +
+         (dCl_Beta) * beta_deg/10000 + // TODO
          dCl_RollRate * rad2deg * p * b/(2*vt) +
          dCl_YawRate * rad2deg * r * b/(2*vt) +  
          0;
@@ -192,10 +192,10 @@ package Datcom
          dCm_Flap * flap_deg +
          dCm_Elevator * elevator_deg +
          dCm_PitchRate * rad2deg * q * cBar/(2*vt) +
-         //dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
+         dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     Cn = dCn_Aileron * aileron_deg +
-         //dCn_Beta * beta_deg +
+         (-dCn_Beta) * beta_deg/10000 + // TODO
          dCn_RollRate * rad2deg * p * b/(2*vt) +
          dCn_YawRate * rad2deg * r * b/(2*vt) +
          0;

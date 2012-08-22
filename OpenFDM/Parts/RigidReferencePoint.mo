@@ -30,6 +30,9 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   SI.Angle phi = euler[1] "euler angle 1: body roll";
   SI.Angle theta = euler[2] "euler angle 2: horizon pitch";
   SI.Angle psi = euler[3] "euler angle 3: heading";
+  Real phi_deg = SI.Conversions.to_deg(phi);
+  Real theta_deg = SI.Conversions.to_deg(theta);
+  Real psi_deg = SI.Conversions.to_deg(psi);
   constant Real epsilon = 1e-14;
 
 equation

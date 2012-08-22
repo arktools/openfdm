@@ -78,7 +78,7 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
   parameter SI.Length cBar "average chord";
   parameter SI.Length b "span";
 
-  constant Real epsilon = 1e-20;
+  constant Real epsilon = 1e-10;
 
   SI.AngularVelocity p "body roll rate";
   SI.AngularVelocity q "body pitch rate";
@@ -92,11 +92,11 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
   Real C_bw[3,3] "wind to body frame";
 
 equation
-  vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r);
+  vR_b = fA.v_b - fA.C_br*world.wind_r(fA.r_r) + epsilon*ones(3);
   vt = sqrt(vR_b*vR_b);
   qBar = 0.5*world.rho(fA.r_r)*vt^2;
   aR_b = der(vR_b);
-  alpha = atan2(vR_b[3],(vR_b[1]+epsilon));
+  alpha = atan2(vR_b[3],vR_b[1]);
   alphaDot = der(alpha);
   vtDot = der(vt);
   beta = asin(vR_b[2]/vt);
