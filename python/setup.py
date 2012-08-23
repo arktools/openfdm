@@ -26,14 +26,14 @@ setup(
             'pyopenfdm-run = pyopenfdm.run:command_line',
             'pyopenfdm-plot = pyopenfdm.plot:command_line'
         ]},
-    classifiers = [
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'License :: OSI Approved :: GPLv3 License',
-        'Programming Language :: Python :: 2.7',
         'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Scientific/Engineering',
-        'Topic :: Utilities'
     ],
     install_requires=['matplotlib','scipy'],
     test_suite='nose.collector',
