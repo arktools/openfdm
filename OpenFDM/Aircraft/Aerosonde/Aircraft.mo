@@ -54,7 +54,7 @@ model Aircraft
     angles={0,0,0});
 
   Parts.RigidLink_B321 t_motor(
-    r_a={-0.5639,0,0/*-0.09144*/},
+    r_a={-0.5639,0,-0.09144},
     angles={0,0,0});
 
 equation
@@ -62,9 +62,15 @@ equation
   assert(p.w_ib[1] < 1, "rolling too fast");
   assert(p.w_ib[2] < 1, "pitching too fast");
   assert(p.w_ib[3] < 1, "yawing too fast");
+  assert(p.z_b[1] < 100, "Zx too large");
+  assert(p.z_b[2] < 100, "Zy too large");
+  assert(p.z_b[3] < 100, "Zz too large");
   assert(p.v_b[1] < 100, "Vx too fast");
   assert(p.v_b[2] < 100, "Vy too fast");
   assert(p.v_b[3] < 100, "Vz too fast");
+  assert(p.a_b[1] < 100, "Ax too large");
+  assert(p.a_b[2] < 100, "Ay too large");
+  assert(p.a_b[3] < 100, "Az too large");
 
   connect(p.fA,structure.fA);
 

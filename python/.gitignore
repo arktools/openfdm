@@ -1,6 +1,6 @@
 *.egg-info
 build/
-dist/
+*dist*/
 *.deb
 *.tgz
 fig/
