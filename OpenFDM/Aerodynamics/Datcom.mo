@@ -164,7 +164,7 @@ package Datcom
   end CombiTable2DMISO;
 
   partial model ForceMomentBase
-    extends StabilityFrame.ForceMoment;
+    extends ForceMomentStabilityFrame;
     extends CoefficientsAndDerivatives;
     extends Controls;
     constant Real rad2deg = 180.0/3.14159;

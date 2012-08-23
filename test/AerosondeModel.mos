@@ -1,6 +1,6 @@
 // options
 setCommandLineOptions({
-//"+showErrorMessages",
+"+showErrorMessages",
 "+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
 "+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
 //"+a",

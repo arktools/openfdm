@@ -33,7 +33,7 @@ model Aircraft
     input Real rudder_deg;
     input Real aileron_deg;
     input Real flap_deg;
-    extends Aerodynamics.StabilityFrame.ForceMoment(
+    extends Aerodynamics.ForceMomentStabilityFrame(
       s=1,cBar=0.1,b=1);
   equation
     CL =
