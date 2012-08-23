@@ -27,7 +27,7 @@ end AerosondeModel;
 simulate(AerosondeModel,
     stopTime=0.001,
     numberOfIntervals=1,
-    measureTime=true);
+    measureTime=false);
 //getErrorString();
 system("./AerosondeModel -l 0 > log.out");
 readFile("log.out");
@@ -39,9 +39,9 @@ list(linear_AerosondeModel);
 // simulate non-linear model
 simulate(AerosondeModel,
     stopTime=1000,
-    numberOfIntervals=100000,
-    measureTime=true);
+    numberOfIntervals=1000,
+    measureTime=false);
 
 plotParametric(p.r_r[1],p.agl);
-system("chromium-browser $PWD/AerosondeModel_prof.html &");
+//system("chromium-browser $PWD/AerosondeModel_prof.html &");
 //getErrorString();

@@ -47,6 +47,7 @@ package Datcom
     
     // yaw moment
     Real[:,:] dCn_Aileron "change in yaw moment coefficient due to aileron";
+    Real[:,:] dCn_Rudder "change in yaw moment coefficient due to rudder";
     Real[:,:] dCn_Beta "change in yaw moment coefficient due to side slip angle";
     Real[:,:] dCn_RollRate "change in yaw moment coefficient due to roll rate";
     Real[:,:] dCn_YawRate "change in yaw moment coefficient due to yaw rate";
@@ -89,6 +90,7 @@ package Datcom
     
     // yaw moment
     Real dCn_Aileron "change in yaw moment coefficient due to aileron";
+    Real dCn_Rudder "change in yaw moment coefficient due to rudder";
     Real dCn_Beta "change in yaw moment coefficient due to side slip angle";
     Real dCn_RollRate "change in yaw moment coefficient due to roll rate";
     Real dCn_YawRate "change in yaw moment coefficient due to yaw rate";
@@ -101,35 +103,38 @@ package Datcom
     constant Real table[:,:]; 
     constant Real uMin = table[1,1]; 
     constant Real uMax = table[size(table,1),1]; 
-    Modelica.Blocks.Nonlinear.Limiter sat(
-      uMax=table[size(table,1),1],
-      uMin=table[1,1]);
+    /*Modelica.Blocks.Nonlinear.Limiter sat(*/
+      /*limitsAtInit=false,*/
+      /*uMax=table[size(table,1),1],*/
+      /*uMin=table[1,1]);*/
     Modelica.Blocks.Tables.CombiTable1Ds combi(
       columns={2},
       /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
       smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=table);
   equation
-    y = combi.y[1];
-    connect(u,sat.u);
-    connect(sat.y,combi.u);
+    connect(y,combi.y[1]);
+    connect(u,combi.u);
+    /*connect(u,sat.u);*/
+    /*connect(sat.y,combi.u);*/
   end CombiTable1DSISO;
 
   block CombiTable1DSIMO
     output Real y[:]; 
     input Real u;
     constant Real table[:,:]; 
-    Modelica.Blocks.Nonlinear.Limiter sat(
-      uMax=table[size(table,1),1],
-      uMin=table[1,1]);
+    /*Modelica.Blocks.Nonlinear.Limiter sat(*/
+      /*uMax=table[size(table,1),1],*/
+      /*uMin=table[1,1]);*/
     Modelica.Blocks.Tables.CombiTable1Ds combi(
       /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
       smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=table);
   equation
-    y = combi.y;
-    connect(u,sat.u);
-    connect(sat.y,combi.u);
+    connect(y,combi.y);
+    connect(u,combi.u);
+    /*connect(u,sat.u);*/
+    /*connect(sat.y,combi.u);*/
   end CombiTable1DSIMO;
 
   block CombiTable2DMISO
@@ -138,28 +143,32 @@ package Datcom
     constant Real table[:,:]; 
     constant Integer nRows = size(table,1);
     constant Integer nCols = size(table,2);
-    Modelica.Blocks.Nonlinear.Limiter sat1(
-      uMax=table[nRows,1],
-      uMin=table[2,1]);
-    Modelica.Blocks.Nonlinear.Limiter sat2(
-      uMax=table[1,nCols],
-      uMin=table[1,2]);
+    /*Modelica.Blocks.Nonlinear.Limiter sat1(*/
+      /*uMax=table[nRows,1],*/
+      /*uMin=table[2,1]);*/
+    /*Modelica.Blocks.Nonlinear.Limiter sat2(*/
+      /*uMax=table[1,nCols],*/
+      /*uMin=table[1,2]);*/
     Modelica.Blocks.Tables.CombiTable2D combi(
       /*smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,*/
       smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
       table=if nCols > nRows then table else transpose(table));
   equation
-    y = combi.y;
-    connect(u1,sat1.u);
-    connect(u2,sat2.u);
+    connect(y,combi.y);
+    /*connect(u1,sat1.u);*/
+    /*connect(u2,sat2.u);*/
     // 2d combitables like to have more columns than rows
     // so, we flip the table and inputs if necessary
     if nCols > nRows then
-      connect(sat1.y,combi.u1);
-      connect(sat2.y,combi.u2);
+      connect(combi.u1,u1);
+      connect(combi.u2,u2);
+      /*connect(sat1.y,combi.u1);*/
+      /*connect(sat2.y,combi.u2);*/
     else
-      connect(sat1.y,combi.u2);
-      connect(sat2.y,combi.u1);
+      connect(combi.u1,u2);
+      connect(combi.u2,u1);
+      /*connect(sat1.y,combi.u2);*/
+      /*connect(sat2.y,combi.u1);*/
     end if;
   end CombiTable2DMISO;
 
@@ -195,6 +204,7 @@ package Datcom
          dCm_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     Cn = dCn_Aileron * aileron_deg +
+         dCn_Rudder * rudder_deg +
          (-dCn_Beta) * beta_deg/10000 +
          dCn_RollRate * rad2deg * p * b/(2*vt) +
          dCn_YawRate * rad2deg * r * b/(2*vt) +
@@ -225,6 +235,7 @@ package Datcom
     CombiTable1DSISO dCm_PitchRate_table(table=tables.dCm_PitchRate, u=alpha_deg, y=dCm_PitchRate);
     CombiTable1DSISO dCm_AlphaDot_table(table=tables.dCm_AlphaDot, u=alpha_deg, y=dCm_AlphaDot);
     CombiTable2DMISO dCn_Aileron_table(table=tables.dCn_Aileron, u1=alpha_deg, u2=aileron_deg, y=dCn_Aileron);
+    CombiTable1DSISO dCn_Rudder_table(table=tables.dCn_Rudder, u=alpha_deg, y=dCn_Rudder);
     CombiTable1DSISO dCn_Beta_table(table=tables.dCn_Beta, u=alpha_deg, y=dCn_Beta);
     CombiTable1DSISO dCn_RollRate_table(table=tables.dCn_RollRate, u=alpha_deg, y=dCn_RollRate);
     CombiTable1DSISO dCn_YawRate_table(table=tables.dCn_YawRate, u=alpha_deg, y=dCn_YawRate);
@@ -266,6 +277,7 @@ package Datcom
     
     // yaw moment
     dCn_Aileron = 0;
+    dCn_Rudder = 0;
     dCn_Beta = 0;
     dCn_RollRate = 0;
     dCn_YawRate = 0;
@@ -295,6 +307,7 @@ package Datcom
       dCm_PitchRate = Cmq,
       dCm_AlphaDot = 0,
       dCn_Aileron = 0,
+      dCn_Rudder = 0,
       dCn_Beta = Cnb,
       dCn_RollRate = 0,
       dCn_YawRate = Cnr,

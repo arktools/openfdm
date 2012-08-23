@@ -37,7 +37,7 @@ model Aircraft
       s=1,cBar=0.1,b=1);
   equation
     CL =
-      (1.5/20)*alpha_deg + 
+      (1.5/20)*alpha_deg +
       0.00001*flap_deg +
       0.0001*elevator_deg +
       0.0001*q*cBar/(2*vt) +
@@ -46,12 +46,12 @@ model Aircraft
     CD =
       0.001*CL^2 + 0.001 +
       0.00001*flap_deg +
-      0.00001*elevator_deg + 
+      0.00001*elevator_deg +
       0;
     CY =
       0.01*beta_deg +
       0.0001*p*b/(2*vt) +
-      0; 
+      0;
     Cl =
       0.00001*aileron_deg +
       (-0.1)*p*b/(2*vt) +
@@ -67,11 +67,18 @@ model Aircraft
       0.00001*aileron_deg +
       0.00001*p*b/(2*vt) +
       (-0.1)*r*b/(2*vt) +
+      0.00001*rudder_deg +
       0;
   end AerodynamicsSimple;
   
 
-  OpenFDM.Control.AutoPilotConst pilot;
+  OpenFDM.Control.AutoPilotConst pilot(
+    throttle(start=0.5, fixed=false),
+    elevator_deg(start=0, fixed=false),
+    rudder_deg(start=0, fixed=false),
+    aileron_deg(start=0, fixed=false),
+    flap_deg(start=0, fixed=true));
+
 
   AerodynamicsSimple aero(
     elevator_deg=pilot.elevator_deg,
@@ -79,7 +86,7 @@ model Aircraft
     aileron_deg=pilot.aileron_deg,
     flap_deg=pilot.flap_deg);
 
-  OpenFDM.Propulsion.Thruster thrust(throttle=pilot.throttle);
+  Propulsion.Thruster motor(throttle=pilot.throttle);
 
   Parts.RigidBody structure(m=1,I_b=identity(3));
   Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
@@ -90,7 +97,7 @@ equation
   connect(p.fA,structure.fA);
 
   connect(p.fA,t_motor.fA);
-  connect(t_motor.fB,thrust.fA);
+  connect(t_motor.fB,motor.fA);
 
   connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);

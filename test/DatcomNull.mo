@@ -35,6 +35,7 @@ model DatcomNull
       dCm_AlphaDot  = empty1D,
 
       dCn_Aileron  = empty1D,
+      dCn_Rudder  = empty1D,
       dCn_Beta  = empty1D,
       dCn_RollRate  = empty1D,
       dCn_YawRate  = empty1D);
@@ -49,7 +50,7 @@ model DatcomNull
     //vt(start=6,fixed=false),
     // flight path angle
     //gamma(start=0,fixed=true),
-    v_r(start={6,0,0},fixed={false,true,true}),
+    v_r(start={20,0,0},fixed={false,true,true}),
     // position fixed
     r_r(start={0,0,-1000},fixed={true,true,true}),
     // can change pitch, roll and heading fixed
@@ -62,24 +63,25 @@ model DatcomNull
     a_b(start={0,0,0},fixed={true,true,false})
     );
 
-  model Thrust
-    extends Parts.ForceMoment;
-    input Real throttle(start=0.3,min=0,max=1,fixed=true);
-  equation
-    der(throttle) = 0;
-    F_b = throttle*{0.1,0,0};
-    M_b = {0,0,0};
-  end Thrust;
+
+  OpenFDM.Control.AutoPilotConst pilot(
+    throttle(start=0.5, fixed=false),
+    elevator_deg(start=0, fixed=false),
+    rudder_deg(start=0, fixed=false),
+    aileron_deg(start=0, fixed=false),
+    flap_deg(start=0, fixed=true));
 
   Datcom.ForceMoment aero(
     tables=datcomTables,
-    rudder_deg = 0,
-    flap_deg = 0,
-    elevator_deg = 0,
-    aileron_deg = 0,
+    elevator_deg=pilot.elevator_deg,
+    rudder_deg=pilot.rudder_deg,
+    aileron_deg=pilot.aileron_deg,
+    flap_deg=pilot.flap_deg,
     s=1, b=1, cBar=1);
 
-  Thrust thrust;
+
+  Propulsion.Thruster motor(throttle=pilot.throttle);
+
   Parts.RigidBody structure(m=1,I_b=identity(3));
   Parts.RigidLink_B321 t_aero_rp(r_a={0,0,0}, angles={0,0,0});
   Parts.RigidLink_B321 t_motor(r_a={0,0,0}, angles={0,0,0});
@@ -89,7 +91,7 @@ equation
   connect(p.fA,structure.fA);
 
   connect(p.fA,t_motor.fA);
-  connect(t_motor.fB,thrust.fA);
+  connect(t_motor.fB,motor.fA);
 
   connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);

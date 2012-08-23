@@ -16,32 +16,31 @@ getErrorString();
 
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("rm -f linear_DatcomNull.mo DatcomNull.*");
+system("rm -f linear_SizeTest.mo SizeTest.*");
 loadString("
-model DatcomNull
-  extends test.DatcomNull;
-end DatcomNull;
+model SizeTest
+  extends test.SizeTest;
+end SizeTest;
 ");
 
 // get linear model
-simulate(DatcomNull,
+simulate(SizeTest,
     stopTime=0.001,
     numberOfIntervals=1,
     measureTime=false);
-//getErrorString();
-system("./DatcomNull -l 0 > log.out");
+getErrorString();
+system("./SizeTest -l 0 > log.out");
 readFile("log.out");
-loadFile("linear_DatcomNull.mo");
-//getErrorString();
-list(linear_DatcomNull);
-//getErrorString();
+loadFile("linear_SizeTest.mo");
+getErrorString();
+list(linear_SizeTest);
+getErrorString();
 
 // simulate non-linear model
-simulate(DatcomNull,
+simulate(SizeTest,
     stopTime=10,
-    numberOfIntervals=1000,
+    numberOfIntervals=10000,
     measureTime=false);
+getErrorString();
 
-plotParametric(p.r_r[1],p.agl);
-//system("chromium-browser $PWD/DatcomNull_prof.html &");
-//getErrorString();
+//system("chromium-browser $PWD/SizeTest_prof.html &");
