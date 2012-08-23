@@ -4,10 +4,7 @@ import os
 import sys
 import inspect
 
-root=os.path.realpath(os.path.abspath(os.path.join(
-  os.path.split(inspect.getfile( inspect.currentframe() ))[0],
-  os.path.pardir)))
-sys.path.insert(0,root)
+from openfdm_root import root
 
 import pyopenfdm
 from OMPython import OMShell, get
