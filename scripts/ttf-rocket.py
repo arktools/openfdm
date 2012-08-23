@@ -6,10 +6,10 @@ import inspect
 
 root=os.path.realpath(os.path.abspath(os.path.join(
   os.path.split(inspect.getfile( inspect.currentframe() ))[0],
-  os.path.pardir,os.path.pardir)))
+  os.path.pardir)))
 sys.path.insert(0,root)
 
-import OpenFDM
+import pyopenfdm
 from OMPython import OMShell, get
 from DyMat import DyMatFile
 import multiprocessing
