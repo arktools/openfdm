@@ -52,7 +52,7 @@ model Aircraft
     I_b={{101.686,0,0},{0,43.071,0},{0,0,85.463}});
 
   Parts.RigidLink_B321 t_aero_rp(
-    r_a={0,0,0},
+    r_a={-0.05,0,0},
     angles={0,0,0});
 
   Parts.RigidLink_B321 t_motor(
