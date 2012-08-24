@@ -56,7 +56,7 @@ model Aircraft
     angles={0,0,0});
 
   Parts.RigidLink_B321 t_motor(
-    r_a={-0.5639,0,0/*-0.09144*/},
+    r_a={-0.5639,0,-0.09144},
     angles={0,0,0});
 
 equation

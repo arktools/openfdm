@@ -186,16 +186,18 @@ package Datcom
          dCL_AlphaDot * rad2deg * alphaDot * cBar/(2*vt) +
          0;
     CD = CD_Basic +
+         // TODO aileron drag?
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg +
          0;
-    CY = dCY_Beta * beta_deg +
+    CY = //dCY_Beta * beta_deg +
          dCY_RollRate * rad2deg * p * b/(2*vt) +
+          // Cyr, CyDr, CyDa  needed?, not calculated by DATCOM
          0;
     Cl = dCl_Aileron * aileron_deg +
-         //dCl_Beta * beta_deg +
+         dCl_Beta * beta_deg +
          dCl_RollRate * rad2deg * p * b/(2*vt) +
-         dCl_YawRate * rad2deg * r * b/(2*vt) +  
+         dCl_YawRate * rad2deg * r * b/(2*vt) +
          0;
     Cm = Cm_Basic +
          dCm_Flap * flap_deg +
