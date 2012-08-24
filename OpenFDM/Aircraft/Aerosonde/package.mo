@@ -25,7 +25,7 @@ model Aircraft
     // can change pitch, roll and heading fixed
     euler(start={0,0,0},fixed={false,false,false}),
     // no angular velocity, or acceleration
-    w_ib(start={0,0,0},fixed={true,true,true}),
+    eulerDot(start={0,0,0},fixed={true,true,true}),
     z_b(start={0,0,0},fixed={true,true,true}),
     // no translational acceleration
     a_b(start={0,0,0},fixed={true,true,true}));

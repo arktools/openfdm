@@ -113,10 +113,11 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   // states
   SI.Position r_r[3](each stateSelect=StateSelect.always) "cartesian position resolved in the refernce frame";
   SI.Velocity v_r[3](each stateSelect=StateSelect.always) "velocity resolved in the reference frame";
-  SI.Angle euler[3](each stateSelect=StateSelect.always)
-    "euler angles, body roll, horizon pitch, heading";
+  SI.Angle euler[3](each stateSelect=StateSelect.always) "euler angles, body roll, horizon pitch, heading";
   SI.AngularVelocity w_ib[3](each stateSelect=StateSelect.always) "angular velocity of body wrt inertial frame resolved in the body frame";
 
+  // auxiliary variables
+  SI.Angle eulerDot[3](each stateSelect=StateSelect.never) "euler angle rates, body roll, horizon pitch, heading";
   SI.Velocity v_b[3](each stateSelect=StateSelect.never) "velocity resolved in the body frame";
   SI.Acceleration a_b[3](each stateSelect=StateSelect.never) "acceleration resolved in the body frame";
   SI.AngularAcceleration z_b[3](each stateSelect=StateSelect.never) "angular acceleration resolved in the body frame";
@@ -130,10 +131,15 @@ model RigidReferencePoint "The reference point of a rigid body. The acceleratoin
   SI.Angle phi = euler[1] "euler angle 1: body roll";
   SI.Angle theta = euler[2] "euler angle 2: horizon pitch";
   SI.Angle psi = euler[3] "euler angle 3: heading";
+  SI.Angle phiDot = eulerDot[1] "euler angle 1 rate: body roll";
+  SI.Angle thetaDot = eulerDot[2] "euler angle 2 rate: horizon pitch";
+  SI.Angle psiDot = eulerDot[3] "euler angle 3 rate: heading";
+
   Real phi_deg = SI.Conversions.to_deg(phi);
   Real theta_deg = SI.Conversions.to_deg(theta);
   Real psi_deg = SI.Conversions.to_deg(psi);
   constant Real epsilon = 1e-14;
+  Real C_euler[3,3];
 
 equation
   // connect frame
@@ -150,10 +156,12 @@ equation
   v_r = der(r_r);
   v_b = C_br*v_r;
   a_b = der(v_b);
-  w_ib = w_ir + 
-    {{1,           tan(theta)*sin(phi),           tan(theta)*cos(phi)},
+  eulerDot = der(euler);
+  C_euler = {
+     {1,           tan(theta)*sin(phi),           tan(theta)*cos(phi)},
      {0,                      cos(phi),                     -sin(phi)},
-     {0, sin(phi)/(cos(theta)+epsilon), cos(phi)/(cos(theta)+epsilon)}} * der(euler);
+     {0, sin(phi)/(cos(theta)+epsilon), cos(phi)/(cos(theta)+epsilon)}};
+  w_ib = w_ir + C_euler * der(euler);
   C_br = T1(phi)*T2(theta)*T3(psi);
   z_b = der(w_ib);
 
