@@ -5,7 +5,7 @@ setCommandLineOptions({
 "+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
 //"+a",
 //"+noSimplify",
-"+d=linearization,gendebugsymbols"
+"+d=dumpInit,linearization,gendebugsymbols"
 });
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
@@ -39,7 +39,7 @@ list(linear_AerosondeModel);
 // simulate non-linear model
 simulate(AerosondeModel,
     stopTime=1000,
-    numberOfIntervals=1000,
+    numberOfIntervals=100000,
     measureTime=false);
 
 plotParametric(p.r_r[1],p.agl);

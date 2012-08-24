@@ -96,11 +96,11 @@ partial model ForceMoment "partial force model that computes aerodynamic relaven
 
 equation
   wind = world.wind_r(fA.r_r);
-  vR_b = fA.v_b - fA.C_br*wind; // + epsilon*ones(3);
-  vt = sqrt(vR_b*vR_b);
+  vR_b = fA.v_b - fA.C_br*wind + epsilon*ones(3);
+  vt = sqrt(vR_b*vR_b) + epsilon;
   qBar = 0.5*world.rho(fA.r_r)*vt^2;
   aR_b = der(vR_b);
-  alpha = atan2(vR_b[3],vR_b[1]);
+  alpha = atan2(vR_b[3],(vR_b[1]+epsilon));
   alphaDot = der(alpha);
   vtDot = der(vt);
   beta = asin(vR_b[2]/vt);
