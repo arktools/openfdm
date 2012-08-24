@@ -190,7 +190,7 @@ package Datcom
          dCD_Flap * flap_deg +
          dCD_Elevator * elevator_deg +
          0;
-    CY = //dCY_Beta * beta_deg +
+    CY = dCY_Beta * beta_deg +
          dCY_RollRate * rad2deg * p * b/(2*vt) +
           // Cyr, CyDr, CyDa  needed?, not calculated by DATCOM
          0;

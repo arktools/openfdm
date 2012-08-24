@@ -52,8 +52,8 @@ partial model Translational "Translational kinematics of a rigid body. Requires 
   SI.Mass m "mass";
   SI.Momentum L_b[3] "linear momentum";
 equation
-  L_b = m*(fA.v_b /*+ cross(fA.w_ib,fA.C_br*fA.r_r)*/);
-  fA.F_b + fA.C_br*world.g_r(fA.r_r) = der(L_b) /*+ cross(fA.w_ib, L_b)*/;
+  L_b = m*fA.v_b;
+  fA.F_b + fA.C_br*world.g_r(fA.r_r) = der(L_b) + cross(fA.w_ib, L_b);
 end Translational;
 
 model PointMass "A point mass with translational, but no rotational dynamics."
@@ -151,9 +151,9 @@ equation
   fA.M_b = zeros(3);
 
   // kinematics
-  v_r = der(r_r);
+  v_r = der(r_r) + cross(w_ir,r_r);
   v_b = C_br*v_r;
-  a_b = der(v_b);
+  a_b = der(v_b) + cross(w_ib,C_br*r_r);
   eulerDot = der(euler);
   C_euler = {
      {1,           tan(theta)*sin(phi),           tan(theta)*cos(phi)},
