@@ -115,6 +115,45 @@ end InertialAttitudeQuaternionBased;
   /*v_b = der(C_br*r_r) + cross(w_ib,r_r);*/
 /*end InertialPosition;*/
 
+record NavigatorState
+  Real phi;
+  Real theta;
+  Real psi;
+  Real vN;
+  Real vE;
+  Real vD;
+  Real L;
+  Real l;
+  Real h;
+end NavigatorState;
+
+record NavigatorInput
+  Real wX, wY, wZ;
+  Real fX, fY, fZ;
+end NavigatorInput;
+
+block NavigatorLinearization "
+Strapdown Inertial Navigation Technology, Titterton, pg. 344
+"
+NavigatorState x;
+protected
+  Real cL = cos(L);
+  Real sL = sin(L);
+  Real tL = tan(L);
+algorithm
+  Real F[9,9] = {{              0, -(W*sL + vE*tL/R,        vN/R,                0,                 1/R,             0,                                -W*sL, 0,               -vE/R^2},
+                 { W*sL + vE*tL/R,                0, W*cL + vE/R,             -1/R,                   0,             0,                                    0, 0,                vN/R^2}, 
+                 {          -vN/R,     -W*cL - vE/R,           0,                0,               -tL/R,             0,                  -W*cL - vE/(R*cL^2), 0,             vE*tL/R^2},
+                 {              0,              -fD,          fE,             vD/R, -2*(W*sL + vE*tL/R),          vN/R,           -vE*(2*W*cL + vE/(R*cL^2)), 0, (vE^2*tL - vN*vD)/R^2}, 
+                 {             fD,                0,         -fN, 2*W*sL + vE*tL/R,      (vN*tL + vD)/R, 2*W*cL + vE/R, 2*W*(vN*cL - vD*sL) + vN*vE/(R*cL^2), 0,  -vE*(vN*tL + vD)/R^2},
+                 {            -fE,               fN,           0,          -2*vN/R,    -2*(W*cL + vE/R),             0,                            2*W*vE*sL, 0,     (vN^2 + vE^2)/R^2},
+                 {              0,                0,           0,              1/R,                   0,             0,                                    0, 0,               -vN/R^2},
+                 {              0,                0,           0,                0,            1/(R*cL),             0,                         vE*tL/(R*cL), 0,          -vE/(R^2*cL)}};
+  // TODO not sure if this matrix syntax will work
+  Real G[6,6] = {{     -C_nb, zeros(3,3)},
+                 {zeros(3,3),       C_nb}};
+end NavigatorLinearization
+
 end Navigation;
 
 // vim:ts=2:sw=2:expandtab
