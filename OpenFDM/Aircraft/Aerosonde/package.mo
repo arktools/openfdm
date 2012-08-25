@@ -11,6 +11,8 @@ model Aircraft
   import OpenFDM.Aircraft.Aerosonde;
   inner World.Earth world;
 
+  Real ePhi_deg;
+
   // init aircraft in steady level flight
   // can change pitch and throttle only
   // to obtain zero flight path angle at desired vt
@@ -32,6 +34,9 @@ model Aircraft
 
 
   OpenFDM.Control.AutoPilotConst pilot;
+
+  OpenFDM.Navigation.InertialAttitudeQuaternionBased nav(
+    w_ib=p.w_ib, euler_start={0,-0.046,0);
 
   Aerodynamics.Datcom.ForceMoment aero(
     tables=Aerosonde.Datcom.tables,
@@ -81,6 +86,8 @@ equation
 
   connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);
+
+  ePhi_deg = nav.phi_deg - p.phi_deg;
 
 end Aircraft;
 
