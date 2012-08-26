@@ -72,59 +72,16 @@ algorithm
   euler := dcmToEuler(quatToDcm(q));
 end quatToEuler;
 
-block InertialAttitudeQuaternionBased "a quaternion based attitude computer"
-  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);
-  input Real w_ib[3];
-  parameter Real euler_start[3] = {0,0,0};
-  output Real C_nb[3,3];
-  /*// TODO, gimbal lock, titterton pg. 47*/
-  output Real q[4](start=eulerToQuat(euler_start));
-  output Real euler[3];
-  output Real phi, theta, psi;
-  output Real phi_deg, theta_deg, psi_deg;
-  output Real qNorm;
-  constant Real rad2Deg = 180/Modelica.Constants.pi;
-equation
-  euler = {phi,theta,psi};
-  euler * rad2Deg = {phi_deg, theta_deg, psi_deg};
+function localGravity
+  // see tittterton pg. 57 for local gravity model
+  input NavigatorState x;
+  output Real g_l_n[3]; 
 algorithm
-  when sampleTrigger then
-    // TODO, nav computer pitch not in agreement
-    q := quatDeriv(q,w_ib)*samplePeriod + q;
-    C_nb := quatToDcm(q);
-    qNorm := sqrt(q*q);
-    euler := dcmToEuler(C_nb);
-    if abs(1- qNorm) > 1e-3 then
-      reinit(q[1],q[1]/qNorm);
-      reinit(q[2],q[2]/qNorm);
-      reinit(q[3],q[3]/qNorm);
-      reinit(q[4],q[4]/qNorm);
-    end if;
-  end when;
-end InertialAttitudeQuaternionBased;
-
-/*block InertialPosition "an inertial position computer"*/
-  /*extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);*/
-  /*input Real a_b[3];*/
-  /*input Real w_ib[3];*/
-  /*input Real C_br[3,3];*/
-/*equation*/
-  /*a_b = der(v_b) + cross(w_ib,v_b);*/
-  /*v_r = transpose(C_br)*v_b;*/
-  /*v_r = der(r_r) + cross(w_ir,r_r);*/
-  /*v_b = der(C_br*r_r) + cross(w_ib,r_r);*/
-/*end InertialPosition;*/
+  g_l_n := {0,0,9.8};
+end localGravity;
 
 record NavigatorState
-  Real phi;
-  Real theta;
-  Real psi;
-  Real vN;
-  Real vE;
-  Real vD;
-  Real L;
-  Real l;
-  Real h;
+  Real phi, theta, psi, vN, vE, vD, L, l, h;
 end NavigatorState;
 
 record NavigatorInput
@@ -132,27 +89,101 @@ record NavigatorInput
   Real fX, fY, fZ;
 end NavigatorInput;
 
-block NavigatorLinearization "
+block InertialNavigationSystem "a quaternion based INS" 
+  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);
+  input NavigatorInput u;
+  output NavigatorState x(vN=vN,vE=vE,vD=vD,L=L,l=l,h=h);
+  parameter Real euler_start[3] = {0,0,0};
+  output Real C_nb[3,3];
+  /*// TODO, gimbal lock, titterton pg. 47*/
+  output Real euler[3];
+  output Real phi_deg, theta_deg, psi_deg;
+  constant Real rad2Deg = 180/Modelica.Constants.pi;
+protected
+  Real phi, theta, psi, vN, vE, vD, L, l, h;
+  output Real q[4](start=eulerToQuat(euler_start));
+  output Real qNorm;
+equation
+  euler = {phi,theta,psi};
+  euler * rad2Deg = {phi_deg, theta_deg, psi_deg};
+algorithm
+  when sampleTrigger then
+    // TODO, nav computer pitch not in agreement
+    if abs(1- qNorm) > 1e-3 then
+      reinit(q[1],q[1]/qNorm);
+      reinit(q[2],q[2]/qNorm);
+      reinit(q[3],q[3]/qNorm);
+      reinit(q[4],q[4]/qNorm);
+    end if;
+    q := quatDeriv(q,{u.wX, u.wY, u.wZ})*samplePeriod + q;
+    C_nb := quatToDcm(q);
+    qNorm := sqrt(q*q);
+    euler := dcmToEuler(C_nb);
+    sL := sin(L);
+    cL := cos(L);
+    R := R0 + h;
+    LDot := vN/R;
+    lDot := vE/(R*cL);
+    hDot := -vD;
+    fN := f_n[1];
+    fE := f_n[2];
+    fD := f_n[3];
+    vNDot := fN - vE*(2*W + lDot)*sL + vD*LDot;
+    vEDot := fE + vN*(2*W + lDot)*sL + vD*(2*W+lDot)*cL;
+    vDDot := fD - vE*(2*W + lDot)*cL - vN*LDot + localGravity(x);
+    vN := vN + vNDot*samplePeriod;
+    vE := vE + vEDot*samplePeriod;
+    vD := vD + vDDot*samplePeriod;
+  end when;
+end InertialNavigationSystem;
+
+function NavigatorF "
 Strapdown Inertial Navigation Technology, Titterton, pg. 344
 "
-NavigatorState x;
+  input NavigatorState x(vN=vN, vE=vE, vD=vD);
+  input Real f_n[3];
+  input Real W;
+  input Real R0;
+
+  output Real F[9,9];
+
 protected
-  Real cL = cos(L);
-  Real sL = sin(L);
-  Real tL = tan(L);
+  Real vN, vE, vD;
+  Real fN, fE, fD;
+  Real cL, sL, tL;
+  Real R;
+
 algorithm
-  Real F[9,9] = {{              0, -(W*sL + vE*tL/R,        vN/R,                0,                 1/R,             0,                                -W*sL, 0,               -vE/R^2},
-                 { W*sL + vE*tL/R,                0, W*cL + vE/R,             -1/R,                   0,             0,                                    0, 0,                vN/R^2}, 
-                 {          -vN/R,     -W*cL - vE/R,           0,                0,               -tL/R,             0,                  -W*cL - vE/(R*cL^2), 0,             vE*tL/R^2},
-                 {              0,              -fD,          fE,             vD/R, -2*(W*sL + vE*tL/R),          vN/R,           -vE*(2*W*cL + vE/(R*cL^2)), 0, (vE^2*tL - vN*vD)/R^2}, 
-                 {             fD,                0,         -fN, 2*W*sL + vE*tL/R,      (vN*tL + vD)/R, 2*W*cL + vE/R, 2*W*(vN*cL - vD*sL) + vN*vE/(R*cL^2), 0,  -vE*(vN*tL + vD)/R^2},
-                 {            -fE,               fN,           0,          -2*vN/R,    -2*(W*cL + vE/R),             0,                            2*W*vE*sL, 0,     (vN^2 + vE^2)/R^2},
-                 {              0,                0,           0,              1/R,                   0,             0,                                    0, 0,               -vN/R^2},
-                 {              0,                0,           0,                0,            1/(R*cL),             0,                         vE*tL/(R*cL), 0,          -vE/(R^2*cL)}};
-  // TODO not sure if this matrix syntax will work
-  Real G[6,6] = {{     -C_nb, zeros(3,3)},
-                 {zeros(3,3),       C_nb}};
-end NavigatorLinearization
+  cL := cos(x.L);
+  sL := sin(x.L);
+  tL := tan(x.L);
+  fN := f_n[1];
+  fE := f_n[2];
+  fD := f_n[3];
+  R := x.h + R0;
+  F := {
+  {              0, -(W*sL + vE*tL/R),        vN/R,                0,                 1/R,             0,                                -W*sL, 0,               -vE/R^2},
+  { W*sL + vE*tL/R,                 0, W*cL + vE/R,             -1/R,                   0,             0,                                    0, 0,                vN/R^2}, 
+  {          -vN/R,      -W*cL - vE/R,           0,                0,               -tL/R,             0,                  -W*cL - vE/(R*cL^2), 0,             vE*tL/R^2},
+  {              0,               -fD,          fE,             vD/R, -2*(W*sL + vE*tL/R),          vN/R,           -vE*(2*W*cL + vE/(R*cL^2)), 0, (vE^2*tL - vN*vD)/R^2}, 
+  {             fD,                 0,         -fN, 2*W*sL + vE*tL/R,      (vN*tL + vD)/R, 2*W*cL + vE/R, 2*W*(vN*cL - vD*sL) + vN*vE/(R*cL^2), 0,  -vE*(vN*tL + vD)/R^2},
+  {            -fE,                fN,           0,          -2*vN/R,    -2*(W*cL + vE/R),             0,                            2*W*vE*sL, 0,     (vN^2 + vE^2)/R^2},
+  {              0,                 0,           0,              1/R,                   0,             0,                                    0, 0,               -vN/R^2},
+  {              0,                 0,           0,                0,            1/(R*cL),             0,                         vE*tL/(R*cL), 0,          -vE/(R^2*cL)},
+  {              0,                 0,           0,                0,                   0,            -1,                                    0, 0,                     0}};
+end NavigatorF;
+
+function NavigatorG "
+Strapdown Inertial Navigation Technology, Titterton, pg. 344
+"
+  input Real C_nb[3,3];
+  output Real G[6,6];
+algorithm
+  G := {
+  {     -C_nb, zeros(3,3)},
+  {zeros(3,3),       C_nb}};
+end NavigatorG;
+
 
 end Navigation;
 
