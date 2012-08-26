@@ -1,11 +1,11 @@
 // options
 setCommandLineOptions({
-"+showErrorMessages",
-"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
-"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
+//"+showErrorMessages",
+//"+preOptModules=inlineArrayEqn,partitionIndependentBlocks",
+//"+postOptModules=inlineArrayEqn,constantLinearSystem,removeSimpleEquations,generateSymbolicLinearization",
 //"+a",
 //"+noSimplify",
-"+d=dumpInit,linearization,gendebugsymbols"
+//"+d=dumpInit,linearization,gendebugsymbols"
 });
 
 // this line required the project path to be appended to OPENMODELICALIBRARY
@@ -16,13 +16,15 @@ getErrorString();
 
 
 // it is necessary to extract the model form all packages so the "." is not mis-read
-system("rm -f linear_AerosondeModel.mo AerosondeModel.*");
 loadString("
 model AerosondeModel
   extends OpenFDM.Aircraft.Aerosonde.Aircraft;
 end AerosondeModel;
 ");
 
+// cannot linearize with discrete dynamics
+/*
+system("rm -f linear_AerosondeModel.mo AerosondeModel.*");
 // get linear model
 simulate(AerosondeModel,
     stopTime=0.001,
@@ -35,11 +37,12 @@ loadFile("linear_AerosondeModel.mo");
 //getErrorString();
 list(linear_AerosondeModel);
 //getErrorString();
+*/
 
 // simulate non-linear model
 simulate(AerosondeModel,
-    stopTime=1000,
-    numberOfIntervals=100000,
+    stopTime=50,
+    numberOfIntervals=10000,
     measureTime=false);
 
 plotParametric(p.r_r[1],p.agl);
