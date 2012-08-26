@@ -89,54 +89,6 @@ record NavigatorInput
   Real fX, fY, fZ;
 end NavigatorInput;
 
-block InertialNavigationSystem "a quaternion based INS" 
-  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);
-  input NavigatorInput u;
-  output NavigatorState x(vN=vN,vE=vE,vD=vD,L=L,l=l,h=h);
-  parameter Real euler_start[3] = {0,0,0};
-  output Real C_nb[3,3];
-  /*// TODO, gimbal lock, titterton pg. 47*/
-  output Real euler[3];
-  output Real phi_deg, theta_deg, psi_deg;
-  constant Real rad2Deg = 180/Modelica.Constants.pi;
-protected
-  Real phi, theta, psi, vN, vE, vD, L, l, h;
-  output Real q[4](start=eulerToQuat(euler_start));
-  output Real qNorm;
-equation
-  euler = {phi,theta,psi};
-  euler * rad2Deg = {phi_deg, theta_deg, psi_deg};
-algorithm
-  when sampleTrigger then
-    // TODO, nav computer pitch not in agreement
-    if abs(1- qNorm) > 1e-3 then
-      reinit(q[1],q[1]/qNorm);
-      reinit(q[2],q[2]/qNorm);
-      reinit(q[3],q[3]/qNorm);
-      reinit(q[4],q[4]/qNorm);
-    end if;
-    q := quatDeriv(q,{u.wX, u.wY, u.wZ})*samplePeriod + q;
-    C_nb := quatToDcm(q);
-    qNorm := sqrt(q*q);
-    euler := dcmToEuler(C_nb);
-    sL := sin(L);
-    cL := cos(L);
-    R := R0 + h;
-    LDot := vN/R;
-    lDot := vE/(R*cL);
-    hDot := -vD;
-    fN := f_n[1];
-    fE := f_n[2];
-    fD := f_n[3];
-    vNDot := fN - vE*(2*W + lDot)*sL + vD*LDot;
-    vEDot := fE + vN*(2*W + lDot)*sL + vD*(2*W+lDot)*cL;
-    vDDot := fD - vE*(2*W + lDot)*cL - vN*LDot + localGravity(x);
-    vN := vN + vNDot*samplePeriod;
-    vE := vE + vEDot*samplePeriod;
-    vD := vD + vDDot*samplePeriod;
-  end when;
-end InertialNavigationSystem;
-
 function NavigatorF "
 Strapdown Inertial Navigation Technology, Titterton, pg. 344
 "
@@ -184,6 +136,64 @@ algorithm
   {zeros(3,3),       C_nb}};
 end NavigatorG;
 
+block InertialNavigationSystem "a quaternion based INS" 
+  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);
+  input NavigatorInput u;
+
+  parameter Real W = 0;   
+  parameter Real R0 = 6.3891e6;
+  parameter Real euler_start[3] = {0,0,0};
+
+  output NavigatorState x(phi=phi,theta=theta,psi=psi,vN=vN,vE=vE,vD=vD,L=L,l=l,h=h);
+  output Real C_nb[3,3];
+  // TODO, gimbal lock, titterton pg. 47
+  output Real euler[3];
+  output Real phi_deg, theta_deg, psi_deg;
+  constant Real rad2Deg = 180/Modelica.Constants.pi;
+  output Real q[4](start=eulerToQuat(euler_start));
+  output Real qNorm;
+  output Real qDot[4];
+  /*[>output Real F[9,9], G[6,6];<]*/
+protected
+  Real phi, theta, psi, vN, vE, vD, L, l, h;
+  Real sL, cL, R, LDot, lDot, hDot, vNDot, vEDot, vDDot;
+  Real f_n[3];
+  Real g_l_n[3];
+equation
+  euler = {phi,theta,psi};
+  euler * rad2Deg = {phi_deg, theta_deg, psi_deg};
+algorithm
+  when sampleTrigger then
+    // TODO, nav computer pitch not in agreement
+    qDot := quatDeriv(q,{u.wX, u.wY, u.wZ});
+    q := q + qDot*samplePeriod;
+    qNorm := sqrt(q*q);
+    if abs(1- qNorm) > 1e-3 then
+      q := q/qNorm;
+    end if;
+    C_nb := quatToDcm(q);
+    euler := dcmToEuler(C_nb);
+    sL := sin(L);
+    cL := cos(L);
+    R := R0 + h;
+    LDot := vN/R;
+    lDot := vE/(R*cL);
+    hDot := -vD;
+    f_n := C_nb * {u.fX, u.fY, u.fZ};
+    g_l_n := localGravity(x);
+    vNDot := f_n[1] - vE*(2*W + lDot)*sL + vD*LDot + g_l_n[1];
+    vEDot := f_n[2] + vN*(2*W + lDot)*sL + vD*(2*W+lDot)*cL + g_l_n[2];
+    vDDot := f_n[3] - vE*(2*W + lDot)*cL - vN*LDot + g_l_n[3];
+    vN := vN + vNDot*samplePeriod;
+    vE := vE + vEDot*samplePeriod;
+    vD := vD + vDDot*samplePeriod;
+    L := L + LDot*samplePeriod;
+    l := l + lDot*samplePeriod;
+    h := h + hDot*samplePeriod;
+    /*[>F := NavigatorF(x, f_n, W, R0);<]*/
+    /*[>G := NavigatorG(C_nb);<]*/
+  end when;
+end InertialNavigationSystem;
 
 end Navigation;
 

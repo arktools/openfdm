@@ -35,8 +35,14 @@ model Aircraft
 
   OpenFDM.Control.AutoPilotConst pilot;
 
-  /*OpenFDM.Navigation.InertialNavigationSystem nav(*/
-    /*u(0,0,0,0,0,0), euler_start={0,-0.046,0});*/
+  OpenFDM.Navigation.InertialNavigationSystem nav(
+    u.wX = p.w_ib[1],
+    u.wY = p.w_ib[2],
+    u.wZ = p.w_ib[3],
+    u.fX = p.a_b[1],
+    u.fY = p.a_b[2],
+    u.fZ = p.a_b[3],
+    euler_start={0,-0.046,0});
 
   Aerodynamics.Datcom.ForceMoment aero(
     tables=Aerosonde.Datcom.tables,
