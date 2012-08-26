@@ -137,7 +137,7 @@ algorithm
 end NavigatorG;
 
 block InertialNavigationSystem "a quaternion based INS" 
-  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/10);
+  extends Modelica.Blocks.Interfaces.DiscreteBlock(startTime=0,samplePeriod=1.0/1000);
   input NavigatorInput u;
 
   parameter Real W = 0;   

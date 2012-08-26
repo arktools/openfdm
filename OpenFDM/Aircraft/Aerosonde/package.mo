@@ -11,7 +11,9 @@ model Aircraft
   import OpenFDM.Aircraft.Aerosonde;
   inner World.Earth world;
 
-  /*Real ePhi_deg;*/
+  Real ePhi_deg;
+  Real eTheta_deg;
+  Real ePsi_deg;
 
   // init aircraft in steady level flight
   // can change pitch and throttle only
@@ -93,7 +95,9 @@ equation
   connect(p.fA,t_aero_rp.fA);
   connect(t_aero_rp.fB,aero.fA);
 
-  /*ePhi_deg = nav.phi_deg - p.phi_deg;*/
+  ePhi_deg = nav.phi_deg - p.phi_deg;
+  eTheta_deg = nav.theta_deg - p.theta_deg;
+  ePsi_deg = nav.psi_deg - p.psi_deg;
 
 end Aircraft;
 
