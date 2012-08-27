@@ -1,6 +1,5 @@
 *.swp
 *.pyc
-fig/
 *_parsetab.py
 *.lfi
 *.csv
