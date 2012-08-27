@@ -1,2 +1,5 @@
 openfdm.pdf
 *synctex.gz
+*.aux
+*.log
+*.fdb_latexmk
